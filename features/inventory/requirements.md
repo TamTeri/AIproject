@@ -1,0 +1,7 @@
+- **inventory-001** (ubiquitous): The {EventHub} shall assign each event a fixed ticket capacity.
+- **inventory-002** (ubiquitous): The {EventHub} shall never allocate more tickets for an event than its available capacity.
+- **inventory-003** (event-driven): When a purchase request is processed, the {EventHub} shall perform the availability check and inventory decrement as a single atomic operation.
+- **inventory-004** (event-driven): When concurrent purchase requests contend for the same inventory, the {EventHub} shall allocate each available ticket to at most one requester.
+- **inventory-005** (event-driven): When a buyer creates a checkout hold under the approved hold policy, the {EventHub} shall reserve the requested quantity for ten minutes.
+- **inventory-006** (event-driven): When a checkout hold's ten-minute duration elapses, the {EventHub} shall release its reserved quantity.
+- **inventory-007** (event-driven): When the hold release and hold-to-sale mechanics are approved, the {EventHub} shall apply those mechanics to the corresponding checkout state transitions.

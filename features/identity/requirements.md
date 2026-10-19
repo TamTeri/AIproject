@@ -1,0 +1,12 @@
+- **identity-001** (ubiquitous): The {EventHub} shall allow a person anywhere in the world to register an account.
+- **identity-002** (event-driven): When a person registers, the {EventHub} shall collect the person's name, email address, and password.
+- **identity-003** (event-driven): When a person submits valid account credentials, the {EventHub} shall establish an authenticated session.
+- **identity-004** (unwanted): If submitted account credentials are invalid, then the {EventHub} shall deny authentication and report an authentication failure.
+- **identity-005** (ubiquitous): The {EventHub} shall store passwords only as password hashes and shall never store passwords in plaintext.
+- **identity-006** (ubiquitous): The {EventHub} shall expire authenticated sessions according to the approved session-expiration policy.
+- **identity-007** (ubiquitous): The {EventHub} shall require an authenticated session before checkout, purchase submission, or order-history access.
+- **identity-008** (event-driven): When an unauthenticated user requests checkout or order history, the {EventHub} shall redirect the user to login and return the user to the requested page after successful login.
+- **identity-009** (unwanted): If an unauthenticated user requests checkout or order history, then the {EventHub} shall show no protected content and shall create no checkout or order record.
+- **identity-010** (ubiquitous): The {EventHub} shall authorize a buyer to access only orders belonging to that buyer's account.
+- **identity-011** (ubiquitous): The {EventHub} shall prevent buyer-facing flows from reaching administrator-only functions.
+- **identity-012** (event-driven): When the administrator identity and provisioning mechanism is approved, the {EventHub} shall enforce that mechanism for administrator access.

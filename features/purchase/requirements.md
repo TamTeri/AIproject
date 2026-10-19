@@ -1,0 +1,11 @@
+- **purchase-001** (event-driven): When a buyer selects a quantity and currency, the {EventHub} shall validate the request on the server before processing it.
+- **purchase-002** (unwanted): If a purchase quantity is zero, negative, or otherwise invalid, then the {EventHub} shall reject the purchase request with an invalid-quantity outcome.
+- **purchase-003** (unwanted): If a purchase currency is not in the supported currency list, then the {EventHub} shall reject the purchase request with an unsupported-currency outcome.
+- **purchase-004** (ubiquitous): The {EventHub} shall process version-one payments as a simulated payment step without an external payment provider.
+- **purchase-005** (event-driven): When a buyer completes a successful purchase, the {EventHub} shall create an order containing the event, quantity, currency paid, exchange rate applied, and total.
+- **purchase-006** (event-driven): When a purchase succeeds, the {EventHub} shall display an on-screen confirmation.
+- **purchase-007** (event-driven): When a buyer submits a purchase attempt, the {EventHub} shall record its timestamp, buyer, event, quantity, currency, and outcome in the audit trail.
+- **purchase-008** (unwanted): If a purchase attempt fails because the event is sold out, quantity is invalid, or currency is unsupported, then the {EventHub} shall report the corresponding specific failure outcome.
+- **purchase-009** (unwanted): If a purchase exceeds the approved purchase limit, then the {EventHub} shall reject the purchase request.
+- **purchase-010** (event-driven): When the approved purchase-limit count and organizational-account exception are defined, the {EventHub} shall enforce those values.
+- **purchase-011** (event-driven): When a buyer uses the quick-purchase gesture, the {EventHub} shall apply the same server-side validation and purchase processing as the standard purchase path.

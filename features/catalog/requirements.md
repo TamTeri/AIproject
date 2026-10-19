@@ -1,0 +1,10 @@
+- **catalog-001** (ubiquitous): The {EventHub} shall provide a browsable list of events.
+- **catalog-002** (event-driven): When a buyer searches by artist, the {EventHub} shall display events matching the artist search.
+- **catalog-003** (event-driven): When a buyer searches by venue, the {EventHub} shall display events matching the venue search.
+- **catalog-004** (event-driven): When a buyer selects an event card once, the {EventHub} shall open the event page.
+- **catalog-005** (event-driven): When no events match an artist or venue search, the {EventHub} shall display a no-match message followed by the full event list.
+- **catalog-006** (ubiquitous): The {EventHub} shall render search text as plain text and never as markup.
+- **catalog-007** (ubiquitous): The {EventHub} shall display event availability on the event page.
+- **catalog-008** (event-driven): When a buyer double-clicks an event card, the {EventHub} shall initiate a one-ticket purchase using the buyer's saved settings through the standard purchase path.
+- **catalog-009** (ubiquitous): The {EventHub} shall provide a responsive website that adjusts to phone screens.
+- **catalog-010** (optional): Where the event is not offered in a native mobile application, the {EventHub} shall provide the website experience instead.

@@ -1,0 +1,6 @@
+- **pricing-001** (ubiquitous): The {EventHub} shall compute the purchase price in one pricing component.
+- **pricing-002** (ubiquitous): The {EventHub} shall include base price, quantity, discount eligibility, currency conversion, and total calculation in the pricing component.
+- **pricing-003** (event-driven): When a buyer selects a supported currency, the {EventHub} shall display and charge the purchase in that currency using the configured exchange rate.
+- **pricing-004** (ubiquitous): The {EventHub} shall use configured exchange rates rather than live exchange-rate data for version one.
+- **pricing-005** (event-driven): When an authorized administrator changes an exchange rate through the rate-management screen, the {EventHub} shall persist the updated rate.
+- **pricing-006** (event-driven): When the approved student-discount amount, event coverage, eligibility verification, discount-conversion order, and rounding rules are defined, the {EventHub} shall apply those approved pricing policies.

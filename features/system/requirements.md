@@ -1,0 +1,8 @@
+- **system-001** (ubiquitous): The {EventHub} shall validate every field that crosses the system boundary before processing it.
+- **system-002** (ubiquitous): The {EventHub} shall accept only currency codes from the supported currency configuration.
+- **system-003** (ubiquitous): The {EventHub} shall use Python and Flask for the application implementation.
+- **system-004** (ubiquitous): The {EventHub} shall provide a single web application for version one.
+- **system-005** (ubiquitous): The {EventHub} shall use one transactional database for version one.
+- **system-006** (ubiquitous): The {EventHub} shall provide on-screen confirmation and shall not send confirmation email in version one.
+- **system-007** (ubiquitous): The {EventHub} shall not include native mobile applications or interactive seat-map selection in version one.
+- **system-008** (event-driven): When a session's idle duration exceeds the configured timeout, the {EventHub} shall terminate the session.
