@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Order history · EventHub{% endblock %}
+{% block content %}
+<h1>Order history</h1>
+<ul class="event-list">
+{% for order in orders %}
+  <li class="event-card">
+    <a href="{{ url_for('web.order_detail', order_id=order.id) }}">Order {{ order.id }}</a>
+  </li>
+{% else %}
+  <li><p class="muted">You have no orders yet.</p></li>
+{% endfor %}
+</ul>
+{% endblock %}

@@ -1,0 +1,16 @@
+
+==================================== ERRORS ====================================
+___________ ERROR collecting tests/unit/pricing/test_eligibility.py ____________
+ImportError while importing test module '/Users/iankoratsky/.hermes/cache/scratch/eventhub-worktrees/pricing/tests/unit/pricing/test_eligibility.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/unit/pricing/test_eligibility.py:5: in <module>
+    from app.pricing.config import temporary_local_policy
+E   ModuleNotFoundError: No module named 'app.pricing'
+=========================== short test summary info ============================
+ERROR tests/unit/pricing/test_eligibility.py
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 2.32s

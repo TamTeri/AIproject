@@ -1,0 +1,8 @@
+{
+  "lane": "DB-SCHEMA",
+  "policy_status": "[TEMPORARY_MVP_DEFAULT] [PROVISIONAL_LOCAL_ONLY]",
+  "base_before_edit": "53a14ba4f29dbcdadddcdb8f9682743714395549",
+  "origin_main_at_start": "3edc745f3a87b3944cc49868e59408c409166778",
+  "origin_main_tree_matches_base": true,
+  "entries": []
+}

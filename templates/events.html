@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Events · EventHub{% endblock %}
+{% block content %}
+<h1>Events</h1>
+<form method="get" action="{{ url_for('web.events') }}" role="search">
+  <label for="event-search">Search by artist or venue</label>
+  <input id="event-search" name="q" value="{{ query or '' }}" autocomplete="off">
+  <button type="submit">Search</button>
+</form>
+{% if no_match %}
+  <p class="message" role="status">No events matched “{{ query }}”. Showing all events.</p>
+{% endif %}
+<ul class="event-list">
+{% for event in events %}
+  <li class="event-card">
+    <h2><a href="{{ url_for('web.event_detail', event_id=event.id) }}">{{ event.artist }}</a></h2>
+    <p>{{ event.venue }} · {{ event.starts_at }}</p>
+    <p>Available: {{ event.available }}</p>
+  </li>
+{% else %}
+  <li><p class="muted">No events are available.</p></li>
+{% endfor %}
+</ul>
+{% endblock %}
