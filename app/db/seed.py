@@ -7,7 +7,6 @@ from typing import Any
 
 from sqlalchemy import Connection, text
 
-
 SEED_POLICY_STATUS = "[TEMPORARY_MVP_DEFAULT] [PROVISIONAL_LOCAL_ONLY]"
 
 
@@ -51,7 +50,9 @@ def seed_connection(connection: Connection, fixture: dict[str, Any]) -> None:
         ),
         {
             "key": "catalog-seed",
-            "value": json.dumps({"seeded_at": seeded_at, "policy_status": SEED_POLICY_STATUS}, sort_keys=True),
+            "value": json.dumps(
+                {"seeded_at": seeded_at, "policy_status": SEED_POLICY_STATUS}, sort_keys=True
+            ),
         },
     )
 
@@ -97,9 +98,7 @@ def seed_connection(connection: Connection, fixture: dict[str, Any]) -> None:
     for config in fixture["config"]:
         _require_keys(config, "config_key", "value_json", "policy_status")
         if config["policy_status"] != SEED_POLICY_STATUS:
-            raise SeedFixtureError(
-                f"config {config['config_key']} is not labeled temporary local-only"
-            )
+            raise SeedFixtureError(f"config {config['config_key']} is not labeled temporary local-only")
         connection.execute(
             text(
                 """

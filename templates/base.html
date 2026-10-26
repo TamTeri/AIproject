@@ -5,31 +5,76 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}EventHub{% endblock %}</title>
   <style>
-    :root { font-family: system-ui, sans-serif; color-scheme: light; }
-    body { margin: 0 auto; max-width: 72rem; padding: 1rem; line-height: 1.5; }
-    nav { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem; }
-    main { max-width: 52rem; }
-    form { display: grid; gap: .75rem; max-width: 32rem; }
-    input, select, button { font: inherit; min-height: 2.75rem; padding: .4rem .6rem; }
-    button { cursor: pointer; }
-    .event-list { display: grid; gap: 1rem; padding: 0; list-style: none; }
-    .event-card { border: 1px solid #bbb; border-radius: .5rem; padding: 1rem; }
-    .message, .error { border-radius: .4rem; padding: .75rem; margin: 1rem 0; }
-    .message { background: #eef7ee; }
-    .error { background: #fff0f0; border: 1px solid #b00020; }
-    .muted { color: #555; }
-    @media (max-width: 40rem) { body { padding: .75rem; } nav { gap: .6rem; } }
+    :root {
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      --ink: #1d2433; --muted: #5b6475; --line: #d7dbe3; --bg: #ffffff; --card: #f7f8fb;
+      --accent: #0b6e4f; --accent-ink: #ffffff; --warn-bg: #fff2f2; --warn: #b00020; --ok-bg: #eaf6ef;
+      color-scheme: light;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: var(--ink); background: var(--bg); line-height: 1.5; }
+    header { border-bottom: 1px solid var(--line); }
+    nav, main, footer { margin: 0 auto; max-width: 64rem; padding: 0 1rem; }
+    nav { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1.25rem; min-height: 3.5rem; }
+    nav .brand { font-weight: 700; color: var(--accent); text-decoration: none; margin-right: auto; }
+    nav form { display: inline; }
+    main { padding-top: 1.5rem; padding-bottom: 3rem; }
+    a { color: var(--accent); }
+    h1 { font-size: 1.6rem; margin: 0 0 1rem; }
+    form.stack { display: grid; gap: .6rem; max-width: 28rem; }
+    label { font-weight: 600; }
+    input, select, button { font: inherit; min-height: 2.75rem; padding: .4rem .7rem; border: 1px solid var(--line); border-radius: .4rem; }
+    button { cursor: pointer; background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+    button.secondary, .linklike { background: transparent; color: var(--accent); border-color: var(--line); }
+    .linklike { min-height: auto; padding: 0; border: 0; font-weight: 400; text-decoration: underline; }
+    .event-list { display: grid; gap: 1rem; padding: 0; list-style: none; grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr)); }
+    .event-card { border: 1px solid var(--line); border-radius: .6rem; padding: 1rem; background: var(--card); cursor: pointer; user-select: none; }
+    .event-card:hover, .event-card:focus-within { border-color: var(--accent); }
+    .event-card h2 { font-size: 1.1rem; margin: 0 0 .25rem; }
+    .event-card p { margin: .2rem 0; }
+    .muted { color: var(--muted); }
+    .flash, .message { background: var(--ok-bg); border-radius: .4rem; padding: .75rem 1rem; margin: 0 0 1rem; }
+    .error { background: var(--warn-bg); border: 1px solid var(--warn); border-radius: .4rem; padding: .75rem 1rem; margin: 0 0 1rem; }
+    .search { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .search input { flex: 1 1 14rem; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { text-align: left; padding: .5rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+    .table-wrap { overflow-x: auto; }
+    dl.summary { display: grid; grid-template-columns: max-content 1fr; gap: .3rem 1rem; }
+    dl.summary dt { color: var(--muted); }
+    dl.summary dd { margin: 0; }
+    .total { font-size: 1.25rem; font-weight: 700; }
+    .actions { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; margin-top: 1rem; }
+    @media (max-width: 40rem) { h1 { font-size: 1.35rem; } dl.summary { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
-  <nav aria-label="Primary">
-    <a href="{{ url_for('web.events') }}">Events</a>
-    <a href="{{ url_for('web.orders') }}">Order history</a>
-    <a href="{{ url_for('web.login') }}">Log in</a>
-    <a href="{{ url_for('web.register') }}">Register</a>
-  </nav>
+  <header>
+    <nav aria-label="Primary">
+      <a class="brand" href="{{ url_for('web.events') }}">EventHub</a>
+      <a href="{{ url_for('web.events') }}">Events</a>
+      {% set user = current_user() %}
+      {% if user %}
+        <a href="{{ url_for('web.orders') }}">Order history</a>
+        <a href="{{ url_for('web.account') }}">Account</a>
+        {% if user.is_admin %}<a href="{{ url_for('web.admin_rates') }}">Admin</a>{% endif %}
+        <form method="post" action="{{ url_for('web.logout') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="linklike" type="submit">Log out ({{ user.name }})</button>
+        </form>
+      {% else %}
+        <a href="{{ url_for('web.orders') }}">Order history</a>
+        <a href="{{ url_for('web.login') }}">Log in</a>
+        <a href="{{ url_for('web.register') }}">Register</a>
+      {% endif %}
+    </nav>
+  </header>
   <main>
+    {% with messages = get_flashed_messages() %}
+      {% for message in messages %}<p class="flash" role="status">{{ message }}</p>{% endfor %}
+    {% endwith %}
     {% block content %}{% endblock %}
   </main>
+  {% block scripts %}{% endblock %}
 </body>
 </html>

@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import timedelta
-from typing import Mapping
-
 
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
@@ -26,7 +25,7 @@ class SessionPolicy:
     label: str = "configured"
 
     @classmethod
-    def temporary_mvp(cls) -> "SessionPolicy":
+    def temporary_mvp(cls) -> SessionPolicy:
         return cls(
             idle_timeout=timedelta(minutes=30),
             label="TEMPORARY_SESSION_IDLE_TIMEOUT_30_MINUTES",
@@ -38,13 +37,13 @@ class SessionPolicy:
         values: Mapping[str, object],
         *,
         environment: str,
-    ) -> "SessionPolicy":
+    ) -> SessionPolicy:
         raw_timeout = values.get("EVENTHUB_SESSION_IDLE_TIMEOUT_SECONDS")
         if raw_timeout is None:
-            if environment in {"local", "development"}:
+            if environment in {"local", "development", "test"}:
                 return cls.temporary_mvp()
             raise ValueError(
-                "EVENTHUB_SESSION_IDLE_TIMEOUT_SECONDS is required outside local/development"
+                "EVENTHUB_SESSION_IDLE_TIMEOUT_SECONDS is required outside local/development/test"
             )
         try:
             seconds = int(str(raw_timeout).strip())

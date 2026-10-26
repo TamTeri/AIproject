@@ -1,12 +1,10 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from typing import Any, Protocol, TYPE_CHECKING, runtime_checkable
+from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
-    from app.audit.models import PurchaseAttemptAudit
-    from app.inventory.models import Hold, HoldReleaseReason
-    from app.orders.models import OrderSnapshot
+    from app.inventory.models import Hold
     from app.purchase.models import IdempotencyClaim, PaymentResult, PurchaseResult, QuoteSnapshot
 
 
@@ -16,9 +14,13 @@ class PostgresTransactionContext(Protocol):
 
     def execute(self, statement: str, parameters: Mapping[str, object] | None = None) -> Any: ...
 
-    def fetch_one(self, statement: str, parameters: Mapping[str, object] | None = None) -> Mapping[str, Any] | None: ...
+    def fetch_one(
+        self, statement: str, parameters: Mapping[str, object] | None = None
+    ) -> Mapping[str, Any] | None: ...
 
-    def fetch_all(self, statement: str, parameters: Mapping[str, object] | None = None) -> Sequence[Mapping[str, Any]]: ...
+    def fetch_all(
+        self, statement: str, parameters: Mapping[str, object] | None = None
+    ) -> Sequence[Mapping[str, Any]]: ...
 
     def commit(self) -> None: ...
 
@@ -49,7 +51,26 @@ class QuotePort(Protocol):
     ) -> QuoteSnapshot: ...
 
 
+class QuoteCurrenciesPort(Protocol):
+    def supported_currencies(self, tx: PostgresTransactionContext) -> set[str]: ...
+
+
+class PurchasableEventPort(Protocol):
+    """Locks the event row (SELECT ... FOR UPDATE) so limit and capacity checks
+    for one event run one at a time. False if the event is missing/inactive."""
+
+    def lock_event(self, tx: PostgresTransactionContext, event_id: str) -> bool: ...
+
+
+class PurchaseLimitPort(Protocol):
+    """Tickets the buyer already owns or holds (unexpired) for the event."""
+
+    def committed_quantity(self, tx: PostgresTransactionContext, *, buyer_id: str, event_id: str) -> int: ...
+
+
 class PaymentPort(Protocol):
+    """Simulated payment (purchase-004): no external provider in version one."""
+
     def simulate(
         self,
         *,
@@ -57,6 +78,7 @@ class PaymentPort(Protocol):
         buyer_id: str,
         hold: Hold,
         quote_snapshot: QuoteSnapshot,
+        payment_choice: str = "approve",
     ) -> PaymentResult: ...
 
 

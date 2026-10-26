@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Account · EventHub{% endblock %}
+{% block content %}
+{% set user = current_user() %}
+<h1>Account</h1>
+<dl class="summary">
+  <dt>Name</dt><dd>{{ user.name }}</dd>
+  <dt>Email</dt><dd>{{ user.email }}</dd>
+</dl>
+<h2>Quick Buy settings</h2>
+{% if error %}<p class="error" role="alert">{{ error.message }}</p>{% endif %}
+<form class="stack" method="post" action="{{ url_for('web.account') }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <label for="currency">Saved currency</label>
+  <select id="currency" name="currency">
+    {% for code in currencies %}<option value="{{ code }}" {% if code == (user.preferred_currency or 'USD') %}selected{% endif %}>{{ code }}</option>{% endfor %}
+  </select>
+  <button type="submit">Save</button>
+</form>
+{% endblock %}

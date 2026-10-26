@@ -3,15 +3,14 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence
 
 from alembic import command
 from sqlalchemy import create_engine, text
 
 from app.config.database import alembic_config
 from app.config.settings import ConfigurationError, Settings
-
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
@@ -119,13 +118,9 @@ def _load_seed(path: Path) -> dict[str, object]:
 
 def _require_reset_enabled(settings: Settings) -> None:
     if not settings.reset_enabled:
-        raise ConfigurationError(
-            "database reset is disabled; set EVENTHUB_RESET_ENABLED=true explicitly"
-        )
+        raise ConfigurationError("database reset is disabled; set EVENTHUB_RESET_ENABLED=true explicitly")
     if settings.environment not in {"local", "development", "test"}:
-        raise ConfigurationError(
-            "database reset is only allowed in local, development, or test environments"
-        )
+        raise ConfigurationError("database reset is only allowed in local, development, or test environments")
 
 
 if __name__ == "__main__":

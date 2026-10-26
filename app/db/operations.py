@@ -1,16 +1,14 @@
 from __future__ import annotations
 
-import json
 import os
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Mapping
 
 from alembic import command
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine
 
 from app.config.database import alembic_config
 from app.db.transaction import _validate_postgresql_url
-
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_SEED_FILE = PROJECT_ROOT / "seed" / "catalog.json"
@@ -65,9 +63,7 @@ def database_url_from_environment(values: Mapping[str, object] | None = None) ->
     source = dict(os.environ)
     if values:
         source.update(values)
-    database_url = str(
-        source.get("DATABASE_URL") or source.get("EVENTHUB_DATABASE_URL") or ""
-    ).strip()
+    database_url = str(source.get("DATABASE_URL") or source.get("EVENTHUB_DATABASE_URL") or "").strip()
     if not database_url:
         raise DatabaseResetError("DATABASE_URL is required")
     _validate_postgresql_url(database_url)
@@ -78,6 +74,4 @@ def _require_reset_enabled(*, environment: str, reset_enabled: bool) -> None:
     if not reset_enabled:
         raise DatabaseResetError("database reset requires EVENTHUB_RESET_ENABLED=true")
     if environment not in {"local", "development", "test"}:
-        raise DatabaseResetError(
-            "database reset is only allowed in local, development, or test environments"
-        )
+        raise DatabaseResetError("database reset is only allowed in local, development, or test environments")

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Audit log · Admin · EventHub{% endblock %}
+{% block content %}
+<h1>Purchase-attempt audit log</h1>
+<p><a href="{{ url_for('web.admin_rates') }}">← Exchange rates</a></p>
+<p class="muted">Every purchase attempt, newest first. Records are append-only and cannot be edited or deleted.</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>#</th><th>Time</th><th>Buyer</th><th>Event</th><th>Qty</th><th>Currency</th><th>Outcome</th><th>Reason</th><th>Order</th></tr></thead>
+  <tbody>
+  {% for row in page.rows %}
+    <tr data-outcome="{{ row.outcome }}">
+      <td>{{ row.id }}</td>
+      <td>{{ row.submitted_at }}</td>
+      <td>{{ row.buyer_email or '—' }}</td>
+      <td>{{ row.event_title or '—' }}</td>
+      <td>{{ row.quantity if row.quantity is not none else '—' }}</td>
+      <td>{{ row.currency or '—' }}</td>
+      <td>{{ row.outcome }}</td>
+      <td>{{ row.reason_code }}</td>
+      <td>{{ row.order_id or '—' }}</td>
+    </tr>
+  {% else %}
+    <tr><td colspan="9" class="muted">No purchase attempts yet.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% if page.next_before_id %}<p><a href="{{ url_for('web.admin_audit', before=page.next_before_id) }}">Older attempts →</a></p>{% endif %}
+{% endblock %}
