@@ -7,3 +7,4 @@ __pycache__/
 
 # Local configuration and evidence generated outside the committed bootstrap logs
 .env
+browser-shots/

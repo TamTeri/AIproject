@@ -3,7 +3,7 @@
 **Status:** every version-one feature is built and tested. Policy values the customer has not confirmed run as labelled temporary defaults, which work in local, development and test environments only.
 
 **Branch:** `eventhub/part4` (based on `main` @ `7ebc3a7`)
-**Tests:** 214 passing against PostgreSQL. Without a database, 193 pass and 21 skip.
+**Tests:** 216 passing against PostgreSQL. Without a database, 195 pass and 21 skip.
 
 ## Built and tested
 
@@ -40,4 +40,4 @@
 ## Not done here
 
 - `diagrams/*.png` were exported before Call 4. `workspace.dsl` now has a `Component_PostCall4` view. Re-export the PNGs from Structurizr to include it.
-- Browser-level tests (for example clicking with a real browser). The double-click JavaScript is checked by contract tests and by hand.
+- Browser tests are not part of CI. `scripts/browser_check.py` drives Chrome through 15 scenarios, including single click and double click, and passed on the final code. It is run by hand because it needs Chrome and Playwright.

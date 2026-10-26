@@ -42,10 +42,12 @@ Open http://127.0.0.1:5000. Register with an `@usf.edu` email to see the student
 
 ```bash
 .venv/bin/python -m pytest                    # unit + contract tests; PostgreSQL tests skip
-EVENTHUB_TEST_DATABASE_URL="$DATABASE_URL" .venv/bin/python -m pytest   # everything (214 tests)
+EVENTHUB_TEST_DATABASE_URL="$DATABASE_URL" .venv/bin/python -m pytest   # everything (216 tests)
 ```
 
 The PostgreSQL tests reset the database they are given, so point them at a throwaway one.
+
+**Real-browser check (optional):** with the server running on port 5055, `pip install playwright`, then run `.venv/bin/python scripts/browser_check.py`. It resets the database, drives Google Chrome through 15 scenarios (including single click and double click on event cards and the phone layout), and saves screenshots to `browser-shots/`.
 
 | Folder | What it tests | Needs a database |
 |---|---|---|

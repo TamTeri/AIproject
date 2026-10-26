@@ -10,7 +10,7 @@
   - we gave it the **whole** design at once (the C4 components and their relationships, the requirements, Call 4's rules and the real database schema);
   - we made **one** integration pass own the wiring;
   - we required tests that run the **real** app against a **real** PostgreSQL, including 10 buyers racing for 2 tickets.
-- **End state:** all 214 tests pass against PostgreSQL. Without a database, 193 pass and 21 skip. Lint and style checks are clean, and CI runs everything on every upload.
+- **End state:** all 216 tests pass against PostgreSQL. Without a database, 195 pass and 21 skip. Lint and style checks are clean, and CI runs everything on every upload.
 
 ## Tools
 
@@ -93,13 +93,39 @@ Once we put the merged pieces together and ran them, we found these bugs. None o
 
 There was also an environment problem: Docker hung, so the PostgreSQL tests ran against a temporary local PostgreSQL 15 on the same port. CI uses PostgreSQL 16 in Docker.
 
+### Round 2b: testing in a real browser
+
+All automated tests passed, but they drive the app through Flask's test client, not a browser. As a final check, we ran the real server and drove Google Chrome with Playwright through 15 scenarios:
+- register, log in, search;
+- single-click a card to open it, double-click a card to Quick Buy;
+- checkout with a declined card, then an approved one;
+- limit and sold-out messages; cancel;
+- order history; saved currency;
+- buyer blocked from admin; another buyer blocked from my order;
+- logout; the admin audit log and rate update;
+- a phone-width layout.
+
+This caught problems that none of the 214 tests had caught:
+
+| Problem | Why the tests missed it | Fix |
+|---|---|---|
+| Confirmation page showed "0.92000000 EUR per USD" | The unit test compared `Decimal("0.92000000") == Decimal("0.92")`, which is true; nobody looked at the *text* | `format_rate()` display helper; tests now check the rendered text |
+| The admin page would show a rate of 150 as "1.5E+2" | Same: the number was right, the display wasn't | Same helper, with a contract test for 150 |
+| Dates appeared as raw timestamps (`2026-10-26 17:52:36.657126-04:00`) | Tests checked that the date was present, not that it was readable | A `when` template filter: "Mon, Oct 26, 2026 · 5:52 PM" |
+| Browsers logged a 404 for `/favicon.ico` on every page | Only a browser asks for it | Empty inline favicon |
+
+We also made mistakes in our *own* browser test, which is worth recording. The selector `text=Pay` also matched the label "Simulated card (no real **pay**ment…)". Our expected value for a GBP quick buy (31.99) was wrong: £40.50 × 0.79 = 31.995 rounds half-up to 32.00, so the app was right and the test was wrong. Lesson: when a test fails, check the test as carefully as the code.
+
+After these fixes, all 15 browser scenarios pass with no JavaScript errors, and the test suite has 216 tests.
+
 ## What made the difference
 
 1. **Context beats cleverness.** The same model wrote correct code once it could see the whole system, especially the migrations. Most round-1 bugs were caused by missing context, not by bad code.
 2. **Describe components as contracts plus data plus rules.** A component's responsibility, its calls, its tables and its requirement lines, in plain text, was the most reliable way to "describe the C4 Component diagram to the LLM".
 3. **Fakes can lie.** Every round-1 lane was green with its own fakes. Only tests that ran the real database and the real app exposed the mismatches. We now keep both: fast fake-based unit tests for each standalone feature, and real-database tests in CI.
 4. **Make the AI prove claims.** We asked for evidence (test runs, a smoke script, concurrency tests) rather than accepting "done". When it was wrong, the evidence showed it.
-5. **Humans still review.** AI-written code goes through a human reviewer before merging (`CONTRIBUTING.md`). *[Add: what did your reviewer actually catch or question?]*
+5. **Look at the screen.** Passing tests proved the values were right; only a real browser showed they were displayed badly.
+6. **Humans still review.** AI-written code goes through a human reviewer before merging (`CONTRIBUTING.md`). *[Add: what did your reviewer actually catch or question?]*
 
 ## Our own review notes
 
@@ -110,7 +136,7 @@ There was also an environment problem: Docker hung, so the PostgreSQL tests ran 
 | | Round 1 (`main` @ 7ebc3a7) | Round 2 (`eventhub/part4`) |
 |---|---|---|
 | Buyer can complete a purchase in the app | No | Yes |
-| Tests | 20 pass, 1 fail, 4 skip | 214 pass with PostgreSQL; 193 pass and 21 skip without it |
+| Tests | 20 pass, 1 fail, 4 skip | 216 pass with PostgreSQL; 195 pass and 21 skip without it |
 | Features with real database adapters | 0 of 8 | 8 of 8 |
 | Integration bugs found when combining | 6 (table above) | fixed, with a test for each |
 
