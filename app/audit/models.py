@@ -1,9 +1,8 @@
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from datetime import datetime
-import re
-
 
 _CODE = re.compile(r"^[A-Za-z0-9_.:-]+$")
 _MAX_ID = 128
@@ -55,7 +54,9 @@ class PurchaseAttemptAudit:
         ):
             raise ValueError("currency is not bounded")
         if self.quantity is not None and (
-            not isinstance(self.quantity, int) or isinstance(self.quantity, bool) or not 0 <= self.quantity <= 1_000_000
+            not isinstance(self.quantity, int)
+            or isinstance(self.quantity, bool)
+            or not 0 <= self.quantity <= 1_000_000
         ):
             raise ValueError("quantity is not bounded")
         if self.submitted_at.tzinfo is None or self.submitted_at.utcoffset() is None:

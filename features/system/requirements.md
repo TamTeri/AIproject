@@ -6,3 +6,7 @@
 - **system-006** (ubiquitous): The {EventHub} shall provide on-screen confirmation and shall not send confirmation email in version one.
 - **system-007** (ubiquitous): The {EventHub} shall not include native mobile applications or interactive seat-map selection in version one.
 - **system-008** (event-driven): When a session's idle duration exceeds the configured timeout, the {EventHub} shall terminate the session.
+- **system-009** (ubiquitous) [Call 4]: The {EventHub} shall run lint, style, and all tests automatically on every upload; a change whose automatic run fails shall not be merged.
+- **system-010** (ubiquitous) [Call 4]: The {EventHub} repository shall provide a contributing guide and pre-commit checks, including a warning when application code changes without its requirements file.
+- **system-011** (ubiquitous) [Call 4]: The {EventHub} shall treat a feature as finished only when its code is reviewed by someone else, its tests are written and passing, its requirements file is updated, and every automatic check passes.
+- **system-012** (ubiquitous) [Call 4]: The {EventHub} shall build each feature as a standalone module with its own unit tests, and the main program shall include every feature.

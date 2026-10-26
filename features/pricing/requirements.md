@@ -4,3 +4,7 @@
 - **pricing-004** (ubiquitous): The {EventHub} shall use configured exchange rates rather than live exchange-rate data for version one.
 - **pricing-005** (event-driven): When an authorized administrator changes an exchange rate through the rate-management screen, the {EventHub} shall persist the updated rate.
 - **pricing-006** (event-driven): When the approved student-discount amount, event coverage, eligibility verification, discount-conversion order, and rounding rules are defined, the {EventHub} shall apply those approved pricing policies.
+- **pricing-007** (ubiquitous) [Call 4]: The {EventHub} shall compute every price through one function that takes base price, quantity, discount eligibility, and target currency and returns the amount; no page template shall compute money.
+- **pricing-008** (ubiquitous) [Call 4]: The {EventHub} shall represent money as integers in the currency's minor unit and exchange rates as exact decimals, as recorded in ADR-005 before the first price was computed.
+- **pricing-009** (ubiquitous) [Call 4]: The {EventHub} shall decide student-discount eligibility in one separate, testable function that normalizes the email (trim, ignore case) before checking it.
+- **pricing-010** (ubiquitous) [Call 4]: Until the customer confirms the discount percentage, the {EventHub} shall keep it in one named constant marked `[TEMPORARY_MVP_DEFAULT]` and shall refuse to price outside local, development, and test environments.

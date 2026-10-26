@@ -24,6 +24,8 @@ class AccountRecord:
     normalized_email: str
     password_hash: str
     created_at: datetime
+    role: str = "buyer"
+    preferred_currency: str | None = None
 
 
 @dataclass(frozen=True)
@@ -35,6 +37,14 @@ class PublicAccount:
 
 @dataclass(frozen=True)
 class Principal:
+    """The signed-in account as seen by the rest of the app (no secrets)."""
+
     account_id: str
     name: str
     email: str
+    role: str = "buyer"
+    preferred_currency: str | None = None
+
+    @property
+    def is_admin(self) -> bool:
+        return self.role == "administrator"

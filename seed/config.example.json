@@ -31,7 +31,7 @@
   },
   "quick_buy": {
     "first_path": "explicit button",
-    "double_click": "deferred"
+    "double_click": "in first build (Call 4); same server-side purchase path"
   },
   "not_implemented_by_bootstrap": [
     "product routes and services",

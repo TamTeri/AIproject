@@ -9,3 +9,5 @@
 - **purchase-009** (unwanted): If a purchase exceeds the approved purchase limit, then the {EventHub} shall reject the purchase request.
 - **purchase-010** (event-driven): When the approved purchase-limit count and organizational-account exception are defined, the {EventHub} shall enforce those values.
 - **purchase-011** (event-driven): When a buyer uses the quick-purchase gesture, the {EventHub} shall apply the same server-side validation and purchase processing as the standard purchase path.
+- **purchase-012** (unwanted) [Call 4]: If the simulated payment fails, then the {EventHub} shall release the held tickets exactly once, create no order, and record a failed attempt.
+- **purchase-013** (ubiquitous) [Call 4]: The {EventHub} shall charge the price frozen when the checkout hold was created, even if an exchange rate changes before payment.

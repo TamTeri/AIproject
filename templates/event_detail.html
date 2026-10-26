@@ -2,10 +2,38 @@
 {% block title %}{{ event.artist }} · EventHub{% endblock %}
 {% block content %}
 <h1>{{ event.artist }}</h1>
-<p>{{ event.venue }} · {{ event.starts_at }}</p>
-<p>Available: <strong>{{ event.available }}</strong></p>
-<form method="post" action="/events/{{ event.id }}/quick-buy">
-  <button type="submit">Quick Buy</button>
+{% if event.title %}<p>{{ event.title }}</p>{% endif %}
+<dl class="summary">
+  <dt>Venue</dt><dd>{{ event.venue }}</dd>
+  <dt>Starts</dt><dd>{{ event.starts_at|when }}</dd>
+  {% if price %}<dt>Price</dt><dd>{{ price }} per ticket</dd>{% endif %}
+  <dt>Availability</dt>
+  <dd>{% if event.available > 0 %}<strong>{{ event.available }}</strong> tickets left{% else %}<strong>Sold out</strong>{% endif %}</dd>
+</dl>
+
+{% if error %}<p class="error" role="alert" data-error-code="{{ error.code }}">{{ error.message }}</p>{% endif %}
+
+{% if currencies %}
+<h2>Buy tickets</h2>
+<form class="stack" method="post" action="{{ url_for('web.checkout_start', event_id=event.id) }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <label for="quantity">Quantity</label>
+  <input id="quantity" name="quantity" type="number" min="1" step="1" value="{{ quantity }}" required>
+  <label for="currency">Currency</label>
+  <select id="currency" name="currency">
+    {% for code in currencies %}<option value="{{ code }}" {% if code == preferred_currency %}selected{% endif %}>{{ code }}</option>{% endfor %}
+  </select>
+  <button type="submit">Continue to checkout</button>
 </form>
+<p class="muted">USF students (@usf.edu email) get the student discount. Your tickets are held for 10 minutes while you check out.</p>
+{% endif %}
+
+<div class="actions">
+  <form method="post" action="{{ url_for('web.quick_buy', event_id=event.id) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="secondary" type="submit">Quick Buy</button>
+  </form>
+  <span class="muted">One ticket in your saved currency.</span>
+</div>
 <p><a href="{{ url_for('web.events') }}">Back to events</a></p>
 {% endblock %}

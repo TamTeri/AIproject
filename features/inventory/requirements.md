@@ -5,3 +5,4 @@
 - **inventory-005** (event-driven): When a buyer creates a checkout hold under the approved hold policy, the {EventHub} shall reserve the requested quantity for ten minutes.
 - **inventory-006** (event-driven): When a checkout hold's ten-minute duration elapses, the {EventHub} shall release its reserved quantity.
 - **inventory-007** (event-driven): When the hold release and hold-to-sale mechanics are approved, the {EventHub} shall apply those mechanics to the corresponding checkout state transitions.
+- **inventory-008** (ubiquitous) [Call 4 build, temporary]: Until inventory-007's mechanics are approved, the {EventHub} shall derive availability as capacity minus sold minus active unexpired holds, end each hold in exactly one of converted, cancelled, expired, or payment-failed, and convert a hold to a sale without subtracting inventory a second time. `[TEMPORARY_MVP_DEFAULT]`

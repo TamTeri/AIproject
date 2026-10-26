@@ -12,7 +12,6 @@ from sqlalchemy.exc import DatabaseError, IntegrityError
 
 from app.db import PostgresDatabase, migrate_database, reset_database, seed_database
 
-
 ROOT = Path(__file__).resolve().parents[3]
 SEED_FILE = ROOT / "seed" / "catalog.json"
 
@@ -109,34 +108,37 @@ def test_fresh_migrate_seed_repeat_seed_and_reset_are_deterministic(
                 "idempotency_records",
             } <= tables
 
-            revision = connection.execute(
-                text("SELECT version_num FROM alembic_version")
-            ).scalar_one()
+            revision = connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one()
             assert revision == "0005_schema_seams"
 
-            assert connection.execute(text("SELECT count(*) FROM currencies")).scalar_one() == 1
-            assert connection.execute(text("SELECT count(*) FROM exchange_rates")).scalar_one() == 1
+            assert connection.execute(text("SELECT count(*) FROM currencies")).scalar_one() == 4
+            assert connection.execute(text("SELECT count(*) FROM exchange_rates")).scalar_one() == 4
             assert connection.execute(text("SELECT count(*) FROM app_config")).scalar_one() >= 4
-            assert connection.execute(text("SELECT count(*) FROM events")).scalar_one() == 1
+            assert connection.execute(text("SELECT count(*) FROM events")).scalar_one() == 6
             event = connection.execute(
                 text(
                     """
                     SELECT catalog_key, base_price_minor, capacity
                     FROM events
                     ORDER BY id
+                    LIMIT 1
                     """
                 )
             ).one()
             assert event == ("demo-usf-concert-2026-11-01", 2500, 100)
 
             currency = connection.execute(
-                text("SELECT code, minor_unit, enabled FROM currencies")
+                text("SELECT code, minor_unit, enabled FROM currencies WHERE code = 'USD'")
             ).one()
             assert currency == ("USD", 2, True)
             rate = connection.execute(
-                text("SELECT currency_code, rate FROM exchange_rates")
+                text("SELECT currency_code, rate FROM exchange_rates WHERE currency_code = 'USD'")
             ).one()
             assert rate == ("USD", Decimal("1.00000000"))
+            eur = connection.execute(
+                text("SELECT rate FROM exchange_rates WHERE currency_code = 'EUR'")
+            ).scalar_one()
+            assert eur == Decimal("0.92000000")
 
             config_rows = connection.execute(
                 text(
@@ -148,23 +150,20 @@ def test_fresh_migrate_seed_repeat_seed_and_reset_are_deterministic(
                 )
             ).all()
             assert config_rows
-            assert {row[1] for row in config_rows} == {
-                "[TEMPORARY_MVP_DEFAULT] [PROVISIONAL_LOCAL_ONLY]"
-            }
+            assert {row[1] for row in config_rows} == {"[TEMPORARY_MVP_DEFAULT] [PROVISIONAL_LOCAL_ONLY]"}
 
             availability = connection.execute(
                 text(
                     """
                     SELECT catalog_key, available_quantity, held_quantity, sold_quantity
                     FROM event_availability
+                    WHERE catalog_key = 'demo-usf-concert-2026-11-01'
                     """
                 )
             ).one()
             assert availability == ("demo-usf-concert-2026-11-01", 100, 0, 0)
 
-            assert connection.execute(
-                text("SELECT count(*) FROM eventhub_bootstrap")
-            ).scalar_one() == 1
+            assert connection.execute(text("SELECT count(*) FROM eventhub_bootstrap")).scalar_one() == 1
     finally:
         engine.dispose()
 
@@ -177,9 +176,10 @@ def test_fresh_migrate_seed_repeat_seed_and_reset_are_deterministic(
             assert connection.execute(text("SELECT count(*) FROM events")).scalar_one() == 0
             assert connection.execute(text("SELECT count(*) FROM currencies")).scalar_one() == 0
             assert connection.execute(text("SELECT count(*) FROM app_config")).scalar_one() == 0
-            assert connection.execute(
-                text("SELECT version_num FROM alembic_version")
-            ).scalar_one() == "0005_schema_seams"
+            assert (
+                connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one()
+                == "0005_schema_seams"
+            )
     finally:
         engine.dispose()
 
@@ -217,10 +217,13 @@ def test_one_postgresql_transaction_connection_commits_or_rolls_back_as_a_unit(
         )
 
     with database.transaction() as transaction:
-        assert transaction.execute(
-            text("SELECT count(*) FROM account_sessions WHERE token_hash = :token_hash"),
-            {"token_hash": "a" * 64},
-        ).scalar_one() == 1
+        assert (
+            transaction.execute(
+                text("SELECT count(*) FROM account_sessions WHERE token_hash = :token_hash"),
+                {"token_hash": "a" * 64},
+            ).scalar_one()
+            == 1
+        )
 
     with pytest.raises(RuntimeError, match="rollback marker"):
         with database.transaction() as transaction:
@@ -240,10 +243,13 @@ def test_one_postgresql_transaction_connection_commits_or_rolls_back_as_a_unit(
             raise RuntimeError("rollback marker")
 
     with database.transaction() as transaction:
-        assert transaction.execute(
-            text("SELECT count(*) FROM accounts WHERE normalized_email = :email"),
-            {"email": "rollback@example.test"},
-        ).scalar_one() == 0
+        assert (
+            transaction.execute(
+                text("SELECT count(*) FROM accounts WHERE normalized_email = :email"),
+                {"email": "rollback@example.test"},
+            ).scalar_one()
+            == 0
+        )
 
     database.dispose()
 
@@ -268,9 +274,7 @@ def test_postgresql_constraints_cover_ownership_state_and_bounded_temporary_reco
             },
         ).scalar_one()
         event_id = connection.execute(
-            text(
-                "SELECT id FROM events WHERE catalog_key = 'demo-usf-concert-2026-11-01'"
-            )
+            text("SELECT id FROM events WHERE catalog_key = 'demo-usf-concert-2026-11-01'")
         ).scalar_one()
 
     def assert_rejected(statement: str, parameters: dict[str, object] | None = None):
@@ -399,15 +403,18 @@ def test_postgresql_constraints_cover_ownership_state_and_bounded_temporary_reco
     database = PostgresDatabase(migrated_seeded_database)
     try:
         with database.transaction() as transaction:
-            assert transaction.execute(
-                text(
-                    """
+            assert (
+                transaction.execute(
+                    text(
+                        """
                     SELECT policy_status
                     FROM idempotency_records
                     WHERE buyer_id = :account_id AND idempotency_key = 'temporary-key'
                     """
-                ),
-                {"account_id": account_id},
-            ).scalar_one() == "[TEMPORARY_MVP_DEFAULT]"
+                    ),
+                    {"account_id": account_id},
+                ).scalar_one()
+                == "[TEMPORARY_MVP_DEFAULT]"
+            )
     finally:
         database.dispose()

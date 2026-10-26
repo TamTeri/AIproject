@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Exchange rates · Admin · EventHub{% endblock %}
+{% block content %}
+<h1>Exchange rates</h1>
+<p><a href="{{ url_for('web.admin_audit') }}">Purchase-attempt audit log →</a></p>
+<p class="muted">Configured rates (no live data). 1 USD = rate × currency. Changes apply to new checkouts; existing orders keep the rate they paid.</p>
+{% if error %}<p class="error" role="alert">{{ error.message }}</p>{% endif %}
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Currency</th><th>Rate</th><th>Last updated</th><th>Update</th></tr></thead>
+  <tbody>
+  {% for row in rates %}
+    <tr>
+      <td>{{ row.currency }}</td>
+      <td>{{ row.rate|rate }}</td>
+      <td class="muted">{{ row.updated_at|when }}{% if row.updated_by %}<br>by {{ row.updated_by }}{% endif %}</td>
+      <td>
+        {% if row.currency != 'USD' %}
+        <form class="search" method="post" action="{{ url_for('web.admin_rates_update') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="currency" value="{{ row.currency }}">
+          <input name="rate" inputmode="decimal" aria-label="New rate for {{ row.currency }}" placeholder="{{ row.rate|rate }}" required>
+          <button type="submit">Save</button>
+        </form>
+        {% else %}<span class="muted">Base currency</span>{% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

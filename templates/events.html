@@ -2,23 +2,29 @@
 {% block title %}Events · EventHub{% endblock %}
 {% block content %}
 <h1>Events</h1>
-<form method="get" action="{{ url_for('web.events') }}" role="search">
-  <label for="event-search">Search by artist or venue</label>
-  <input id="event-search" name="q" value="{{ query or '' }}" autocomplete="off">
+<form class="search" method="get" action="{{ url_for('web.events') }}" role="search">
+  <label class="muted" for="event-search" hidden>Search by artist or venue</label>
+  <input id="event-search" name="q" value="{{ query or '' }}" placeholder="Search by artist or venue" autocomplete="off" maxlength="100">
   <button type="submit">Search</button>
 </form>
 {% if no_match %}
   <p class="message" role="status">No events matched “{{ query }}”. Showing all events.</p>
 {% endif %}
+<p class="muted">Click a card to open the event. Double-click to Quick Buy one ticket in your saved currency.</p>
 <ul class="event-list">
 {% for event in events %}
-  <li class="event-card">
+  <li class="event-card" data-event-url="{{ url_for('web.event_detail', event_id=event.id) }}">
     <h2><a href="{{ url_for('web.event_detail', event_id=event.id) }}">{{ event.artist }}</a></h2>
-    <p>{{ event.venue }} · {{ event.starts_at }}</p>
-    <p>Available: {{ event.available }}</p>
+    {% if event.title %}<p>{{ event.title }}</p>{% endif %}
+    <p class="muted">{{ event.venue }} · {{ event.starts_at|when }}</p>
+    <p>{% if event.available > 0 %}{{ event.available }} tickets left{% else %}<strong>Sold out</strong>{% endif %}</p>
+    <form class="quick-buy-form" method="post" action="{{ url_for('web.quick_buy', event_id=event.id) }}" hidden>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    </form>
   </li>
 {% else %}
   <li><p class="muted">No events are available.</p></li>
 {% endfor %}
 </ul>
 {% endblock %}
+{% block scripts %}<script src="{{ url_for('web.static', filename='eventhub.js') }}" defer></script>{% endblock %}

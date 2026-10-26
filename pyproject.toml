@@ -5,12 +5,11 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "eventhub"
 version = "0.1.0"
-description = "EventHub greenfield Flask bootstrap"
+description = "EventHub ticketing web application (CEN 4020 AI project)"
 requires-python = ">=3.12"
 dependencies = [
   "alembic>=1.14,<2",
   "Flask>=3.1,<4",
-  "Flask-SQLAlchemy>=3.1,<4",
   "psycopg[binary]>=3.2,<4",
   "SQLAlchemy>=2.0,<3",
 ]
@@ -18,6 +17,8 @@ dependencies = [
 [project.optional-dependencies]
 test = [
   "pytest>=8,<10",
+  "ruff>=0.6",
+  "pre-commit>=3.7",
 ]
 
 [project.scripts]
@@ -28,7 +29,24 @@ eventhub-seed = "app.config.commands:seed"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-ra"
+pythonpath = ["."]
+addopts = "-ra --import-mode=importlib"
+markers = [
+  "postgres: needs a real PostgreSQL (EVENTHUB_TEST_DATABASE_URL); skipped otherwise",
+]
 
 [tool.setuptools.packages.find]
 include = ["app*"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+extend-exclude = ["migrations/versions"]
+
+[tool.ruff.lint]
+# E/F/W: errors and obvious mistakes, I: import order, B: likely bugs, UP: modern syntax
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["E501"]  # long SQL strings and test tables; ruff format handles code lines
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["B017"]

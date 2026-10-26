@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Checkout · EventHub{% endblock %}
+{% block content %}
+<h1>Checkout</h1>
+<p class="message" role="status">Your tickets are held for 10 minutes, until {{ hold.expires_at|when("time") }}. If you do not pay by then they are released.</p>
+<dl class="summary">
+  <dt>Event</dt><dd>{{ hold.event_title }}</dd>
+  <dt>Quantity</dt><dd>{{ hold.quantity }}</dd>
+  <dt>Currency</dt><dd>{{ hold.currency }} (rate {{ hold.exchange_rate }} per USD)</dd>
+  <dt>Subtotal</dt><dd>{{ hold.subtotal }}</dd>
+  {% if hold.discount_applied %}<dt>Student discount</dt><dd>−{{ hold.discount }}</dd>{% endif %}
+  <dt>Total</dt><dd class="total">{{ hold.total }}</dd>
+</dl>
+<form class="stack" method="post" action="{{ url_for('web.checkout_pay', hold_id=hold.hold_id) }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <label for="payment">Simulated card (no real payment in version one)</label>
+  <select id="payment" name="payment">
+    <option value="approve">Test card — approves</option>
+    <option value="decline">Test card — declines</option>
+  </select>
+  <button type="submit">Pay {{ hold.total }}</button>
+</form>
+<form method="post" action="{{ url_for('web.checkout_cancel', hold_id=hold.hold_id) }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="actions"><button class="secondary" type="submit">Cancel and release tickets</button></div>
+</form>
+{% endblock %}

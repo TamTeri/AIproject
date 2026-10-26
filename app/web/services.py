@@ -18,6 +18,10 @@ class ServiceError(Exception):
 class IdentityPort(Protocol):
     def register(self, *, name: str, email: str, password: str) -> Any: ...
     def authenticate(self, *, email: str, password: str) -> Any: ...
+    def start_session(self, *, account_id: str) -> str: ...
+    def resolve_session(self, *, token: str | None) -> Any: ...
+    def end_session(self, *, token: str | None) -> None: ...
+    def set_preferred_currency(self, *, account_id: str, currency: str) -> None: ...
 
 
 class CatalogPort(Protocol):
@@ -26,22 +30,30 @@ class CatalogPort(Protocol):
 
 
 class PricingPort(Protocol):
-    def quote(self, *, buyer_id: str, event_id: str, quantity: int, currency: str) -> Any: ...
+    def currencies(self) -> list[str]: ...
+    def base_price_display(self, *, base_price_minor: int) -> str: ...
 
 
 class CheckoutPort(Protocol):
-    def start(self, *, buyer_id: str, event_id: str, quantity: int, currency: str) -> Any: ...
+    def start(self, *, buyer_id: str, event_id: str, quantity: Any, currency: Any) -> Any: ...
+    def review(self, *, buyer_id: str, hold_id: str) -> Any: ...
     def pay(self, *, buyer_id: str, hold_id: str, payment_choice: str) -> Any: ...
     def cancel(self, *, buyer_id: str, hold_id: str) -> Any: ...
 
 
 class PurchasePort(Protocol):
-    def quick_buy(self, *, buyer_id: str, event_id: str) -> Any: ...
+    def quick_buy(self, *, buyer_id: str, event_id: str, currency: str | None) -> Any: ...
 
 
 class OrdersPort(Protocol):
     def list_for_buyer(self, *, buyer_id: str) -> Any: ...
     def get_for_buyer(self, *, buyer_id: str, order_id: str) -> Any: ...
+
+
+class AdminPort(Protocol):
+    def list_rates(self, *, actor: Any) -> Any: ...
+    def set_rate(self, *, actor: Any, currency: str, rate: str) -> Any: ...
+    def audit_page(self, *, actor: Any, before_id: str | None = None) -> Any: ...
 
 
 @dataclass(frozen=True)
@@ -52,6 +64,7 @@ class WebServices:
     checkout: CheckoutPort
     purchase: PurchasePort
     orders: OrdersPort
+    admin: AdminPort | Any = None
 
 
 class _UnavailableService:
@@ -66,8 +79,12 @@ class _UnavailableService:
         return unavailable
 
 
+def unavailable_service() -> Any:
+    return _UnavailableService()
+
+
 def default_services() -> WebServices:
-    """Return explicit local wiring until domain lanes provide their adapters."""
+    """Every port unavailable (503). Used when no wiring is supplied."""
     unavailable = _UnavailableService()
     return WebServices(
         identity=unavailable,
@@ -76,4 +93,5 @@ def default_services() -> WebServices:
         checkout=unavailable,
         purchase=unavailable,
         orders=unavailable,
+        admin=unavailable,
     )

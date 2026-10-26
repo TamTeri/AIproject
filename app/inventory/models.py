@@ -7,16 +7,23 @@ from typing import Any
 
 
 class HoldStatus(StrEnum):
+    """Matches the holds.status CHECK constraint in migration 0004 exactly."""
+
     ACTIVE = "active"
     CONVERTED = "converted"
-    RELEASED = "released"
+    CANCELLED = "cancelled"
     EXPIRED = "expired"
+    PAYMENT_FAILED = "payment_failed"
 
 
 class HoldReleaseReason(StrEnum):
     PAYMENT_FAILED = "payment_failed"
     EXPIRED = "expired"
     CANCELLED = "cancelled"
+
+    @property
+    def status(self) -> HoldStatus:
+        return HoldStatus(self.value)
 
 
 @dataclass(frozen=True, slots=True)

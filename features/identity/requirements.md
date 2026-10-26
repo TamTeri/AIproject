@@ -10,3 +10,4 @@
 - **identity-010** (ubiquitous): The {EventHub} shall authorize a buyer to access only orders belonging to that buyer's account.
 - **identity-011** (ubiquitous): The {EventHub} shall prevent buyer-facing flows from reaching administrator-only functions.
 - **identity-012** (event-driven): When the administrator identity and provisioning mechanism is approved, the {EventHub} shall enforce that mechanism for administrator access.
+- **identity-013** (ubiquitous) [Call 4 build]: The {EventHub} shall keep sessions on the server, storing only a hash of the session token, and shall end a session on logout.

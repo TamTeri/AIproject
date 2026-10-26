@@ -5,10 +5,9 @@ Revises: 0003_accounts_catalog
 Create Date: 2026-10-26
 """
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 from sqlalchemy.dialects import postgresql
-
 
 revision = "0004_purchase_audit"
 down_revision = "0003_accounts_catalog"
@@ -51,8 +50,7 @@ def upgrade() -> None:
         ),
         sa.CheckConstraint("expires_at > created_at", name="ck_holds_expiry_after_creation"),
         sa.CheckConstraint(
-            "(status = 'active' AND terminal_at IS NULL) OR "
-            "(status <> 'active' AND terminal_at IS NOT NULL)",
+            "(status = 'active' AND terminal_at IS NULL) OR (status <> 'active' AND terminal_at IS NOT NULL)",
             name="ck_holds_terminal_state",
         ),
     )
@@ -111,7 +109,12 @@ def upgrade() -> None:
     op.create_table(
         "purchase_attempts",
         sa.Column("id", sa.BigInteger(), sa.Identity(always=True), primary_key=True),
-        sa.Column("submitted_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("CURRENT_TIMESTAMP")),
+        sa.Column(
+            "submitted_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+        ),
         sa.Column("buyer_id", sa.BigInteger(), nullable=True),
         sa.Column("event_id", sa.BigInteger(), nullable=True),
         sa.Column("quantity_raw", sa.Integer(), nullable=True),
@@ -122,10 +125,18 @@ def upgrade() -> None:
         sa.Column("idempotency_key", sa.String(length=128), nullable=True),
         sa.Column("hold_id", sa.BigInteger(), nullable=True),
         sa.Column("order_id", sa.BigInteger(), nullable=True),
-        sa.ForeignKeyConstraint(["buyer_id"], ["accounts.id"], name="fk_purchase_attempts_buyer", ondelete="SET NULL"),
-        sa.ForeignKeyConstraint(["event_id"], ["events.id"], name="fk_purchase_attempts_event", ondelete="SET NULL"),
-        sa.ForeignKeyConstraint(["hold_id"], ["holds.id"], name="fk_purchase_attempts_hold", ondelete="SET NULL"),
-        sa.ForeignKeyConstraint(["order_id"], ["orders.id"], name="fk_purchase_attempts_order", ondelete="SET NULL"),
+        sa.ForeignKeyConstraint(
+            ["buyer_id"], ["accounts.id"], name="fk_purchase_attempts_buyer", ondelete="SET NULL"
+        ),
+        sa.ForeignKeyConstraint(
+            ["event_id"], ["events.id"], name="fk_purchase_attempts_event", ondelete="SET NULL"
+        ),
+        sa.ForeignKeyConstraint(
+            ["hold_id"], ["holds.id"], name="fk_purchase_attempts_hold", ondelete="SET NULL"
+        ),
+        sa.ForeignKeyConstraint(
+            ["order_id"], ["orders.id"], name="fk_purchase_attempts_order", ondelete="SET NULL"
+        ),
         sa.CheckConstraint(
             "quantity_raw IS NULL OR quantity_raw BETWEEN -1000000 AND 1000000",
             name="ck_purchase_attempts_quantity_bound",
@@ -152,7 +163,9 @@ def upgrade() -> None:
         ),
     )
     op.create_index("ix_purchase_attempts_submitted_at", "purchase_attempts", ["submitted_at"])
-    op.create_index("ix_purchase_attempts_buyer_submitted_at", "purchase_attempts", ["buyer_id", "submitted_at"])
+    op.create_index(
+        "ix_purchase_attempts_buyer_submitted_at", "purchase_attempts", ["buyer_id", "submitted_at"]
+    )
     op.create_index("ix_purchase_attempts_outcome", "purchase_attempts", ["outcome"])
 
 

@@ -2,14 +2,17 @@
 {% block title %}Register · EventHub{% endblock %}
 {% block content %}
 <h1>Register</h1>
-<form method="post" action="{{ url_for('web.register_submit') }}">
+{% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+<form class="stack" method="post" action="{{ url_for('web.register_submit') }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <label for="name">Name</label>
-  <input id="name" name="name" type="text" autocomplete="name" required>
+  <input id="name" name="name" type="text" autocomplete="name" value="{{ form.name or '' }}" maxlength="200" required>
   <label for="email">Email</label>
-  <input id="email" name="email" type="email" autocomplete="username" required>
-  <label for="password">Password</label>
-  <input id="password" name="password" type="password" autocomplete="new-password" required>
-  <button type="submit">Register</button>
+  <input id="email" name="email" type="email" autocomplete="username" value="{{ form.email or '' }}" required>
+  <label for="password">Password (at least 8 characters)</label>
+  <input id="password" name="password" type="password" autocomplete="new-password" minlength="8" required>
+  <button type="submit">Create account</button>
 </form>
+<p class="muted">Anyone, anywhere can register. Use your @usf.edu email to get the student discount.</p>
 <p><a href="{{ url_for('web.login') }}">Already have an account? Log in</a></p>
 {% endblock %}

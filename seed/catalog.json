@@ -7,12 +7,39 @@
       "code": "USD",
       "minor_unit": 2,
       "enabled": true
+    },
+    {
+      "code": "EUR",
+      "minor_unit": 2,
+      "enabled": true
+    },
+    {
+      "code": "GBP",
+      "minor_unit": 2,
+      "enabled": true
+    },
+    {
+      "code": "CAD",
+      "minor_unit": 2,
+      "enabled": true
     }
   ],
   "exchange_rates": [
     {
       "currency_code": "USD",
       "rate": "1.00000000"
+    },
+    {
+      "currency_code": "EUR",
+      "rate": "0.92000000"
+    },
+    {
+      "currency_code": "GBP",
+      "rate": "0.79000000"
+    },
+    {
+      "currency_code": "CAD",
+      "rate": "1.38000000"
     }
   ],
   "config": [
@@ -79,6 +106,56 @@
       "host_type": "usf",
       "base_price_minor": 2500,
       "capacity": 100
+    },
+    {
+      "catalog_key": "bulls-jazz-ensemble-2026-11-08",
+      "title": "Fall Jazz Night",
+      "artist": "Bulls Jazz Ensemble",
+      "venue": "Theatre 1",
+      "starts_at": "2026-11-08T23:30:00+00:00",
+      "host_type": "usf",
+      "base_price_minor": 1500,
+      "capacity": 250
+    },
+    {
+      "catalog_key": "tampa-symphony-2026-11-14",
+      "title": "Symphony Under the Stars",
+      "artist": "Tampa Symphony",
+      "venue": "Yuengling Center",
+      "starts_at": "2026-11-15T00:00:00+00:00",
+      "host_type": "external",
+      "base_price_minor": 4500,
+      "capacity": 500
+    },
+    {
+      "catalog_key": "comedy-showcase-2026-11-20",
+      "title": "Stand-up Showcase",
+      "artist": "Comedy Collective",
+      "venue": "Marshall Student Center",
+      "starts_at": "2026-11-21T01:00:00+00:00",
+      "host_type": "usf",
+      "base_price_minor": 1000,
+      "capacity": 120
+    },
+    {
+      "catalog_key": "indie-rock-2026-12-05",
+      "title": "Indie Rock Winter Tour",
+      "artist": "The Sun Dogs",
+      "venue": "USF Arena",
+      "starts_at": "2026-12-06T01:00:00+00:00",
+      "host_type": "external",
+      "base_price_minor": 3999,
+      "capacity": 300
+    },
+    {
+      "catalog_key": "poetry-slam-2026-12-10",
+      "title": "Poetry Slam Finals",
+      "artist": "Open Mic Society",
+      "venue": "Library Auditorium",
+      "starts_at": "2026-12-10T22:00:00+00:00",
+      "host_type": "usf",
+      "base_price_minor": 500,
+      "capacity": 2
     }
   ]
 }

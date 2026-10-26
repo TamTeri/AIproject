@@ -1,12 +1,16 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import Mapping
-
 
 LOCAL_ONLY_LABEL = "PROVISIONAL_LOCAL_ONLY"
-_LOCAL_ENVIRONMENTS = frozenset({"local", "development"})
+# "test" is disposable like local/development (same rule as database reset).
+_LOCAL_ENVIRONMENTS = frozenset({"local", "development", "test"})
+
+
+# !!! [TEMPORARY_MVP_DEFAULT] NOT APPROVED BY THE CUSTOMER — see Call 4 !!!
+STUDENT_DISCOUNT_PERCENT_PLACEHOLDER = Decimal("10")
 
 
 class PricingUnavailable(RuntimeError):
@@ -72,9 +76,11 @@ class PricingPolicy:
             raise PricingConfigurationError("eligibility_domain is invalid")
         object.__setattr__(self, "eligibility_domain", domain)
 
+        # currency_code is the BASE currency event prices are stored in. Buyers
+        # may pay in any enabled currency via configured exchange rates.
         currency_code = self.currency_code.strip().upper()
         if currency_code != "USD":
-            raise PricingConfigurationError("only USD is available in the temporary pricing slice")
+            raise PricingConfigurationError("USD is the only supported base currency")
         object.__setattr__(self, "currency_code", currency_code)
         if self.currency_exponent != 2:
             raise PricingConfigurationError("USD must use a two-digit minor unit exponent")
@@ -90,9 +96,7 @@ class PricingPolicy:
     def validate_for_environment(self, environment: str) -> None:
         normalized_environment = environment.strip().casefold()
         if normalized_environment not in _LOCAL_ENVIRONMENTS or not self.local_only:
-            raise PricingUnavailable(
-                "pricing policy is local-only; non-local environments fail closed"
-            )
+            raise PricingUnavailable("pricing policy is local-only; non-local environments fail closed")
         if LOCAL_ONLY_LABEL not in self.label:
             raise PricingUnavailable("local pricing policy must carry the provisional label")
 
@@ -102,7 +106,10 @@ def temporary_local_policy() -> PricingPolicy:
 
     return PricingPolicy(
         revision="temporary-local-v1",
-        discount_percent=Decimal("10"),
+        # !!! [TEMPORARY_MVP_DEFAULT] NOT APPROVED BY THE CUSTOMER !!!
+        # Call 4: the student-discount percentage is still not written down.
+        # 10 is a flagged placeholder, not a decision. Change it here only.
+        discount_percent=STUDENT_DISCOUNT_PERCENT_PLACEHOLDER,
         eligibility_domain="usf.edu",
         currency_code="USD",
         currency_exponent=2,
@@ -128,9 +135,7 @@ def policy_from_mapping(
     if not values:
         raise PricingUnavailable("pricing policy is required; no fallback is available")
     if environment.strip().casefold() not in _LOCAL_ENVIRONMENTS or not local_opt_in:
-        raise PricingUnavailable(
-            "temporary pricing configuration requires explicit local opt-in"
-        )
+        raise PricingUnavailable("temporary pricing configuration requires explicit local opt-in")
 
     required = {
         "revision",
@@ -169,6 +174,7 @@ def policy_from_mapping(
 
 __all__ = [
     "LOCAL_ONLY_LABEL",
+    "STUDENT_DISCOUNT_PERCENT_PLACEHOLDER",
     "PricingConfigurationError",
     "PricingPolicy",
     "PricingUnavailable",

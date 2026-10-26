@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from decimal import Decimal
 from types import SimpleNamespace
 
@@ -64,6 +64,9 @@ class FakeQuotes:
     def __init__(self) -> None:
         self.calls: list[tuple[FakeTransaction, str, str, int, str]] = []
 
+    def supported_currencies(self, tx) -> set[str]:
+        return {"USD"}
+
     def quote(self, *, tx, buyer_id, event_id, quantity, currency) -> QuoteSnapshot:
         self.calls.append((tx, buyer_id, event_id, quantity, currency))
         return QuoteSnapshot(
@@ -125,7 +128,7 @@ class FakePayments:
         self.succeeded = succeeded
         self.calls: list[tuple] = []
 
-    def simulate(self, *, tx, buyer_id, hold, quote_snapshot):
+    def simulate(self, *, tx, buyer_id, hold, quote_snapshot, payment_choice="approve"):
         self.calls.append((tx, buyer_id, hold, quote_snapshot))
         return SimpleNamespace(succeeded=self.succeeded, reason_code="PAYMENT_FAILED")
 
@@ -150,6 +153,16 @@ class FakeOrders:
         return order
 
 
+class FakeEvents:
+    def lock_event(self, tx, event_id):
+        return True
+
+
+class FakeLimits:
+    def committed_quantity(self, tx, *, buyer_id, event_id):
+        return 0
+
+
 class FakeAudit:
     def __init__(self) -> None:
         self.records: list = []
@@ -161,7 +174,7 @@ class FakeAudit:
 def test_successful_purchase_creates_order_without_second_inventory_allocation() -> None:
     transactions = FakeTransactions()
     identity = FakeIdentity("buyer-a")
-    clock = FakeClock(datetime(2026, 10, 26, 12, 0, tzinfo=timezone.utc))
+    clock = FakeClock(datetime(2026, 10, 26, 12, 0, tzinfo=UTC))
     quotes = FakeQuotes()
     inventory = FakeInventory()
     payments = FakePayments(succeeded=True)
@@ -177,6 +190,8 @@ def test_successful_purchase_creates_order_without_second_inventory_allocation()
         payments=payments,
         orders=orders,
         audit=audit,
+        events=FakeEvents(),
+        limits=FakeLimits(),
     )
 
     result = service.purchase(
