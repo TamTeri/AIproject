@@ -26,6 +26,8 @@ from flask import (
 )
 from jinja2 import ChoiceLoader, FileSystemLoader
 
+from app.pricing.calculator import format_rate
+
 from .services import ServiceError, WebServices, default_services
 
 _TEMPLATES = Path(__file__).resolve().parents[2] / "templates"
@@ -70,6 +72,7 @@ def register_web(app: Flask, services: WebServices | Any | None = None) -> Flask
         loaders.append(existing_loader)
     app.jinja_loader = ChoiceLoader(loaders)
     app.jinja_env.globals["csrf_token"] = csrf_token
+    app.jinja_env.filters["rate"] = format_rate
     app.jinja_env.globals["current_user"] = lambda: g.get("principal")
     return app
 

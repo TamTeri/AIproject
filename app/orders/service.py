@@ -11,7 +11,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Protocol
 
-from app.pricing.calculator import format_minor
+from app.pricing.calculator import format_minor, format_rate
 
 
 @dataclass(frozen=True)
@@ -24,6 +24,7 @@ class OrderView:
     quantity: int
     currency: str
     exchange_rate: Decimal
+    exchange_rate_display: str
     subtotal: str
     discount: str
     discount_applied: bool
@@ -53,6 +54,7 @@ def to_view(row: dict) -> OrderView:
         quantity=int(row["quantity"]),
         currency=currency,
         exchange_rate=Decimal(str(row["rate_applied"])),
+        exchange_rate_display=format_rate(Decimal(str(row["rate_applied"]))),
         subtotal=format_minor(subtotal, currency, exponent),
         discount=format_minor(discount, currency, exponent),
         discount_applied=discount > 0,

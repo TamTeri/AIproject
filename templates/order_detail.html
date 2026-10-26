@@ -10,7 +10,7 @@
   <dt>Starts</dt><dd>{{ order.starts_at }}</dd>
   <dt>Quantity</dt><dd>{{ order.quantity }}</dd>
   <dt>Currency paid</dt><dd>{{ order.currency }}</dd>
-  <dt>Exchange rate applied</dt><dd>{{ order.exchange_rate }} {{ order.currency }} per USD</dd>
+  <dt>Exchange rate applied</dt><dd>{{ order.exchange_rate_display }} {{ order.currency }} per USD</dd>
   <dt>Subtotal</dt><dd>{{ order.subtotal }}</dd>
   {% if order.discount_applied %}<dt>Student discount</dt><dd>−{{ order.discount }}</dd>{% endif %}
   <dt>Total</dt><dd class="total">{{ order.total }}</dd>

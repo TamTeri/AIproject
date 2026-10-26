@@ -43,6 +43,7 @@ def test_confirmation_shows_event_quantity_currency_rate_and_total():
     assert view.quantity == 2
     assert view.currency == "EUR"
     assert view.exchange_rate == Decimal("0.92")
+    assert view.exchange_rate_display == "0.92"  # not "0.92000000" as stored in NUMERIC(18,8)
     assert (view.subtotal, view.discount, view.total) == ("46.00 EUR", "4.60 EUR", "41.40 EUR")
     assert view.discount_applied is True
 

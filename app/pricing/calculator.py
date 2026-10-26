@@ -99,4 +99,10 @@ def format_minor(amount_minor: int, currency: str, exponent: int) -> str:
     return f"{value:,.{exponent}f} {currency}"
 
 
-__all__ = ["MAX_QUANTITY", "PriceBreakdown", "PriceError", "calculate_price", "format_minor"]
+def format_rate(rate: Decimal) -> str:
+    """Display helper: Decimal("0.92000000") -> "0.92", Decimal("150") -> "150"."""
+    text = f"{Decimal(rate).normalize():f}"
+    return text
+
+
+__all__ = ["MAX_QUANTITY", "PriceBreakdown", "PriceError", "calculate_price", "format_minor", "format_rate"]

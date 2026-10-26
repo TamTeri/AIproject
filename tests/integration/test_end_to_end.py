@@ -50,7 +50,8 @@ def test_student_buys_tickets_and_reopens_the_confirmation(app):
 
     paid = client.post(start.location + "/pay", data={"csrf_token": token, "payment": "approve"})
     confirmation = client.get(paid.location).get_data(as_text=True)
-    assert "Order confirmed" in confirmation and "21.33 GBP" in confirmation and "0.79" in confirmation
+    assert "Order confirmed" in confirmation and "21.33 GBP" in confirmation
+    assert "0.79 GBP per USD" in confirmation  # not the stored "0.79000000"
 
     history = client.get("/orders").get_data(as_text=True)
     order_link = re.search(r'href="(/orders/\d+)"', history).group(1)

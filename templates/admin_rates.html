@@ -12,14 +12,14 @@
   {% for row in rates %}
     <tr>
       <td>{{ row.currency }}</td>
-      <td>{{ row.rate.normalize() }}</td>
+      <td>{{ row.rate|rate }}</td>
       <td class="muted">{{ row.updated_at or '' }}{% if row.updated_by %}<br>by {{ row.updated_by }}{% endif %}</td>
       <td>
         {% if row.currency != 'USD' %}
         <form class="search" method="post" action="{{ url_for('web.admin_rates_update') }}">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <input type="hidden" name="currency" value="{{ row.currency }}">
-          <input name="rate" inputmode="decimal" aria-label="New rate for {{ row.currency }}" placeholder="{{ row.rate.normalize() }}" required>
+          <input name="rate" inputmode="decimal" aria-label="New rate for {{ row.currency }}" placeholder="{{ row.rate|rate }}" required>
           <button type="submit">Save</button>
         </form>
         {% else %}<span class="muted">Base currency</span>{% endif %}

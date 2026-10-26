@@ -138,7 +138,7 @@ class OrdersFake:
             starts_at="soon",
             quantity=2,
             currency="EUR",
-            exchange_rate="0.92",
+            exchange_rate_display="0.92",
             subtotal="46.00 EUR",
             discount="4.60 EUR",
             discount_applied=True,
@@ -156,7 +156,8 @@ class AdminFake:
 
         return [
             SimpleNamespace(currency="USD", rate=Decimal("1"), updated_at=None, updated_by=None),
-            SimpleNamespace(currency="EUR", rate=Decimal("0.92"), updated_at=None, updated_by=None),
+            SimpleNamespace(currency="EUR", rate=Decimal("0.92000000"), updated_at=None, updated_by=None),
+            SimpleNamespace(currency="JPY", rate=Decimal("150.00000000"), updated_at=None, updated_by=None),
         ]
 
     def set_rate(self, *, actor, currency, rate):
@@ -455,7 +456,8 @@ def test_anonymous_admin_access_redirects_to_login(client):
 def test_admin_sees_rates_and_audit_and_can_update(client, services):
     token = login_as(client, "admin-token")
     rates = client.get("/admin/rates").get_data(as_text=True)
-    assert "EUR" in rates and "0.92" in rates
+    assert "EUR" in rates and "<td>0.92</td>" in rates and "<td>150</td>" in rates
+    assert "E+" not in rates and "0.92000000" not in rates
     audit = client.get("/admin/audit").get_data(as_text=True)
     assert "b@usf.edu" in audit and 'data-outcome="success"' in audit
 

@@ -31,7 +31,7 @@ from app.identity.sessions import SessionService
 from app.inventory.postgres import PostgresInventory
 from app.orders.postgres import PostgresOrderReader, PostgresOrderWriter
 from app.orders.service import OrderHistoryService
-from app.pricing.calculator import format_minor
+from app.pricing.calculator import format_minor, format_rate
 from app.pricing.config import PricingPolicy, PricingUnavailable, temporary_local_policy
 from app.pricing.postgres import PostgresPricingRepository
 from app.pricing.service import QuoteService
@@ -206,7 +206,7 @@ class CheckoutAdapter:
             discount=format_minor(q.discount_minor, q.currency, exp),
             discount_applied=q.discount_minor > 0,
             total=format_minor(q.total_minor, q.currency, exp),
-            exchange_rate=f"{q.exchange_rate.normalize():f}",
+            exchange_rate=format_rate(q.exchange_rate),
             expires_at=hold.expires_at,
             status=str(hold.status),
         )

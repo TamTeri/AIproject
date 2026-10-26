@@ -98,3 +98,12 @@ def test_format_minor_is_display_only():
     assert format_minor(4140, "EUR", 2) == "41.40 EUR"
     assert format_minor(123456, "USD", 2) == "1,234.56 USD"
     assert format_minor(3753, "JPY", 0) == "3,753 JPY"
+
+
+def test_format_rate_drops_database_padding_without_scientific_notation():
+    from app.pricing.calculator import format_rate
+
+    assert format_rate(Decimal("0.92000000")) == "0.92"
+    assert format_rate(Decimal("1.00000000")) == "1"
+    assert format_rate(Decimal("150.00000000")) == "150"
+    assert format_rate(Decimal("1.38000000")) == "1.38"
