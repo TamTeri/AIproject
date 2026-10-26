@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
+from datetime import UTC
 from types import SimpleNamespace
 
 import pytest
@@ -481,3 +482,15 @@ def test_saved_currency_setting(client):
     token = login_as(client)
     assert client.post("/account", data={"csrf_token": token, "currency": "USD"}).status_code == 302
     assert client.post("/account", data={"csrf_token": token, "currency": "XYZ"}).status_code == 400
+
+
+def test_dates_are_shown_in_readable_form():
+    from datetime import datetime
+
+    from app.web import format_when
+
+    moment = datetime(2026, 11, 1, 19, 5, tzinfo=UTC)
+    assert format_when(moment) == "Sun, Nov 1, 2026 · 7:05 PM"
+    assert format_when(moment, "time") == "7:05 PM"
+    assert format_when(None) == ""
+    assert format_when("already text") == "already text"

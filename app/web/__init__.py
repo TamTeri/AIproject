@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import secrets
 from collections.abc import Callable, Mapping
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -73,6 +74,7 @@ def register_web(app: Flask, services: WebServices | Any | None = None) -> Flask
     app.jinja_loader = ChoiceLoader(loaders)
     app.jinja_env.globals["csrf_token"] = csrf_token
     app.jinja_env.filters["rate"] = format_rate
+    app.jinja_env.filters["when"] = format_when
     app.jinja_env.globals["current_user"] = lambda: g.get("principal")
     return app
 
@@ -89,6 +91,16 @@ def create_web_app(
         app.config.update(config)
     register_web(app, services)
     return app
+
+
+def format_when(value: Any, style: str = "datetime") -> str:
+    """Readable dates: "Sun, Nov 1, 2026 · 7:00 PM" (time only with style="time")."""
+    if not isinstance(value, datetime):
+        return "" if value is None else str(value)
+    time_text = value.strftime("%I:%M %p").lstrip("0")
+    if style == "time":
+        return time_text
+    return f"{value.strftime('%a, %b')} {value.day}, {value.year} · {time_text}"
 
 
 def _services() -> Any:

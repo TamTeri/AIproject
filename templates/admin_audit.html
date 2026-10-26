@@ -11,7 +11,7 @@
   {% for row in page.rows %}
     <tr data-outcome="{{ row.outcome }}">
       <td>{{ row.id }}</td>
-      <td>{{ row.submitted_at }}</td>
+      <td>{{ row.submitted_at|when }}</td>
       <td>{{ row.buyer_email or '—' }}</td>
       <td>{{ row.event_title or '—' }}</td>
       <td>{{ row.quantity if row.quantity is not none else '—' }}</td>

@@ -5,7 +5,7 @@
 {% if event.title %}<p>{{ event.title }}</p>{% endif %}
 <dl class="summary">
   <dt>Venue</dt><dd>{{ event.venue }}</dd>
-  <dt>Starts</dt><dd>{{ event.starts_at }}</dd>
+  <dt>Starts</dt><dd>{{ event.starts_at|when }}</dd>
   {% if price %}<dt>Price</dt><dd>{{ price }} per ticket</dd>{% endif %}
   <dt>Availability</dt>
   <dd>{% if event.available > 0 %}<strong>{{ event.available }}</strong> tickets left{% else %}<strong>Sold out</strong>{% endif %}</dd>

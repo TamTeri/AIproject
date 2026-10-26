@@ -7,14 +7,14 @@
   <dt>Order number</dt><dd>{{ order.id }}</dd>
   <dt>Event</dt><dd>{{ order.artist }}{% if order.event_title %} — {{ order.event_title }}{% endif %}</dd>
   <dt>Venue</dt><dd>{{ order.venue }}</dd>
-  <dt>Starts</dt><dd>{{ order.starts_at }}</dd>
+  <dt>Starts</dt><dd>{{ order.starts_at|when }}</dd>
   <dt>Quantity</dt><dd>{{ order.quantity }}</dd>
   <dt>Currency paid</dt><dd>{{ order.currency }}</dd>
   <dt>Exchange rate applied</dt><dd>{{ order.exchange_rate_display }} {{ order.currency }} per USD</dd>
   <dt>Subtotal</dt><dd>{{ order.subtotal }}</dd>
   {% if order.discount_applied %}<dt>Student discount</dt><dd>−{{ order.discount }}</dd>{% endif %}
   <dt>Total</dt><dd class="total">{{ order.total }}</dd>
-  <dt>Purchased</dt><dd>{{ order.created_at }}</dd>
+  <dt>Purchased</dt><dd>{{ order.created_at|when }}</dd>
 </dl>
 <p><a href="{{ url_for('web.orders') }}">Back to order history</a></p>
 {% endblock %}

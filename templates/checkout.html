@@ -2,7 +2,7 @@
 {% block title %}Checkout · EventHub{% endblock %}
 {% block content %}
 <h1>Checkout</h1>
-<p class="message" role="status">Your tickets are held for 10 minutes, until {{ hold.expires_at }}. If you do not pay by then they are released.</p>
+<p class="message" role="status">Your tickets are held for 10 minutes, until {{ hold.expires_at|when("time") }}. If you do not pay by then they are released.</p>
 <dl class="summary">
   <dt>Event</dt><dd>{{ hold.event_title }}</dd>
   <dt>Quantity</dt><dd>{{ hold.quantity }}</dd>

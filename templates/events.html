@@ -16,7 +16,7 @@
   <li class="event-card" data-event-url="{{ url_for('web.event_detail', event_id=event.id) }}">
     <h2><a href="{{ url_for('web.event_detail', event_id=event.id) }}">{{ event.artist }}</a></h2>
     {% if event.title %}<p>{{ event.title }}</p>{% endif %}
-    <p class="muted">{{ event.venue }} · {{ event.starts_at }}</p>
+    <p class="muted">{{ event.venue }} · {{ event.starts_at|when }}</p>
     <p>{% if event.available > 0 %}{{ event.available }} tickets left{% else %}<strong>Sold out</strong>{% endif %}</p>
     <form class="quick-buy-form" method="post" action="{{ url_for('web.quick_buy', event_id=event.id) }}" hidden>
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
