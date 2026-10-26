@@ -1,0 +1,41 @@
+{
+  "status": "[TEMPORARY_MVP_DEFAULT] [PROVISIONAL_LOCAL_ONLY]",
+  "authority": "User chat authorization dated 2026-10-26; not stakeholder or Minh approval.",
+  "production_behavior": "Fail closed when required policy is absent or provisional outside explicit local/demo mode.",
+  "pricing": {
+    "supported_currencies": ["USD"],
+    "minor_unit": 2,
+    "student_discount_percent": 10,
+    "eligibility": "exact case-insensitive usf.edu domain; no subdomains or plus-address semantics",
+    "calculation": "discount base subtotal, then conversion, then one half-up final rounding"
+  },
+  "inventory": {
+    "hold_duration_minutes": 10,
+    "expiry_authority": "database time at mutation",
+    "allocation": "PostgreSQL transaction with row/conditional update",
+    "conversion": "active hold converts without a second inventory subtraction"
+  },
+  "purchase": {
+    "per_account_event_limit": 4,
+    "idempotency": "buyer-scoped key, canonical request hash, replay original outcome",
+    "validation_precedence": "auth -> event -> currency -> quantity -> ownership/expiry -> limit -> pricing -> inventory -> payment",
+    "payment_failure": "no order, exactly-once hold release, failure audit"
+  },
+  "session": {
+    "idle_timeout_minutes": 30
+  },
+  "administration": {
+    "provisioning": "seed/config-only; no self-service promotion",
+    "audit_access": "administrator-only paginated access",
+    "audit_retention": "indefinite append-only for MVP; production governance remains open"
+  },
+  "quick_buy": {
+    "first_path": "explicit button",
+    "double_click": "deferred"
+  },
+  "not_implemented_by_bootstrap": [
+    "product routes and services",
+    "pricing, inventory, purchase, order, audit, and admin behavior",
+    "any stakeholder-policy closure"
+  ]
+}

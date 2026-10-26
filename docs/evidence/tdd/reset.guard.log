@@ -1,0 +1,1 @@
+eventhub bootstrap error: database reset is disabled; set EVENTHUB_RESET_ENABLED=true explicitly
