@@ -2,3 +2,4 @@
 - **orders-002** (event-driven): When an authenticated buyer opens an order, the {EventHub} shall display the order as a confirmation-style page.
 - **orders-003** (ubiquitous): The {EventHub} shall include the event, quantity, currency paid, exchange rate applied, and total on an order confirmation page.
 - **orders-004** (event-driven): When an authenticated buyer reopens an order, the {EventHub} shall display the stored confirmation information without requiring a paper ticket.
+- **orders-005** (ubiquitous) [Call 4 build]: The {EventHub} shall show the subtotal, student discount, and total on an order confirmation page such that subtotal minus discount equals the total exactly, with the exchange rate shown as applied (ADR-005).
