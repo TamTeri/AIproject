@@ -59,9 +59,7 @@ def test_exact_usf_domain_is_eligible_after_normalization(local_policy):
         "student@example.edu",
     ],
 )
-def test_temporary_rule_rejects_subdomains_trailing_dot_plus_tags_and_other_domains(
-    email: str, local_policy
-):
+def test_temporary_rule_rejects_subdomains_trailing_dot_plus_tags_and_other_domains(email: str, local_policy):
     decision = evaluate_student_eligibility(
         IdentityFacts(email=email),
         EventFacts(event_id="event-1"),
@@ -80,3 +78,33 @@ def test_malformed_email_fails_closed_without_raising_from_eligibility_seam(loca
 
     assert decision.eligible is False
     assert decision.reason == "invalid_email"
+
+
+# Call 4 (Kenji): normalise before checking; the open questions land in one place.
+@pytest.mark.parametrize(
+    ("email", "eligible", "reason"),
+    [
+        ("UPPERCASE@USF.EDU", True, "eligible"),
+        ("  mixed.Case@Usf.Edu ", True, "eligible"),
+        ("name+party@usf.edu", False, "plus_address_not_allowed"),
+        ("someone@mail.usf.edu", False, "domain_not_eligible"),
+        ("someone@usf.edu.evil.com", False, "domain_not_eligible"),
+        ("someone@notusf.edu", False, "domain_not_eligible"),
+    ],
+)
+def test_call4_email_cases(email, eligible, reason, local_policy):
+    decision = evaluate_student_eligibility(
+        IdentityFacts(email=email), EventFacts(event_id="event-1"), local_policy
+    )
+    assert (decision.eligible, decision.reason) == (eligible, reason)
+
+
+def test_policy_switches_change_the_answer_in_one_place():
+    from dataclasses import replace
+
+    relaxed = replace(temporary_local_policy(), allow_plus_addressing=True, allow_subdomains=True)
+    for email in ("name+party@usf.edu", "someone@mail.usf.edu"):
+        decision = evaluate_student_eligibility(
+            IdentityFacts(email=email), EventFacts(event_id="event-1"), relaxed
+        )
+        assert decision.eligible is True

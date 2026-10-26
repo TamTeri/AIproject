@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 
@@ -16,11 +16,7 @@ class FakeAccountRepository:
 
     def find_by_normalized_email(self, normalized_email: str) -> AccountRecord | None:
         return next(
-            (
-                record
-                for record in self.records.values()
-                if record.normalized_email == normalized_email
-            ),
+            (record for record in self.records.values() if record.normalized_email == normalized_email),
             None,
         )
 
@@ -53,7 +49,7 @@ def test_register_validates_and_persists_only_a_password_hash() -> None:
         account_repository=repository,
         password_hasher=Pbkdf2PasswordHasher(iterations=20_000),
     )
-    now = datetime(2030, 1, 1, tzinfo=timezone.utc)
+    now = datetime(2030, 1, 1, tzinfo=UTC)
 
     account = service.register(
         RegisterInput(
@@ -93,4 +89,65 @@ def test_register_rejects_invalid_identity_fields(
     )
 
     with pytest.raises(ValueError, match=message):
-        service.register(input_value, now=datetime(2030, 1, 1, tzinfo=timezone.utc))
+        service.register(input_value, now=datetime(2030, 1, 1, tzinfo=UTC))
+
+
+# ---- login (identity-003/004/005)
+
+from app.identity.contracts import LoginInput  # noqa: E402
+from app.identity.service import EmailAlreadyRegistered, InvalidCredentials  # noqa: E402
+
+
+def _service_with_account():
+    repository = FakeAccountRepository(records={})
+    service = IdentityService(
+        account_repository=repository,
+        password_hasher=Pbkdf2PasswordHasher(iterations=20_000),
+    )
+    service.register(
+        RegisterInput(name="Ada", email="ada@usf.edu", password="Correct-Horse-Battery-7"),
+        now=datetime(2030, 1, 1, tzinfo=UTC),
+    )
+    return service
+
+
+def test_login_with_valid_credentials_returns_principal_without_secrets():
+    principal = _service_with_account().authenticate(
+        LoginInput(email=" ADA@usf.edu ", password="Correct-Horse-Battery-7")
+    )
+    assert principal.email == "ada@usf.edu"
+    assert principal.role == "buyer"
+    assert principal.is_admin is False
+    assert not hasattr(principal, "password_hash")
+
+
+@pytest.mark.parametrize(
+    ("email", "password"),
+    [
+        ("ada@usf.edu", "wrong-password"),
+        ("nobody@usf.edu", "Correct-Horse-Battery-7"),
+        ("not-an-email", "Correct-Horse-Battery-7"),
+        ("ada@usf.edu", ""),
+    ],
+)
+def test_login_failures_all_look_the_same(email, password):
+    with pytest.raises(InvalidCredentials, match="invalid email or password"):
+        _service_with_account().authenticate(LoginInput(email=email, password=password))
+
+
+def test_duplicate_email_is_rejected_case_insensitively():
+    service = _service_with_account()
+    with pytest.raises(EmailAlreadyRegistered):
+        service.register(
+            RegisterInput(name="Ada 2", email="ADA@USF.EDU", password="another-password"),
+            now=datetime(2030, 1, 1, tzinfo=UTC),
+        )
+
+
+def test_people_anywhere_can_register_with_any_email_domain():
+    service = _service_with_account()
+    account = service.register(
+        RegisterInput(name="Kenji", email="kenji@example.jp", password="another-password"),
+        now=datetime(2030, 1, 1, tzinfo=UTC),
+    )
+    assert account.email == "kenji@example.jp"
