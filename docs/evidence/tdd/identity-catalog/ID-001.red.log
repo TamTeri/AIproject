@@ -1,0 +1,17 @@
+ERROR: found no collectors for /Users/iankoratsky/.hermes/cache/scratch/eventhub-worktrees/identity-catalog/tests/unit/identity/test_service.py::test_register_validates_and_persists_only_a_password_hash
+
+
+==================================== ERRORS ====================================
+_____________ ERROR collecting tests/unit/identity/test_service.py _____________
+ImportError while importing test module '/Users/iankoratsky/.hermes/cache/scratch/eventhub-worktrees/identity-catalog/tests/unit/identity/test_service.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/unit/identity/test_service.py:8: in <module>
+    from app.identity.contracts import AccountRecord, RegisterInput
+E   ModuleNotFoundError: No module named 'app.identity'
+=========================== short test summary info ============================
+ERROR tests/unit/identity/test_service.py
+1 error in 2.47s
