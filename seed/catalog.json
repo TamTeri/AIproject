@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "policy_status": "[TEMPORARY_MVP_DEFAULT] [PROVISIONAL_LOCAL_ONLY]",
+  "seeded_at": "2026-10-26T00:00:00+00:00",
+  "currencies": [
+    {
+      "code": "USD",
+      "minor_unit": 2,
+      "enabled": true
+    }
+  ],
+  "exchange_rates": [
+    {
+      "currency_code": "USD",
+      "rate": "1.00000000"
+    }
+  ],
+  "config": [
+    {
+      "config_key": "pricing.base_currency",
+      "value_json": {
+        "code": "USD"
+      },
+      "policy_status": "[TEMPORARY_MVP_DEFAULT] [PROVISIONAL_LOCAL_ONLY]"
+    },
+    {
+      "config_key": "pricing.student_discount_percent",
+      "value_json": {
+        "percent": "10.00"
+      },
+      "policy_status": "[TEMPORARY_MVP_DEFAULT] [PROVISIONAL_LOCAL_ONLY]"
+    },
+    {
+      "config_key": "pricing.student_eligibility_domain",
+      "value_json": {
+        "domain": "usf.edu",
+        "rule": "exact_case_insensitive_domain_no_subdomains_or_plus_semantics"
+      },
+      "policy_status": "[TEMPORARY_MVP_DEFAULT] [PROVISIONAL_LOCAL_ONLY]"
+    },
+    {
+      "config_key": "pricing.calculation",
+      "value_json": {
+        "discount_order": "discount_then_conversion",
+        "rounding": "half_up_final_target_minor_unit"
+      },
+      "policy_status": "[TEMPORARY_MVP_DEFAULT] [PROVISIONAL_LOCAL_ONLY]"
+    },
+    {
+      "config_key": "inventory.hold_duration_seconds",
+      "value_json": {
+        "seconds": 600,
+        "state": "temporary_mvp_boundary_only"
+      },
+      "policy_status": "[TEMPORARY_MVP_DEFAULT] [PROVISIONAL_LOCAL_ONLY]"
+    },
+    {
+      "config_key": "session.idle_timeout_seconds",
+      "value_json": {
+        "seconds": 1800
+      },
+      "policy_status": "[TEMPORARY_MVP_DEFAULT] [PROVISIONAL_LOCAL_ONLY]"
+    },
+    {
+      "config_key": "purchase.account_event_limit",
+      "value_json": {
+        "quantity": 4
+      },
+      "policy_status": "[TEMPORARY_MVP_DEFAULT] [PROVISIONAL_LOCAL_ONLY]"
+    }
+  ],
+  "events": [
+    {
+      "catalog_key": "demo-usf-concert-2026-11-01",
+      "title": "EventHub Demo Night",
+      "artist": "EventHub Demo",
+      "venue": "USF Arena",
+      "starts_at": "2026-11-01T19:00:00+00:00",
+      "host_type": "usf",
+      "base_price_minor": 2500,
+      "capacity": 100
+    }
+  ]
+}
