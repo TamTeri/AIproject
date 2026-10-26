@@ -1,0 +1,8 @@
+$ DATABASE_URL=... EVENTHUB_ENVIRONMENT=test EVENTHUB_RESET_ENABLED=true .venv/bin/eventhub-reset
+reset disposable database to head without seed data
+$ .venv/bin/eventhub-migrate
+migrated to head
+$ .venv/bin/eventhub-seed
+seeded 1 bootstrap fixture(s) from /Users/iankoratsky/.hermes/cache/scratch/eventhub-worktrees/bootstrap/seed/bootstrap.json
+$ .venv/bin/python -m app.config.commands seed
+seeded 1 bootstrap fixture(s) from /Users/iankoratsky/.hermes/cache/scratch/eventhub-worktrees/bootstrap/seed/bootstrap.json

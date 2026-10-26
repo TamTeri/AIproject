@@ -1,0 +1,1 @@
+Expected RED: the greenfield app factory is not implemented yet; pytest should fail on the missing app package.

@@ -1,0 +1,48 @@
+{
+  "lane": "bootstrap",
+  "status": "PASS",
+  "authority_date": "2026-10-26",
+  "base_revision": "3bd9414cd7c2f130fc00fbdad1ee1aa1bd03253",
+  "runner": ".venv/bin/python -m pytest",
+  "evidence": [
+    {
+      "behavior": "app-factory-health-and-postgresql-configuration",
+      "test": "tests/test_bootstrap.py::test_app_factory_exposes_health_and_postgresql_configuration",
+      "red": {
+        "command": "python3 -m pytest tests/test_bootstrap.py::test_app_factory_exposes_health_and_postgresql_configuration -q",
+        "log": "docs/evidence/tdd/bootstrap.red.log",
+        "exit_code_file": "docs/evidence/tdd/bootstrap.red.exitcode",
+        "expected_failure": "ModuleNotFoundError: No module named 'app'"
+      },
+      "green": {
+        "command": ".venv/bin/python -m pytest tests/test_bootstrap.py::test_app_factory_exposes_health_and_postgresql_configuration -q",
+        "log": "docs/evidence/tdd/bootstrap.green.log",
+        "exit_code_file": "docs/evidence/tdd/bootstrap.green.exitcode"
+      }
+    },
+    {
+      "behavior": "postgresql-migration-seed-reset-round-trip",
+      "test": "tests/test_bootstrap.py::test_migration_seed_and_reset_entrypoints_round_trip_bootstrap_fixture",
+      "red": {
+        "command": "EVENTHUB_TEST_DATABASE_URL=postgresql+psycopg://eventhub:eventhub@localhost:55432/eventhub_test .venv/bin/python -m pytest tests/test_bootstrap.py::test_migration_seed_and_reset_entrypoints_round_trip_bootstrap_fixture -q",
+        "log": "docs/evidence/tdd/bootstrap-entrypoints.red.log",
+        "exit_code_file": "docs/evidence/tdd/bootstrap-entrypoints.red.exitcode",
+        "expected_failure": "No module named app.config.commands"
+      },
+      "green": {
+        "command": "EVENTHUB_TEST_DATABASE_URL=postgresql+psycopg://eventhub:eventhub@localhost:55432/eventhub_test .venv/bin/python -m pytest tests/test_bootstrap.py::test_migration_seed_and_reset_entrypoints_round_trip_bootstrap_fixture -q",
+        "log": "docs/evidence/tdd/bootstrap-entrypoints.green.log",
+        "exit_code_file": "docs/evidence/tdd/bootstrap-entrypoints.green.exitcode"
+      }
+    }
+  ],
+  "fail_closed_evidence": {
+    "command": "env -u DATABASE_URL -u EVENTHUB_DATABASE_URL .venv/bin/eventhub migrate",
+    "exit_code": 2,
+    "log": "docs/evidence/tdd/bootstrap.fail-closed.log",
+    "guard_command": "DATABASE_URL=... EVENTHUB_ENVIRONMENT=test env -u EVENTHUB_RESET_ENABLED .venv/bin/eventhub reset",
+    "guard_exit_code": 2,
+    "guard_log": "docs/evidence/tdd/reset.guard.log"
+  },
+  "policy_note": "Temporary MVP defaults are user-authorized chat evidence dated 2026-10-26, labeled [TEMPORARY_MVP_DEFAULT]/[PROVISIONAL_LOCAL_ONLY], and do not close frozen [OPEN] rows."
+}

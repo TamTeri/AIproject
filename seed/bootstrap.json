@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "fixtures": [
+    {
+      "key": "bootstrap",
+      "value": {
+        "kind": "bootstrap_fixture",
+        "scope": "infrastructure-only",
+        "policy_status": "[TEMPORARY_MVP_DEFAULT]",
+        "note": "This marker does not select or implement product policy."
+      }
+    }
+  ]
+}

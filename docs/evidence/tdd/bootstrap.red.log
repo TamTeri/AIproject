@@ -1,0 +1,12 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_________ test_app_factory_exposes_health_and_postgresql_configuration _________
+
+    def test_app_factory_exposes_health_and_postgresql_configuration():
+>       from app import create_app
+E       ModuleNotFoundError: No module named 'app'
+
+tests/test_bootstrap.py:2: ModuleNotFoundError
+=========================== short test summary info ============================
+FAILED tests/test_bootstrap.py::test_app_factory_exposes_health_and_postgresql_configuration
+1 failed in 0.02s

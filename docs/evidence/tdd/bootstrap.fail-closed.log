@@ -1,0 +1,1 @@
+eventhub bootstrap error: DATABASE_URL is required; EventHub does not provide a SQLite fallback
