@@ -1,0 +1,41 @@
+# Checks that run before every commit (Call 4). Install once:
+#   .venv/bin/pre-commit install
+# Run on everything:
+#   .venv/bin/pre-commit run --all-files
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-added-large-files
+        args: ["--maxkb=1024"]
+      - id: check-merge-conflict
+
+  - repo: local
+    hooks:
+      - id: ruff-lint
+        name: ruff lint (obvious errors)
+        entry: .venv/bin/ruff check --fix
+        language: system
+        types: [python]
+      - id: ruff-format
+        name: ruff format (style)
+        entry: .venv/bin/ruff format
+        language: system
+        types: [python]
+      - id: spec-alignment
+        name: spec alignment (warn if code changes without requirements)
+        entry: .venv/bin/python scripts/check_spec_alignment.py
+        language: system
+        pass_filenames: false
+        always_run: true
+        verbose: true
+      - id: unit-tests
+        name: unit + contract tests (no database needed)
+        entry: .venv/bin/python -m pytest -q tests/unit tests/contract tests/test_main_program.py
+        language: system
+        pass_filenames: false
+        types: [python]
