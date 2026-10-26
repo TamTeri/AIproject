@@ -2,3 +2,4 @@
 - **admin-002** (ubiquitous): The {EventHub} shall prevent buyers from accessing administrator-only functions.
 - **admin-003** (event-driven): When an administrator submits an exchange-rate update, the {EventHub} shall validate and persist the update through the administrator-only area.
 - **admin-004** (event-driven): When the administrator identity and provisioning mechanism is approved, the {EventHub} shall use that mechanism to authorize administrator-only functions.
+- **admin-005** (ubiquitous) [Call 4 build, temporary]: The {EventHub} shall create administrator accounts only through an operator command (`create-admin`), never through the website. `[TEMPORARY_MVP_DEFAULT]` until ADR-004 is closed.

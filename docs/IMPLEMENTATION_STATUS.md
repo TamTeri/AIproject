@@ -1,32 +1,43 @@
 # EventHub implementation status
 
-**Status:** `PARTIAL` — bootstrap foundation implemented; product lanes intentionally untouched.
+**Status:** every version-one feature is built and tested. Policy values the customer has not confirmed run as labelled temporary defaults, which work in local, development and test environments only.
 
-**Base:** `3bd9414cd7c2f130fc00fbdad1ee1aa1bd03253`
-**Branch:** `eventhub/bootstrap`
-**Authority date:** October 26, 2026
+**Branch:** `eventhub/part4` (based on `main` @ `7ebc3a7`)
+**Tests:** 214 passing against PostgreSQL. Without a database, 193 pass and 21 skip.
 
-## Implemented and verified
+## Built and tested
 
-- Project dependency manifest (`pyproject.toml`) and reproducible `requirements.lock`.
-- Flask `create_app()` factory with a `/healthz` bootstrap route.
-- SQLAlchemy/Flask-SQLAlchemy extension seam and PostgreSQL-only configuration validation.
-- Alembic migration stream containing only the bootstrap infrastructure marker table.
-- Deterministic JSON seed fixture and guarded reset command.
-- `python -m app.config.commands {migrate,seed,reset}` plus installed console-script entrypoints.
-- Disposable PostgreSQL Compose configuration.
-- Focused RED/GREEN evidence for the app factory and the real PostgreSQL migration/seed/reset round trip.
-- Ownership, authority, acceptance, and temporary-default documentation.
+| Feature | Code | Tests |
+|---|---|---|
+| Identity: register, login, hashed passwords, server-side sessions, 30-minute idle timeout, logout | `app/identity/` | `tests/unit/identity/`, contract, integration |
+| Catalog: list, artist/venue search, no-match message, event page with availability, click/double-click | `app/catalog/`, `templates/events.html`, `app/web/static/eventhub.js` | `tests/unit/catalog/`, contract |
+| Pricing: one calculator, discount eligibility, configured multi-currency rates | `app/pricing/` | `tests/unit/pricing/` (incl. Call 4 email cases) |
+| Inventory: 10-minute holds, no overselling, release exactly once | `app/inventory/` | `tests/unit/purchase/`, integration concurrency |
+| Purchase: server validation, limit, simulated payment, quick buy on the same path | `app/purchase/` | `tests/unit/purchase/`, integration |
+| Orders: history, confirmation page, buyer-only access | `app/orders/` | `tests/unit/orders/`, contract, integration |
+| Audit: every attempt recorded, append-only, internal-error record | `app/audit/`, `purchase/service.py` | unit, integration (database trigger) |
+| Admin: rates and audit viewer; buyers blocked | `app/admin/` | `tests/unit/admin/`, contract, integration |
+| Process: CI, pre-commit hooks, lint and style, spec-alignment warning, CONTRIBUTING | `.github/`, `.pre-commit-config.yaml`, `scripts/` | CI |
 
-## Not implemented by design
+## Integration bugs fixed in this branch (from the separately built pieces on `main`)
 
-- No identity, catalog, pricing, inventory, purchase, orders, audit, administration, or web product behavior.
-- No stakeholder-policy closure. Temporary defaults are labeled `[TEMPORARY_MVP_DEFAULT]` / `[PROVISIONAL_LOCAL_ONLY]` and are not consumed by this bootstrap.
-- No production session, admin provisioning, purchase limit, hold state machine, idempotency, audit durability, or route/service contract.
-- No claim of product acceptance, performance, browser, concurrency, or production readiness.
+1. `app/db/` (a package) replaced the `db` variable in `app/__init__.py`, so `create_app()` crashed. The app could not start.
+2. The purchase code wrote outcomes like `payment_failed` to `purchase_attempts.outcome`, which only accepts `success`, `rejected`, `failed` or `replayed`. Every audit insert would have failed. Outcomes are now a category plus a `reason_code`.
+3. `HoldStatus.RELEASED` did not exist in the database's allowed values. The enum now matches the database exactly.
+4. A sold-out event made `allocate_hold()` return `None` and the purchase code then crashed on `hold.id`. It now returns `sold_out`.
+5. The web layer always answered "service unavailable", because nothing connected the routes to real services. `app/wiring.py` now does that.
+6. Pricing only allowed USD, but pricing-003 needs a choice of currency. USD is now the base currency and buyers can pay in any enabled currency.
 
-## Known blockers for later lanes
+## Still open (customer decisions)
 
-- Frozen target open items and ADR-004 remain open unless separately approved and recorded.
-- The reported on-screen confirmation/order-history/no-email rule is retained, but the direct email thread is not present in the repository.
-- Product lanes must add their own strict RED → GREEN evidence and independent review.
+- The discount percentage, discount scope by event type, and email verification for the discount.
+- The organizational-account exception to the purchase limit (purchase-010).
+- Administrator provisioning lifecycle (ADR-004).
+- Audit retention and who besides administrators may read the audit log.
+- Production session policy, load and performance targets, and production deployment.
+- Idempotent retry of payments. The `idempotency_records` table exists but is not used, because the frozen requirements exclude it.
+
+## Not done here
+
+- `diagrams/*.png` were exported before Call 4. `workspace.dsl` now has a `Component_PostCall4` view. Re-export the PNGs from Structurizr to include it.
+- Browser-level tests (for example clicking with a real browser). The double-click JavaScript is checked by contract tests and by hand.

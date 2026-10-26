@@ -2,3 +2,6 @@
 - **audit-002** (ubiquitous): The {EventHub} shall distinguish sold-out, invalid-quantity, unsupported-currency, and other approved failure outcomes.
 - **audit-003** (event-driven): When an authorized administrator opens the audit viewer, the {EventHub} shall display the purchase-attempt audit records needed for investigation.
 - **audit-004** (ubiquitous): The {EventHub} shall keep audit logging in the purchase processing path so that purchase routes cannot omit it.
+- **audit-005** (ubiquitous) [Call 4]: The {EventHub} shall include the time, user, event, quantity, currency, and outcome in every purchase-attempt audit record.
+- **audit-006** (ubiquitous) [Call 4]: The {EventHub} shall allow only administrators to read purchase-attempt audit records. Retention is `[OPEN]`; the temporary default keeps records indefinitely and append-only.
+- **audit-007** (unwanted) [Call 4]: If a purchase attempt fails unexpectedly, then the {EventHub} shall still record the attempt with an internal-error outcome.

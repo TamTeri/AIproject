@@ -8,3 +8,4 @@
 - **catalog-008** (event-driven): When a buyer double-clicks an event card, the {EventHub} shall initiate a one-ticket purchase using the buyer's saved settings through the standard purchase path.
 - **catalog-009** (ubiquitous): The {EventHub} shall provide a responsive website that adjusts to phone screens.
 - **catalog-010** (optional): Where the event is not offered in a native mobile application, the {EventHub} shall provide the website experience instead.
+- **catalog-011** (ubiquitous) [Call 4]: The {EventHub} shall include the single-click open and double-click quick-buy event-list interactions in the first build, alongside an explicit Quick Buy button for touch screens.

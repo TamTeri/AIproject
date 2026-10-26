@@ -1,24 +1,38 @@
-# EventHub bootstrap acceptance matrix
+# EventHub acceptance matrix
 
-Statuses use the planning vocabulary: `PASS`, `RUNNABLE`, `DECISION-BLOCKED`, `DEFERRED`, and `FAIL`. A bootstrap `PASS` proves only the foundation seam, not product behavior.
+`PASS` means an automated test proves the requirement. `PASS (temporary)` means it passes using a `[TEMPORARY_MVP_DEFAULT]` value the customer has not confirmed. `OPEN` means it is waiting on a decision.
 
-| Row | Authority/source | Bootstrap proof | Status | Notes |
-|---|---|---|---|---|
-| BOOTSTRAP-001 | User bootstrap request; ADR-001/002 | `tests/test_bootstrap.py::test_app_factory_exposes_health_and_postgresql_configuration` | PASS | Flask app factory, `/healthz`, and PostgreSQL SQLAlchemy URI seam pass in the project venv. |
-| BOOTSTRAP-002 | QA plan G0; ADR-002 | `tests/test_bootstrap.py::test_migration_seed_and_reset_entrypoints_round_trip_bootstrap_fixture` | PASS | Real PostgreSQL: reset, fresh migration, idempotent seed, read-back, and reset-to-empty. |
-| system-003 | `TRACEABILITY.md` system-003; `[STAKEHOLDER]` | BOOTSTRAP-001 | PASS (foundation only) | Python/Flask is wired; no product routes are claimed. |
-| system-004 | `TRACEABILITY.md` system-004; `[TEAM]` D1 | BOOTSTRAP-001 | PASS (foundation only) | One Flask application factory. |
-| system-005 | `TRACEABILITY.md` system-005; `[TEAM]` D1/D2 | BOOTSTRAP-002 | PASS (foundation only) | One PostgreSQL migration/seed/reset seam; product schema is not implemented. |
-| system-006 | `TRACEABILITY.md` system-006; reported Part 2/email-thread decision | Later confirmation/order tests | DEFERRED | Preserve reported on-screen confirmation, order-history reopening, and no email in v1; direct email source is absent. |
-| identity, catalog, pricing, inventory, purchase, orders, audit, admin | Frozen target v2 and feature requirements | Later lane-owned tests | DEFERRED | No product behavior is implemented in bootstrap. |
-| pricing-006 and related policy rows | Frozen target v2 open items 1–5; user defaults artifact | Policy-gated product tests | DECISION-BLOCKED | Temporary local/demo defaults are visible but do not close acceptance. |
-| inventory-005..007 | Frozen target v2 D5/item 13 | Hold-state tests | DECISION-BLOCKED | Ten-minute duration is recorded; release/conversion state machine remains open. |
-| identity-012/admin-004 | ADR-004/D4 | Admin boundary tests | DECISION-BLOCKED | Seed/config-only is a temporary MVP default, not approved administrator provisioning. |
-| purchase idempotency/replay | Frozen target v2 anti-contamination clause | Later contract revision | DECISION-BLOCKED | Temporary default is recorded, but the frozen requirements exclude idempotency acceptance. |
-| load, browser, retention, governance | Frozen target v2 open/deferred items | Later approved gates | DEFERRED | No unsupported NFR or production-governance claim is made. |
-
-## Required evidence for this branch
-
-- Focused RED/GREEN logs and exit codes are indexed in `docs/evidence/tdd/index.json`.
-- The real PostgreSQL command path is documented in `README.md` and exercised by the bootstrap test.
-- A clean branch commit and pushed remote ref are required before handoff; the commit SHA is recorded in the implementation result artifact, not guessed here.
+| Requirement | Proof | Status |
+|---|---|---|
+| identity-001/002 register anywhere, name/email/password | `tests/unit/identity/test_service.py`, `tests/integration/test_end_to_end.py` | PASS |
+| identity-003/004 login, generic failure | `test_service.py::test_login_*`, contract `test_wrong_password_shows_generic_error` | PASS |
+| identity-005 hashed passwords only | `test_register_validates_and_persists_only_a_password_hash`, integration `pbkdf2_sha256$` check | PASS |
+| identity-006, system-008 session expiry | `tests/unit/identity/test_sessions.py`, integration session timeout | PASS (temporary: 30 min) |
+| identity-007/008/009 login required, return to page, nothing created | contract `test_protected_pages_*`, `test_unauthenticated_checkout_post_creates_nothing` | PASS |
+| identity-010, orders-001 own orders only | `tests/unit/orders/test_service.py`, integration `test_buyers_only_see_their_own_orders` | PASS |
+| identity-011, admin-002 buyers blocked from admin | contract `test_buyers_cannot_open_admin_pages`, `tests/unit/admin/` | PASS |
+| identity-012, admin-004/005 admin provisioning | `create-admin` command, e2e `test_admin_area_end_to_end` | PASS (temporary, ADR-004 OPEN) |
+| catalog-001..005 list, search artist/venue, open page, no-match | `tests/unit/catalog/`, contract | PASS |
+| catalog-006 search text never markup | contract `test_catalog_search_escapes_query...` | PASS |
+| catalog-007 availability on event page | contract, e2e | PASS |
+| catalog-008/011, purchase-011 double-click quick buy, same path | contract `test_event_cards_support...`, `test_quick_buy_uses_saved_currency...`, unit `test_quick_buy_uses_the_same_validation...` | PASS |
+| catalog-009 responsive | contract viewport check; CSS media queries | PASS (no device lab) |
+| inventory-001..004 capacity, atomic, concurrent | integration `test_concurrent_buyers_never_oversell...` | PASS |
+| inventory-005/006/007 10-minute hold, release, convert once | unit `test_expired_hold_*`, `test_pay_converts_hold_without_second...`, integration | PASS (temporary mechanics) |
+| pricing-001/002/007 one calculator | `tests/unit/pricing/test_calculator.py` | PASS |
+| pricing-003/004/005 currency choice, configured rates, admin update | `test_quote_service.py`, integration rate tests | PASS |
+| pricing-006/009/010 discount policy | `test_eligibility.py` Call 4 cases | PASS (temporary: 10%, exact domain) |
+| pricing-008 money representation | ADR-005, calculator tests | PASS |
+| purchase-001/002/003/008 server validation, specific failures | `tests/unit/purchase/test_checkout_flow.py`, contract rejection messages | PASS |
+| purchase-004 simulated payment | `SimulatedPayments`, decline tests | PASS |
+| purchase-005/006, orders-002/003/004, system-006 order and on-screen confirmation, no email | contract `test_checkout_review_pay_and_confirmation`, e2e | PASS |
+| purchase-009 limit | unit and integration limit tests | PASS (temporary: 4) |
+| purchase-010 organizational exception | — | OPEN |
+| purchase-012/013 payment failure, frozen price | unit and integration | PASS |
+| audit-001/002/004/005/007 every attempt, specific outcomes, required fields | unit `test_every_attempt_is_audited...`, integration `test_rejections_are_audited...` | PASS |
+| audit-003/006 admin-only viewer | contract, e2e | PASS (retention OPEN) |
+| system-001/002 boundary validation, currency list | unit parse tests, contract | PASS |
+| system-003/004/005 Python/Flask, one app, one database | `tests/test_main_program.py` | PASS |
+| system-007 no native app, no seat map | (nothing built) | PASS |
+| system-009/010/011 CI, pre-commit, definition of done | `.github/workflows/ci.yml`, `.pre-commit-config.yaml`, `CONTRIBUTING.md` | PASS |
+| system-012 standalone modules, main program includes all | `tests/test_main_program.py`, ADR-006 | PASS |

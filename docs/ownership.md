@@ -27,7 +27,7 @@ The bootstrap implementer is the only writer for the shared foundation paths abo
 
 ## Temporary defaults and open policy
 
-The consolidated artifact `/Users/iankoratsky/.hermes/cache/scratch/eventhub-review/decision-defaults/temporary-mvp-defaults.json` is the source for the user-authorized temporary defaults. They are recorded here as `[TEMPORARY_MVP_DEFAULT]` / `[PROVISIONAL_LOCAL_ONLY]`, never as stakeholder decisions:
+`seed/config.example.json` (and `seed/catalog.json` for the values the app reads) is the source for the user-authorized temporary defaults. They are recorded here as `[TEMPORARY_MVP_DEFAULT]` / `[PROVISIONAL_LOCAL_ONLY]`, never as stakeholder decisions:
 
 - USD-only Decimal cents; 10% discount and exact case-insensitive `usf.edu` eligibility only in local/demo;
 - discount, then conversion, then half-up final rounding;
@@ -39,7 +39,7 @@ The consolidated artifact `/Users/iankoratsky/.hermes/cache/scratch/eventhub-rev
 - thirty-minute session timeout;
 - seed/config-only administrator provisioning; administrator-only paginated audit reads;
 - indefinite append-only audit for MVP; production governance remains open;
-- explicit-button Quick Buy first; double-click behavior deferred.
+- explicit-button Quick Buy first. Call 4 then brought double-click Quick Buy into the first build (`app/web/static/eventhub.js`); the explicit button stays for touch screens.
 
 The bootstrap foundation does not consume these product defaults. Production, CI, staging, and acceptance must fail closed when an unresolved policy is required. The exact discount, currencies, verification, rounding, limits, session policy, administrator lifecycle, audit governance, hold mechanics, and wire contracts remain `[OPEN]` for final acceptance.
 

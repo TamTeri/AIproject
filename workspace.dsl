@@ -1,4 +1,4 @@
-workspace "EventHub" "EventHub C4 model before and after Call 3" {
+workspace "EventHub" "EventHub C4 model before and after Calls 3 and 4" {
 
     !identifiers hierarchical
 
@@ -19,6 +19,9 @@ workspace "EventHub" "EventHub C4 model before and after Call 3" {
                 inventory = component "Inventory" "Fixed capacity per event, availability, checkout holds, atomic check-and-decrement." "InventoryService (Python module)"
                 orders = component "Orders" "Order history and confirmation-style order pages, scoped to the signed-in buyer." "Flask blueprint /orders + OrderService"
                 audit = component "Audit" "Records every purchase attempt and its outcome." "AuditService (Python module)"
+                eligibility = component "Discount eligibility" "One small function: normalizes the buyer email and decides student-discount eligibility. Open policy questions (plus addresses, subdomains, verification) change only here." "evaluate_student_eligibility() (Python module)" {
+                    tags "PostCall4"
+                }
 
                 group "Administrator-only area" {
                     admin = component "Administration" "Rate-management screen and purchase-attempt audit viewer. Every route requires the administrator role; no buyer-facing component calls it." "Flask blueprint /admin" {
@@ -73,6 +76,23 @@ workspace "EventHub" "EventHub C4 model before and after Call 3" {
         eventHub.webApp.inventory -> eventHub.database "conditional UPDATE, holds" "SQL"
         eventHub.webApp.orders -> eventHub.database "orders" "SQL"
         eventHub.webApp.audit -> eventHub.database "purchase_attempts (append-only)" "SQL"
+
+        # ---- After Call 4: implementation decisions
+        eventHub.webApp.pricing -> eventHub.webApp.eligibility "is_eligible(email)" "Python call" {
+            tags "PostCall4"
+        }
+        buyer -> eventHub.webApp.catalog "Double-clicks an event card (Quick Buy)" "HTTPS POST /events/{id}/quick-buy" {
+            tags "PostCall4"
+        }
+        eventHub.webApp.catalog -> eventHub.webApp.purchase "quick_buy(): same purchase path" "Python call" {
+            tags "PostCall4"
+        }
+        eventHub.webApp.identity -> eventHub.database "account_sessions (hashed tokens, idle timeout)" "SQL" {
+            tags "PostCall4"
+        }
+        eventHub.webApp.purchase -> eventHub.database "One transaction per attempt; SELECT ... FOR UPDATE on the event" "SQL" {
+            tags "PostCall4"
+        }
     }
 
     views {
@@ -80,6 +100,7 @@ workspace "EventHub" "EventHub C4 model before and after Call 3" {
         systemContext eventHub "Context_PreCall3" {
             include *
             exclude "relationship.tag==PostCall3"
+            exclude "relationship.tag==PostCall4"
             exclude administrator
             autolayout lr
             title "EventHub system context - before Call 3"
@@ -88,6 +109,7 @@ workspace "EventHub" "EventHub C4 model before and after Call 3" {
         container eventHub "Container_PreCall3" {
             include *
             exclude "relationship.tag==PostCall3"
+            exclude "relationship.tag==PostCall4"
             exclude administrator
             autolayout lr
             title "EventHub containers - before Call 3"
@@ -96,6 +118,8 @@ workspace "EventHub" "EventHub C4 model before and after Call 3" {
         component eventHub.webApp "Component_PreCall3" {
             include *
             exclude "relationship.tag==PostCall3"
+            exclude "relationship.tag==PostCall4"
+            exclude "element.tag==PostCall4"
             exclude administrator
             exclude eventHub.webApp.admin
             autolayout lr 250 200
@@ -105,20 +129,31 @@ workspace "EventHub" "EventHub C4 model before and after Call 3" {
         # After Call 3: administrator actor, admin routes, Administration component.
         systemContext eventHub "Context_PostCall3" {
             include *
+            exclude "relationship.tag==PostCall4"
             autolayout lr
             title "EventHub system context - after Call 3"
         }
 
         container eventHub "Container_PostCall3" {
             include *
+            exclude "relationship.tag==PostCall4"
             autolayout lr
             title "EventHub containers - after Call 3"
         }
 
         component eventHub.webApp "Component_PostCall3" {
             include *
+            exclude "relationship.tag==PostCall4"
+            exclude "element.tag==PostCall4"
             autolayout lr 250 200
             title "Flask application components - after Call 3"
+        }
+
+        # After Call 4: separate eligibility function, quick-buy path, server-side sessions.
+        component eventHub.webApp "Component_PostCall4" {
+            include *
+            autolayout lr 250 200
+            title "Flask application components - after Call 4 (as built)"
         }
 
 
