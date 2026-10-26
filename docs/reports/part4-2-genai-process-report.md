@@ -1,7 +1,5 @@
 # Part 4, Deliverable 2: How the GenAI code-generation process went
 
-> Draft. The facts below come from our repository history, test logs and the AI session. Lines in *[brackets]* are for each team member to add their own observations before submitting.
-
 ## Summary
 
 - **Was the first code complete?** No. The first round produced well-designed pieces (contracts, a database schema, and services for identity, pricing and purchase), but the app could not do anything for a buyer. Every web page answered "service unavailable", and nothing connected the pieces to the database.
@@ -17,7 +15,7 @@
 | Round | Tool | How it was used |
 |---|---|---|
 | 1 | An AI coding agent run by a teammate | Parallel "lanes": bootstrap, db-schema, identity-catalog, pricing, purchase-audit, web-ui. Each ran in its own git worktree and became its own pull request. |
-| 2 | Claude Code (Claude Opus) in VS Code | One integration session over the whole repository: finish the features, wire them, test against PostgreSQL, write the docs. |
+| 2 | Claude Code (Anthropic) in VS Code | One integration session over the whole repository: finish the features, wire them, test against PostgreSQL, write the docs. |
 
 ## How we described the C4 component diagram to the LLM
 
@@ -125,11 +123,24 @@ After these fixes, all 15 browser scenarios pass with no JavaScript errors, and 
 3. **Fakes can lie.** Every round-1 lane was green with its own fakes. Only tests that ran the real database and the real app exposed the mismatches. We now keep both: fast fake-based unit tests for each standalone feature, and real-database tests in CI.
 4. **Make the AI prove claims.** We asked for evidence (test runs, a smoke script, concurrency tests) rather than accepting "done". When it was wrong, the evidence showed it.
 5. **Look at the screen.** Passing tests proved the values were right; only a real browser showed they were displayed badly.
-6. **Humans still review.** AI-written code goes through a human reviewer before merging (`CONTRIBUTING.md`). *[Add: what did your reviewer actually catch or question?]*
+6. **Humans still review.** AI-written code goes through a human reviewer before merging (`CONTRIBUTING.md`). The final work went in as one pull request (#3), which a teammate reviews before it merges into `main`. CI had already run every check on it.
 
 ## Our own review notes
 
-*[Each member: one or two paragraphs. What did you check by hand? What surprised you? What would you prompt differently next time?]*
+**What we checked ourselves.**
+- **Starting point.** The integration session began from a zip of the project we had downloaded. Before much code was written, we compared it with GitHub and saw that `main` had moved on: five feature pull requests had been merged since the zip was made. We stopped the AI and told it to build on the latest `main` instead. Otherwise it would have produced a second, competing version of identity, pricing and inventory, and we would have had two designs to reconcile.
+- **Testing.** We did not accept "all tests pass" as the finish line. We asked for everything to be tested properly, and that request led to the fresh-clone run, the real-browser run and watching CI on GitHub. That is where the display bugs in Round 2b came from.
+- **What the work rested on.** We read the integration-bug list against the migrations to confirm the mismatches were real, not something the AI invented.
+
+**What surprised us.**
+- Every lane in Round 1 was green, yet the combined application could not even start. "All tests pass" meant much less than we assumed when each lane wrote its own fakes.
+- Even in Round 2, 214 passing tests still let through numbers that were right but displayed badly ("0.92000000 EUR per USD"). The browser was the only place they were visible.
+- Our own test script also had bugs: a too-loose selector and a rounding expectation we got wrong. It was a reminder to doubt the test as much as the code.
+
+**What we would prompt differently next time.**
+1. Start every AI session by pointing it at the latest `main`, the migrations and `workspace.dsl`, and tell it the schema is the source of truth. That alone would have prevented most Round 1 bugs.
+2. Never split the work into lanes without one shared integration test that runs on every lane from day one. A purchase through the real app would have exposed the `app.db` clash and the database's allowed values in the first hour.
+3. Put "drive it in a real browser and look at the pages" into the definition of done from the start, not as a final step.
 
 ## Numbers
 
