@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}{{ event.artist }} · EventHub{% endblock %}
+{% block content %}
+<h1>{{ event.artist }}</h1>
+<p>{{ event.venue }} · {{ event.starts_at }}</p>
+<p>Available: <strong>{{ event.available }}</strong></p>
+<form method="post" action="/events/{{ event.id }}/quick-buy">
+  <button type="submit">Quick Buy</button>
+</form>
+<p><a href="{{ url_for('web.events') }}">Back to events</a></p>
+{% endblock %}

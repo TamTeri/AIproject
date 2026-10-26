@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}EventHub{% endblock %}</title>
+  <style>
+    :root { font-family: system-ui, sans-serif; color-scheme: light; }
+    body { margin: 0 auto; max-width: 72rem; padding: 1rem; line-height: 1.5; }
+    nav { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem; }
+    main { max-width: 52rem; }
+    form { display: grid; gap: .75rem; max-width: 32rem; }
+    input, select, button { font: inherit; min-height: 2.75rem; padding: .4rem .6rem; }
+    button { cursor: pointer; }
+    .event-list { display: grid; gap: 1rem; padding: 0; list-style: none; }
+    .event-card { border: 1px solid #bbb; border-radius: .5rem; padding: 1rem; }
+    .message, .error { border-radius: .4rem; padding: .75rem; margin: 1rem 0; }
+    .message { background: #eef7ee; }
+    .error { background: #fff0f0; border: 1px solid #b00020; }
+    .muted { color: #555; }
+    @media (max-width: 40rem) { body { padding: .75rem; } nav { gap: .6rem; } }
+  </style>
+</head>
+<body>
+  <nav aria-label="Primary">
+    <a href="{{ url_for('web.events') }}">Events</a>
+    <a href="{{ url_for('web.orders') }}">Order history</a>
+    <a href="{{ url_for('web.login') }}">Log in</a>
+    <a href="{{ url_for('web.register') }}">Register</a>
+  </nav>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>
