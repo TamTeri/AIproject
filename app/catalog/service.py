@@ -22,6 +22,7 @@ class EventSummary:
     base_price_minor: int
     capacity: int
     available: int
+    sales_closed: bool = False  # purchase-018: the event has already started
 
 
 @dataclass(frozen=True)
@@ -62,7 +63,7 @@ class CatalogService:
 
     def get_event(self, *, event_id: str) -> EventSummary | None:
         event_id = str(event_id or "").strip()
-        if not event_id.isdigit() or len(event_id) > 18:
+        if not (event_id.isascii() and event_id.isdigit()) or len(event_id) > 18:
             return None
         return self._repository.get_active(event_id)
 

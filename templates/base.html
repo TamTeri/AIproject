@@ -46,6 +46,10 @@
     dl.summary dd { margin: 0; }
     .total { font-size: 1.25rem; font-weight: 700; }
     .actions { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; margin-top: 1rem; }
+    .charged { border: 2px solid var(--accent); border-radius: .6rem; padding: .75rem 1rem; margin: 0 0 1rem; background: var(--ok-bg); }
+    .charged p { margin: .1rem 0; }
+    .charged .amount { font-size: 1.6rem; font-weight: 700; }
+    .hint { margin: -.3rem 0 .2rem; font-size: .95rem; }
     @media (max-width: 40rem) { h1 { font-size: 1.35rem; } dl.summary { grid-template-columns: 1fr; } }
   </style>
 </head>
@@ -76,6 +80,7 @@
     {% endwith %}
     {% block content %}{% endblock %}
   </main>
+  <script src="{{ url_for('web.static', filename='eventhub.js') }}" defer></script>
   {% block scripts %}{% endblock %}
 </body>
 </html>

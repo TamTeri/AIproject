@@ -21,6 +21,10 @@ class InvalidCredentials(ValueError):
     """Login failed. Deliberately does not say whether the email exists."""
 
 
+class WrongCurrentPassword(ValueError):
+    """identity-014: changing the email needs the account's current password."""
+
+
 class PasswordHasher(Protocol):
     def hash(self, password: str) -> str: ...
 
@@ -74,6 +78,28 @@ class IdentityService:
         if not self.password_hasher.verify(password, record.password_hash):
             raise InvalidCredentials("invalid email or password")
         return principal_from_record(record)
+
+    def change_email(self, *, account_id: str, new_email: str, current_password: str) -> Principal:
+        """identity-014 (Call 5): change the login email.
+
+        Needs the current password, refuses an email another account uses, and
+        is the only email later discount decisions see (pricing-011).
+        """
+        record = self.account_repository.find_by_id(account_id)
+        password = current_password if isinstance(current_password, str) else ""
+        if record is None or not self.password_hasher.verify(password, record.password_hash):
+            raise WrongCurrentPassword("current password is not correct")
+        normalized_email = _validate_email(new_email)
+        if normalized_email == record.normalized_email:
+            return principal_from_record(record)
+        if self.account_repository.find_by_normalized_email(normalized_email) is not None:
+            raise EmailAlreadyRegistered("email is already registered")
+        try:
+            self.account_repository.update_email(account_id, normalized_email)
+        except DuplicateEmailError as exc:
+            raise EmailAlreadyRegistered("email is already registered") from exc
+        updated = self.account_repository.find_by_id(account_id)
+        return principal_from_record(updated)
 
     def principal(self, account_id: str) -> Principal | None:
         record = self.account_repository.find_by_id(account_id)

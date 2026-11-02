@@ -1,0 +1,32 @@
+graph LR
+  linkStyle default fill:#ffffff
+
+  subgraph diagram ["EventHub containers - after Call 5 (with the system test suite)"]
+    style diagram fill:#ffffff,stroke:#ffffff
+
+    1["<div style='font-weight: bold'>Buyer</div><div style='font-size: 70%; margin-top: 0px'>[Person]</div><div style='font-size: 80%; margin-top:10px'>Registers, browses events,<br />buys tickets in a chosen<br />currency, and reopens past<br />orders.</div>"]
+    style 1 fill:#08415c,stroke:#052d40,color:#ffffff
+    2["<div style='font-weight: bold'>QA / developer</div><div style='font-size: 70%; margin-top: 0px'>[Person]</div><div style='font-size: 80%; margin-top:10px'>Runs the system tests with<br />one command (or the GitHub<br />button) and reads the report.</div>"]
+    style 2 fill:#08415c,stroke:#052d40,color:#ffffff
+    3["<div style='font-weight: bold'>Administrator</div><div style='font-size: 70%; margin-top: 0px'>[Person]</div><div style='font-size: 80%; margin-top:10px'>Finance or EventHub staff who<br />update exchange rates and<br />read the purchase-attempt<br />audit log. How an account<br />becomes an administrator is<br />an open decision.</div>"]
+    style 3 fill:#8f2d56,stroke:#641f3c,color:#ffffff
+
+    subgraph 4 ["EventHub"]
+      style 4 fill:#ffffff,stroke:#0d543f,color:#0d543f
+
+      15["<div style='font-weight: bold'>System test suite</div><div style='font-size: 70%; margin-top: 0px'>[Container: Python, pytest, Selenium, headless Chrome]</div><div style='font-size: 80%; margin-top:10px'>Selenium drives a real<br />browser through every buyer<br />and admin journey; each test<br />names the requirement it<br />proves. Runs with one command<br />and on every code change, and<br />writes an HTML report.</div>"]
+      style 15 fill:#5c4d7d,stroke:#403557,color:#ffffff
+      16[("<div style='font-weight: bold'>EventHub database</div><div style='font-size: 70%; margin-top: 0px'>[Container: PostgreSQL]</div><div style='font-size: 80%; margin-top:10px'>All persistent application<br />data: accounts, events,<br />inventory, orders,<br />purchase-attempt records.</div>")]
+      style 16 fill:#6c757d,stroke:#4b5157,color:#ffffff
+      5["<div style='font-weight: bold'>Flask web application</div><div style='font-size: 70%; margin-top: 0px'>[Container: Python 3, Flask, SQLAlchemy]</div><div style='font-size: 80%; margin-top:10px'>Single Python/Flask<br />application (modular<br />monolith). Server-rendered<br />HTML pages; one Flask<br />blueprint per component;<br />components call each other<br />through Python service<br />interfaces.</div>"]
+      style 5 fill:#198754,stroke:#115e3a,color:#ffffff
+    end
+
+    1-. "<div>Browses events, buys tickets,<br />views orders</div><div style='font-size: 70%'>[HTTPS (HTML pages)]</div>" .->5
+    3-. "<div>Updates exchange rates, reads<br />audit log</div><div style='font-size: 70%'>[HTTPS (HTML pages, /admin)]</div>" .->5
+    5-. "<div>Reads and writes all<br />persistent data in ACID<br />transactions</div><div style='font-size: 70%'>[SQL over TCP (SQLAlchemy / psycopg)]</div>" .->16
+    2-. "<div>Runs at the press of a<br />button; reads the pass/fail<br />report</div><div style='font-size: 70%'>[run-system-tests.cmd / GitHub Actions]</div>" .->15
+    15-. "<div>Drives a real browser through<br />the journeys (Selenium<br />WebDriver)</div><div style='font-size: 70%'>[HTTP]</div>" .->5
+    15-. "<div>Resets and seeds a throwaway<br />copy; fast-forwards hold and<br />session time</div><div style='font-size: 70%'>[SQL]</div>" .->16
+
+  end

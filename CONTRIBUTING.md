@@ -10,7 +10,7 @@ These rules come from Call 4 (Implementation). They apply to everyone, including
 
 ## Definition of done (all four boxes)
 - [ ] Code reviewed by someone other than the author
-- [ ] Tests written and passing
+- [ ] Tests written and passing, each naming the requirement it proves (Call 5), including `python scripts/run_system_tests.py` when a page or the purchase path changed
 - [ ] The feature's `features/<name>/requirements.md` updated (or the PR explains why no requirement changed)
 - [ ] Every automatic check passes (lint, style, spec alignment, tests)
 
@@ -29,7 +29,13 @@ python3.12 -m venv .venv
 | `scripts/check_spec_alignment.py` | **warns** when `app/<feature>/` changes but `features/<feature>/requirements.md` does not |
 | unit + contract tests | broken behaviour, without needing a database |
 
-CI (`.github/workflows/ci.yml`) runs the same checks plus the PostgreSQL tests on every push and pull request.
+CI (`.github/workflows/ci.yml`) runs the same checks plus the PostgreSQL tests and the requirement-coverage check on every push and pull request. `.github/workflows/system-tests.yml` runs the Selenium system tests on every push and pull request, and from the **Run workflow** button.
+
+## System tests (Part 5 / Call 5)
+- Run them all: `python scripts/run_system_tests.py`, or double-click `run-system-tests.cmd` on Windows.
+- Every system test needs `@pytest.mark.requirement("<id>")` with a real id from `features/`. The run stops otherwise.
+- Write the expected result from the requirement, not from what the code does today (Priya, Call 5).
+- After adding or renaming a system test, run `python scripts/list_system_tests.py --write` (a test checks the catalogue is current).
 
 ## Where code goes
 - Feature rules belong in `app/<feature>/service.py`. Plain Python only, no Flask and no SQL.

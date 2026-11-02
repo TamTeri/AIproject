@@ -157,6 +157,12 @@ class FakeEvents:
     def lock_event(self, tx, event_id):
         return True
 
+    def event_exists(self, tx, event_id):
+        return True
+
+    def sales_closed(self, tx, event_id, now):
+        return False
+
 
 class FakeLimits:
     def committed_quantity(self, tx, *, buyer_id, event_id):

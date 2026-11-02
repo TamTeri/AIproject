@@ -65,6 +65,8 @@ class World:
     orders: list[OrderSnapshot] = field(default_factory=list)
     audit: list = field(default_factory=list)
     currencies: set[str] = field(default_factory=lambda: {"USD", "EUR"})
+    started: set[str] = field(default_factory=set)  # events whose start time has passed
+    eligible: bool = True  # does the buyer's current email still get the discount?
 
     def sold(self, event_id: str) -> int:
         return sum(o.quantity for o in self.orders if o.event_id == event_id)
@@ -84,6 +86,12 @@ class Events:
     def lock_event(self, tx, event_id: str) -> bool:
         return event_id in self.world.capacity
 
+    def event_exists(self, tx, event_id: str) -> bool:
+        return event_id in self.world.capacity
+
+    def sales_closed(self, tx, event_id: str, now) -> bool:
+        return event_id in self.world.started
+
 
 class Quotes:
     def __init__(self, world: World, unit_price_minor: int = 2500) -> None:
@@ -93,6 +101,9 @@ class Quotes:
 
     def supported_currencies(self, tx) -> set[str]:
         return set(self.world.currencies)
+
+    def discount_still_applies(self, *, tx, buyer_id, quote) -> bool:
+        return self.world.eligible
 
     def quote(self, *, tx, buyer_id, event_id, quantity, currency) -> QuoteSnapshot:
         self.calls += 1
@@ -113,9 +124,12 @@ class Inventory:
         self.clock = clock
         self.next_id = 1
 
+    def available(self, tx, *, event_id, now) -> int:
+        return self.world.capacity[event_id] - self.world.sold(event_id) - self.world.held(event_id, now)
+
     def allocate_hold(self, *, tx, buyer_id, event_id, quantity, expires_at, quote_snapshot):
         now = self.clock.value
-        available = self.world.capacity[event_id] - self.world.sold(event_id) - self.world.held(event_id, now)
+        available = self.available(tx, event_id=event_id, now=now)
         if available < quantity:
             return None
         hold = Hold(

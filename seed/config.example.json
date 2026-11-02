@@ -3,11 +3,18 @@
   "authority": "User chat authorization dated 2026-10-26; not stakeholder or Minh approval.",
   "production_behavior": "Fail closed when required policy is absent or provisional outside explicit local/demo mode.",
   "pricing": {
-    "supported_currencies": ["USD"],
+    "supported_currencies": [
+      "USD",
+      "EUR",
+      "GBP",
+      "CAD"
+    ],
     "minor_unit": 2,
     "student_discount_percent": 10,
     "eligibility": "exact case-insensitive usf.edu domain; no subdomains or plus-address semantics",
-    "calculation": "discount base subtotal, then conversion, then one half-up final rounding"
+    "calculation": "discount base subtotal, then conversion, then one half-up final rounding",
+    "base_currency": "USD",
+    "eligibility_recheck": "decided from the current email at every quote and again at payment (Call 5, pricing-011)"
   },
   "inventory": {
     "hold_duration_minutes": 10,
@@ -17,9 +24,15 @@
   },
   "purchase": {
     "per_account_event_limit": 4,
-    "idempotency": "buyer-scoped key, canonical request hash, replay original outcome",
-    "validation_precedence": "auth -> event -> currency -> quantity -> ownership/expiry -> limit -> pricing -> inventory -> payment",
-    "payment_failure": "no order, exactly-once hold release, failure audit"
+    "idempotency": "one-time key in every purchase form; buyer-scoped, canonical request hash, replay the first outcome; keys kept 24 hours (Call 5, purchase-014)",
+    "validation_precedence": "auth -> form key (repeats replay) -> request limit -> event -> sales closed -> currency -> quantity -> ownership/expiry -> discount still valid -> limit -> pricing -> inventory -> payment",
+    "payment_failure": "no order, exactly-once hold release, failure audit",
+    "request_limit": {
+      "requests": 10,
+      "window_seconds": 60,
+      "scope": "per account (Call 5, purchase-015)"
+    },
+    "sales_close": "at the event's start time (Call 5, purchase-018)"
   },
   "session": {
     "idle_timeout_minutes": 30
@@ -37,5 +50,9 @@
     "product routes and services",
     "pricing, inventory, purchase, order, audit, and admin behavior",
     "any stakeholder-policy closure"
-  ]
+  ],
+  "performance": {
+    "target": "20 buyers at once: 95% of purchase requests within 1 second, no server errors (Call 5, system-013)",
+    "owner": "Marcus (Product) to confirm"
+  }
 }

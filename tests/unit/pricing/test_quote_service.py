@@ -1,4 +1,6 @@
-"""QuoteService builds the server-owned quote from repository facts only."""
+"""QuoteService builds the server-owned quote from repository facts only: base price, quantity,
+eligibility, conversion and total (pricing-002), using configured rates, never live data (pricing-004).
+"""
 
 from __future__ import annotations
 

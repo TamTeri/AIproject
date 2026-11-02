@@ -10,3 +10,4 @@ Short records of decisions that shape the code. Labels: `[STAKEHOLDER]` (custome
 | [ADR-004](ADR-004-admin-provisioning.md) | How an account becomes an administrator | `[OPEN]` (temporary: operator command) |
 | [ADR-005](ADR-005-money-representation.md) | Money as integer minor units; exact decimal rates; one rounding | `[TEAM]` accepted (Call 4) |
 | [ADR-006](ADR-006-feature-modules-and-testing.md) | Standalone feature modules behind ports; one composition root | `[TEAM]` accepted (Call 4) |
+| [ADR-007](ADR-007-duplicate-submissions-and-request-limits.md) | One-time form keys, a per-account request limit, and discount/sales re-checks in the purchase path | `[TEAM]` accepted (Call 5); numbers `[TEMPORARY_MVP_DEFAULT]` |

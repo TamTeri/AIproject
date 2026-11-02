@@ -8,7 +8,8 @@ from app.db.transaction import SqlTransaction, db_id
 
 _SELECT = """
     SELECT e.id, e.title, e.artist, e.venue, e.starts_at, e.base_price_minor, e.capacity,
-           GREATEST(a.available_quantity, 0) AS available
+           GREATEST(a.available_quantity, 0) AS available,
+           (e.starts_at <= CURRENT_TIMESTAMP) AS sales_closed
     FROM events e
     JOIN event_availability a ON a.event_id = e.id
     WHERE e.status = 'active'
@@ -25,6 +26,7 @@ def _summary(row: dict) -> EventSummary:
         base_price_minor=int(row["base_price_minor"]),
         capacity=int(row["capacity"]),
         available=int(row["available"]),
+        sales_closed=bool(row.get("sales_closed", False)),
     )
 
 

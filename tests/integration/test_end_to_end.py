@@ -11,10 +11,16 @@ from app import create_app
 pytestmark = pytest.mark.postgres
 
 TOKEN = re.compile(r'name="csrf_token" value="([^"]+)"')
+KEY = re.compile(r'name="idempotency_key" value="([^"]+)"')
 
 
 def csrf(client, path: str) -> str:
     return TOKEN.search(client.get(path).get_data(as_text=True)).group(1)
+
+
+def form_key(client, path: str) -> str:
+    """purchase-014: the one-time key printed in the page's purchase form."""
+    return KEY.search(client.get(path).get_data(as_text=True)).group(1)
 
 
 @pytest.fixture
@@ -43,12 +49,23 @@ def test_student_buys_tickets_and_reopens_the_confirmation(app):
     search = client.get("/events?q=jazz").get_data(as_text=True)
     assert "Bulls Jazz Ensemble" in search and "Tampa Symphony" not in search
 
-    start = client.post("/events/2/checkout", data={"csrf_token": token, "quantity": "2", "currency": "GBP"})
+    start = client.post(
+        "/events/2/checkout",
+        data={
+            "csrf_token": token,
+            "idempotency_key": form_key(client, "/events/2"),
+            "quantity": "2",
+            "currency": "GBP",
+        },
+    )
     review = client.get(start.location).get_data(as_text=True)
     # 2 x 15.00 USD = 30.00 -> 10% student discount = 27.00 -> x0.79 = 21.33 GBP
     assert "21.33 GBP" in review and "−2.37 GBP" in review
 
-    paid = client.post(start.location + "/pay", data={"csrf_token": token, "payment": "approve"})
+    paid = client.post(
+        start.location + "/pay",
+        data={"csrf_token": token, "idempotency_key": form_key(client, start.location), "payment": "approve"},
+    )
     confirmation = client.get(paid.location).get_data(as_text=True)
     assert "Order confirmed" in confirmation and "21.33 GBP" in confirmation
     assert "0.79 GBP per USD" in confirmation  # not the stored "0.79000000"
@@ -64,7 +81,9 @@ def test_quick_buy_uses_saved_currency(app):
     token = register_and_login(client, "fan@example.com")
     client.post("/account", data={"csrf_token": token, "currency": "CAD"})
 
-    bought = client.post("/events/1/quick-buy", data={"csrf_token": token})
+    bought = client.post(
+        "/events/1/quick-buy", data={"csrf_token": token, "idempotency_key": form_key(client, "/events/1")}
+    )
     page = client.get(bought.location).get_data(as_text=True)
     assert "34.50 CAD" in page  # 25.00 USD x 1.38, no discount
     assert "Quantity</dt><dd>1<" in page
@@ -73,13 +92,32 @@ def test_quick_buy_uses_saved_currency(app):
 def test_sold_out_and_limits_show_errors_in_the_real_app(app):
     client = app.test_client()
     token = register_and_login(client, "fan@example.com")
-    over = client.post("/events/6/checkout", data={"csrf_token": token, "quantity": "3", "currency": "USD"})
-    assert over.status_code == 409 and "not enough tickets" in over.get_data(as_text=True)
-    limit = client.post("/events/1/checkout", data={"csrf_token": token, "quantity": "5", "currency": "USD"})
+    over = client.post(
+        "/events/6/checkout",
+        data={
+            "csrf_token": token,
+            "idempotency_key": form_key(client, "/events/6"),
+            "quantity": "3",
+            "currency": "USD",
+        },
+    )
+    # purchase-017 (Call 5): the message says how many are left.
+    assert over.status_code == 409 and "Only 2 tickets left" in over.get_data(as_text=True)
+    limit = client.post(
+        "/events/1/checkout",
+        data={
+            "csrf_token": token,
+            "idempotency_key": form_key(client, "/events/1"),
+            "quantity": "5",
+            "currency": "USD",
+        },
+    )
     assert limit.status_code == 409 and "ticket limit" in limit.get_data(as_text=True)
 
 
 def test_admin_area_end_to_end(app, seeded_database, monkeypatch, database_url):
+    """admin-001, admin-002, admin-003, admin-005: the operator command creates the admin;
+    buyers are blocked."""
     from app.db.commands import create_admin
 
     monkeypatch.setenv("EVENTHUB_ADMIN_EMAIL", "admin@eventhub.test")
@@ -88,7 +126,10 @@ def test_admin_area_end_to_end(app, seeded_database, monkeypatch, database_url):
 
     buyer = app.test_client()
     buyer_token = register_and_login(buyer, "fan@example.com")
-    buyer.post("/events/1/quick-buy", data={"csrf_token": buyer_token})
+    buyer.post(
+        "/events/1/quick-buy",
+        data={"csrf_token": buyer_token, "idempotency_key": form_key(buyer, "/events/1")},
+    )
     assert buyer.get("/admin/audit").status_code == 403
 
     admin = app.test_client()

@@ -19,6 +19,9 @@ test = [
   "pytest>=8,<10",
   "ruff>=0.6",
   "pre-commit>=3.7",
+  # Part 5 system tests: a real browser via Selenium, and an HTML report
+  "selenium>=4.20,<5",
+  "pytest-html>=4.1,<5",
 ]
 
 [project.scripts]
@@ -30,9 +33,17 @@ eventhub-seed = "app.config.commands:seed"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
-addopts = "-ra --import-mode=importlib"
+# System tests (Selenium) are left out of a plain `pytest` run; run them with
+# `python scripts/run_system_tests.py` (or `pytest -m system tests/system`).
+addopts = "-ra --import-mode=importlib -m 'not system'"
+# xunit1 keeps record_property values (requirements, performance numbers) in the JUnit XML.
+junit_family = "xunit1"
 markers = [
   "postgres: needs a real PostgreSQL (EVENTHUB_TEST_DATABASE_URL); skipped otherwise",
+  "system: Selenium system test through a real browser (scripts/run_system_tests.py)",
+  "whitebox: system test designed from knowledge of the code (the rest are black-box)",
+  "performance: load test against the system-013 performance target",
+  "requirement(*ids): the requirement ids (features/*/requirements.md) a test proves",
 ]
 
 [tool.setuptools.packages.find]

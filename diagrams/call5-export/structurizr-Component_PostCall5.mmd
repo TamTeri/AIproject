@@ -1,0 +1,80 @@
+graph LR
+  linkStyle default fill:#ffffff
+
+  subgraph diagram ["Flask application components - after Call 5 (as built)"]
+    style diagram fill:#ffffff,stroke:#ffffff
+
+    1["<div style='font-weight: bold'>Buyer</div><div style='font-size: 70%; margin-top: 0px'>[Person]</div><div style='font-size: 80%; margin-top:10px'>Registers, browses events,<br />buys tickets in a chosen<br />currency, and reopens past<br />orders.</div>"]
+    style 1 fill:#08415c,stroke:#052d40,color:#ffffff
+    3["<div style='font-weight: bold'>Administrator</div><div style='font-size: 70%; margin-top: 0px'>[Person]</div><div style='font-size: 80%; margin-top:10px'>Finance or EventHub staff who<br />update exchange rates and<br />read the purchase-attempt<br />audit log. How an account<br />becomes an administrator is<br />an open decision.</div>"]
+    style 3 fill:#8f2d56,stroke:#641f3c,color:#ffffff
+
+    subgraph 4 ["EventHub"]
+      style 4 fill:#ffffff,stroke:#0d543f,color:#0d543f
+
+      subgraph 5 ["Flask web application"]
+        style 5 fill:#ffffff,stroke:#115e3a,color:#115e3a
+
+        subgraph group1 ["Administrator-only area"]
+          style group1 fill:#ffffff,stroke:#8f2d56,color:#8f2d56,stroke-dasharray:5
+
+          14["<div style='font-weight: bold'>Administration</div><div style='font-size: 70%; margin-top: 0px'>[Component: Flask blueprint /admin]</div><div style='font-size: 80%; margin-top:10px'>Rate-management screen and<br />purchase-attempt audit<br />viewer. Every route requires<br />the administrator role; no<br />buyer-facing component calls<br />it.</div>"]
+          style 14 fill:#b56576,stroke:#7e4652,color:#ffffff
+        end
+
+        10["<div style='font-weight: bold'>Inventory</div><div style='font-size: 70%; margin-top: 0px'>[Component: InventoryService (Python module)]</div><div style='font-size: 80%; margin-top:10px'>Fixed capacity per event,<br />availability, checkout holds,<br />atomic check-and-decrement.</div>"]
+        style 10 fill:#4f9d69,stroke:#376d49,color:#ffffff
+        11["<div style='font-weight: bold'>Orders</div><div style='font-size: 70%; margin-top: 0px'>[Component: Flask blueprint /orders + OrderService]</div><div style='font-size: 80%; margin-top:10px'>Order history and<br />confirmation-style order<br />pages, scoped to the<br />signed-in buyer.</div>"]
+        style 11 fill:#4f9d69,stroke:#376d49,color:#ffffff
+        12["<div style='font-weight: bold'>Audit</div><div style='font-size: 70%; margin-top: 0px'>[Component: AuditService (Python module)]</div><div style='font-size: 80%; margin-top:10px'>Records every purchase<br />attempt and its outcome.</div>"]
+        style 12 fill:#4f9d69,stroke:#376d49,color:#ffffff
+        13["<div style='font-weight: bold'>Discount eligibility</div><div style='font-size: 70%; margin-top: 0px'>[Component: evaluate_student_eligibility() (Python module)]</div><div style='font-size: 80%; margin-top:10px'>One small function:<br />normalizes the buyer email<br />and decides student-discount<br />eligibility. Open policy<br />questions (plus addresses,<br />subdomains, verification)<br />change only here.</div>"]
+        style 13 fill:#4f9d69,stroke:#376d49,color:#ffffff
+        6["<div style='font-weight: bold'>Identity</div><div style='font-size: 70%; margin-top: 0px'>[Component: Flask blueprint /auth + IdentityService]</div><div style='font-size: 80%; margin-top:10px'>Registration, login, password<br />hashing, sessions, order<br />ownership checks.</div>"]
+        style 6 fill:#4f9d69,stroke:#376d49,color:#ffffff
+        7["<div style='font-weight: bold'>Catalog</div><div style='font-size: 70%; margin-top: 0px'>[Component: Flask blueprint /events + CatalogService]</div><div style='font-size: 80%; margin-top:10px'>Event list, artist and venue<br />search, event pages with<br />availability.</div>"]
+        style 7 fill:#4f9d69,stroke:#376d49,color:#ffffff
+        8["<div style='font-weight: bold'>Purchase</div><div style='font-size: 70%; margin-top: 0px'>[Component: Flask blueprint /checkout + PurchaseService]</div><div style='font-size: 80%; margin-top:10px'>Checkout flow: validates<br />quantity and currency on the<br />server, runs the simulated<br />payment step, creates the<br />order.</div>"]
+        style 8 fill:#4f9d69,stroke:#376d49,color:#ffffff
+        9["<div style='font-weight: bold'>Pricing</div><div style='font-size: 70%; margin-top: 0px'>[Component: PricingService (Python module)]</div><div style='font-size: 80%; margin-top:10px'>Computes the price: base<br />price x quantity, discount<br />eligibility, currency<br />conversion, total.</div>"]
+        style 9 fill:#4f9d69,stroke:#376d49,color:#ffffff
+      end
+
+      16[("<div style='font-weight: bold'>EventHub database</div><div style='font-size: 70%; margin-top: 0px'>[Container: PostgreSQL]</div><div style='font-size: 80%; margin-top:10px'>All persistent application<br />data: accounts, events,<br />inventory, orders,<br />purchase-attempt records.</div>")]
+      style 16 fill:#6c757d,stroke:#4b5157,color:#ffffff
+    end
+
+    1-. "<div>Registers, logs in, logs out</div><div style='font-size: 70%'>[HTTPS /auth]</div>" .->6
+    1-. "<div>Browses and searches events</div><div style='font-size: 70%'>[HTTPS /events]</div>" .->7
+    1-. "<div>Selects quantity and<br />currency, checks out</div><div style='font-size: 70%'>[HTTPS /checkout]</div>" .->8
+    1-. "<div>Views order history and<br />confirmations</div><div style='font-size: 70%'>[HTTPS /orders]</div>" .->11
+    3-. "<div>Logs in</div><div style='font-size: 70%'>[HTTPS /auth/login]</div>" .->6
+    3-. "<div>Edits rates, opens audit<br />viewer</div><div style='font-size: 70%'>[HTTPS /admin]</div>" .->14
+    8-. "<div>current_buyer()</div><div style='font-size: 70%'>[Python call]</div>" .->6
+    8-. "<div>get_event()</div><div style='font-size: 70%'>[Python call]</div>" .->7
+    8-. "<div>quote()</div><div style='font-size: 70%'>[Python call]</div>" .->9
+    8-. "<div>hold() / commit(): atomic</div><div style='font-size: 70%'>[Python call]</div>" .->10
+    8-. "<div>record_attempt()</div><div style='font-size: 70%'>[Python call]</div>" .->12
+    8-. "<div>create_order()</div><div style='font-size: 70%'>[Python call]</div>" .->11
+    7-. "<div>available()</div><div style='font-size: 70%'>[Python call]</div>" .->10
+    11-. "<div>require_login(), owner check</div><div style='font-size: 70%'>[Python call]</div>" .->6
+    14-. "<div>require_admin()</div><div style='font-size: 70%'>[Python call]</div>" .->6
+    14-. "<div>list_rates(), set_rate()</div><div style='font-size: 70%'>[Python call]</div>" .->9
+    14-. "<div>query_attempts()</div><div style='font-size: 70%'>[Python call]</div>" .->12
+    6-. "<div>accounts, sessions</div><div style='font-size: 70%'>[SQL]</div>" .->16
+    7-. "<div>events</div><div style='font-size: 70%'>[SQL]</div>" .->16
+    9-. "<div>exchange_rates</div><div style='font-size: 70%'>[SQL]</div>" .->16
+    10-. "<div>conditional UPDATE, holds</div><div style='font-size: 70%'>[SQL]</div>" .->16
+    11-. "<div>orders</div><div style='font-size: 70%'>[SQL]</div>" .->16
+    12-. "<div>purchase_attempts<br />(append-only)</div><div style='font-size: 70%'>[SQL]</div>" .->16
+    9-. "<div>is_eligible(email)</div><div style='font-size: 70%'>[Python call]</div>" .->13
+    1-. "<div>Double-clicks an event card<br />(Quick Buy)</div><div style='font-size: 70%'>[HTTPS POST /events/{id}/quick-buy]</div>" .->7
+    7-. "<div>quick_buy(): same purchase<br />path</div><div style='font-size: 70%'>[Python call]</div>" .->8
+    6-. "<div>account_sessions (hashed<br />tokens, idle timeout)</div><div style='font-size: 70%'>[SQL]</div>" .->16
+    8-. "<div>One transaction per attempt;<br />SELECT ... FOR UPDATE on the<br />event</div><div style='font-size: 70%'>[SQL]</div>" .->16
+    8-. "<div>idempotency_records: one-time<br />form keys (a double click<br />buys once)</div><div style='font-size: 70%'>[SQL]</div>" .->16
+    8-. "<div>purchase_rate_windows: 10<br />purchase requests per account<br />per minute</div><div style='font-size: 70%'>[SQL]</div>" .->16
+    8-. "<div>discount_still_applies():<br />re-check the current email at<br />payment</div><div style='font-size: 70%'>[Python call]</div>" .->9
+    1-. "<div>Changes email (needs current<br />password); picks a home<br />currency</div><div style='font-size: 70%'>[HTTPS /account, /register]</div>" .->6
+
+  end

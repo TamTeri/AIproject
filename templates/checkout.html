@@ -3,16 +3,29 @@
 {% block content %}
 <h1>Checkout</h1>
 <p class="message" role="status">Your tickets are held for 10 minutes, until {{ hold.expires_at|when("time") }}. If you do not pay by then they are released.</p>
+
+{# orders-006 (Call 5): one clearly labelled amount; the USD price is only a reference. #}
+<section class="charged" aria-labelledby="amount-charged-label">
+  <p id="amount-charged-label">Amount that will be charged to your card</p>
+  <p id="amount-charged" class="amount">{{ hold.total }}</p>
+  <p class="muted">This is the only amount you pay, in {{ hold.currency }}.</p>
+</section>
+
 <dl class="summary">
   <dt>Event</dt><dd>{{ hold.event_title }}</dd>
   <dt>Quantity</dt><dd>{{ hold.quantity }}</dd>
   <dt>Currency</dt><dd>{{ hold.currency }} (rate {{ hold.exchange_rate }} per USD)</dd>
   <dt>Subtotal</dt><dd>{{ hold.subtotal }}</dd>
   {% if hold.discount_applied %}<dt>Student discount</dt><dd>−{{ hold.discount }}</dd>{% endif %}
-  <dt>Total</dt><dd class="total">{{ hold.total }}</dd>
+  <dt>Total charged</dt><dd class="total">{{ hold.total }}</dd>
 </dl>
-<form class="stack" method="post" action="{{ url_for('web.checkout_pay', hold_id=hold.hold_id) }}">
+{% if hold.list_price %}
+<p class="muted" id="usd-reference">Ticket list price: {{ hold.list_price }} each. This US-dollar price is for reference only and is not charged. Converted at {{ hold.exchange_rate }} {{ hold.currency }} per 1 USD.</p>
+{% endif %}
+
+<form class="stack" method="post" action="{{ url_for('web.checkout_pay', hold_id=hold.hold_id) }}" data-single-submit>
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="idempotency_key" value="{{ idempotency_key() }}">
   <label for="payment">Simulated card (no real payment in version one)</label>
   <select id="payment" name="payment">
     <option value="approve">Test card — approves</option>

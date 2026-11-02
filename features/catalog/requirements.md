@@ -9,3 +9,4 @@
 - **catalog-009** (ubiquitous): The {EventHub} shall provide a responsive website that adjusts to phone screens.
 - **catalog-010** (optional): Where the event is not offered in a native mobile application, the {EventHub} shall provide the website experience instead.
 - **catalog-011** (ubiquitous) [Call 4]: The {EventHub} shall include the single-click open and double-click quick-buy event-list interactions in the first build, alongside an explicit Quick Buy button for touch screens.
+- **catalog-012** (ubiquitous) [Call 5]: The {EventHub} shall say next to every preselected currency (the event page and Quick Buy) which currency will be used, that it comes from the buyer's saved home currency, and where to change it.

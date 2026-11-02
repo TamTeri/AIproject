@@ -10,21 +10,24 @@
 {% if no_match %}
   <p class="message" role="status">No events matched “{{ query }}”. Showing all events.</p>
 {% endif %}
-<p class="muted">Click a card to open the event. Double-click to Quick Buy one ticket in your saved currency.</p>
+{% set user = current_user() %}
+<p class="muted">Click a card to open the event. Double-click to Quick Buy one ticket in {% if user %}{{ user.preferred_currency or "USD" }}, your saved home currency (<a href="{{ url_for('web.account') }}">change it</a>){% else %}your saved home currency{% endif %}.</p>
 <ul class="event-list">
 {% for event in events %}
   <li class="event-card" data-event-url="{{ url_for('web.event_detail', event_id=event.id) }}">
     <h2><a href="{{ url_for('web.event_detail', event_id=event.id) }}">{{ event.artist }}</a></h2>
     {% if event.title %}<p>{{ event.title }}</p>{% endif %}
     <p class="muted">{{ event.venue }} · {{ event.starts_at|when }}</p>
-    <p>{% if event.available > 0 %}{{ event.available }} tickets left{% else %}<strong>Sold out</strong>{% endif %}</p>
+    <p>{% if event.sales_closed %}<strong>Sales closed</strong>{% elif event.available > 0 %}{{ event.available }} tickets left{% else %}<strong>Sold out</strong>{% endif %}</p>
+    {% if not event.sales_closed %}
     <form class="quick-buy-form" method="post" action="{{ url_for('web.quick_buy', event_id=event.id) }}" hidden>
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="idempotency_key" value="{{ idempotency_key() }}">
     </form>
+    {% endif %}
   </li>
 {% else %}
   <li><p class="muted">No events are available.</p></li>
 {% endfor %}
 </ul>
 {% endblock %}
-{% block scripts %}<script src="{{ url_for('web.static', filename='eventhub.js') }}" defer></script>{% endblock %}

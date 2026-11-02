@@ -3,6 +3,14 @@
 {% block content %}
 {% if just_confirmed %}<p class="message" role="status">Payment complete. This page is your confirmation — no email or paper ticket needed. You can reopen it any time from Order history.</p>{% endif %}
 <h1>Order confirmed</h1>
+
+{# orders-006 (Call 5, Darnell's finding): one clearly labelled amount charged. #}
+<section class="charged" aria-labelledby="amount-charged-label">
+  <p id="amount-charged-label">Amount charged to your card</p>
+  <p id="amount-charged" class="amount">{{ order.total }}</p>
+  <p class="muted">This is the only amount you paid, in {{ order.currency }}.</p>
+</section>
+
 <dl class="summary">
   <dt>Order number</dt><dd>{{ order.id }}</dd>
   <dt>Event</dt><dd>{{ order.artist }}{% if order.event_title %} — {{ order.event_title }}{% endif %}</dd>
@@ -13,8 +21,11 @@
   <dt>Exchange rate applied</dt><dd>{{ order.exchange_rate_display }} {{ order.currency }} per USD</dd>
   <dt>Subtotal</dt><dd>{{ order.subtotal }}</dd>
   {% if order.discount_applied %}<dt>Student discount</dt><dd>−{{ order.discount }}</dd>{% endif %}
-  <dt>Total</dt><dd class="total">{{ order.total }}</dd>
+  <dt>Total charged</dt><dd class="total">{{ order.total }}</dd>
   <dt>Purchased</dt><dd>{{ order.created_at|when }}</dd>
 </dl>
+{% if order.list_price %}
+<p class="muted" id="usd-reference">Ticket list price: {{ order.list_price }} each. This US-dollar price is for reference only and was not charged. Converted at {{ order.exchange_rate_display }} {{ order.currency }} per 1 USD.</p>
+{% endif %}
 <p><a href="{{ url_for('web.orders') }}">Back to order history</a></p>
 {% endblock %}

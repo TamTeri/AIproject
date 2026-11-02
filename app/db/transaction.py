@@ -126,6 +126,7 @@ def unit_of_work(database: PostgresDatabase) -> Iterator[SqlTransaction]:
 def db_id(value: object) -> int | None:
     """Convert a string id from a URL/session into a BIGINT, or None if invalid."""
     text_value = str(value).strip() if value is not None else ""
-    if not text_value.isdigit() or len(text_value) > 18:
+    # isascii(): str.isdigit() also accepts "²" and "①", which int() rejects (Part 5, ST-21).
+    if not text_value.isascii() or not text_value.isdigit() or len(text_value) > 18:
         return None
     return int(text_value)

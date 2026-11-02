@@ -42,6 +42,11 @@ class FakeAccountRepository:
         self.records[account_id] = record
         return record
 
+    def update_email(self, account_id: str, normalized_email: str) -> None:
+        from dataclasses import replace
+
+        self.records[account_id] = replace(self.records[account_id], normalized_email=normalized_email)
+
 
 def test_register_validates_and_persists_only_a_password_hash() -> None:
     repository = FakeAccountRepository(records={})
@@ -151,3 +156,53 @@ def test_people_anywhere_can_register_with_any_email_domain():
         now=datetime(2030, 1, 1, tzinfo=UTC),
     )
     assert account.email == "kenji@example.jp"
+
+
+# ------------------------------------------------------- identity-014 (Call 5)
+
+
+def _service_with(*emails: str) -> tuple[IdentityService, list[str]]:
+    service = IdentityService(
+        account_repository=FakeAccountRepository(records={}),
+        password_hasher=Pbkdf2PasswordHasher(iterations=20_000),
+    )
+    now = datetime(2030, 1, 1, tzinfo=UTC)
+    ids = [
+        service.register(RegisterInput(name="Kenji", email=e, password="password-123"), now=now).account_id
+        for e in emails
+    ]
+    return service, ids
+
+
+def test_change_email_needs_the_current_password() -> None:
+    from app.identity.service import WrongCurrentPassword
+
+    service, (kenji,) = _service_with("kenji@usf.edu")
+    with pytest.raises(WrongCurrentPassword):
+        service.change_email(account_id=kenji, new_email="kenji@gmail.com", current_password="wrong-pass")
+    assert service.principal(kenji).email == "kenji@usf.edu"
+
+
+def test_change_email_normalizes_and_is_what_later_lookups_see() -> None:
+    service, (kenji,) = _service_with("kenji@usf.edu")
+    principal = service.change_email(
+        account_id=kenji, new_email="  Kenji@Gmail.COM ", current_password="password-123"
+    )
+    assert principal.email == "kenji@gmail.com"
+    assert service.principal(kenji).email == "kenji@gmail.com"  # pricing-011 reads this email
+
+
+def test_change_email_refuses_an_address_another_account_uses() -> None:
+    from app.identity.service import EmailAlreadyRegistered
+
+    service, (kenji, _friend) = _service_with("kenji@usf.edu", "friend@usf.edu")
+    with pytest.raises(EmailAlreadyRegistered):
+        service.change_email(account_id=kenji, new_email="FRIEND@usf.edu", current_password="password-123")
+
+
+def test_change_email_rejects_an_invalid_address() -> None:
+    from app.identity.service import RegistrationValidationError
+
+    service, (kenji,) = _service_with("kenji@usf.edu")
+    with pytest.raises(RegistrationValidationError):
+        service.change_email(account_id=kenji, new_email="not-an-email", current_password="password-123")

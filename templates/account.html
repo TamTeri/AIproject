@@ -6,15 +6,33 @@
 <dl class="summary">
   <dt>Name</dt><dd>{{ user.name }}</dd>
   <dt>Email</dt><dd>{{ user.email }}</dd>
+  {% if discount is not none %}
+  <dt>Student discount</dt>
+  <dd id="discount-status">{% if discount %}Yes: your current email is a USF address.{% else %}No: the student discount needs a current @usf.edu email.{% endif %}</dd>
+  {% endif %}
 </dl>
-<h2>Quick Buy settings</h2>
+
+<h2>Home currency</h2>
+<p class="muted">Your home currency is preselected at checkout and used for Quick Buy.</p>
 {% if error %}<p class="error" role="alert">{{ error.message }}</p>{% endif %}
 <form class="stack" method="post" action="{{ url_for('web.account') }}">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-  <label for="currency">Saved currency</label>
+  <label for="currency">Saved home currency</label>
   <select id="currency" name="currency">
     {% for code in currencies %}<option value="{{ code }}" {% if code == (user.preferred_currency or 'USD') %}selected{% endif %}>{{ code }}</option>{% endfor %}
   </select>
-  <button type="submit">Save</button>
+  <button type="submit">Save currency</button>
+</form>
+
+<h2>Change email</h2>
+<p class="muted">The student discount is decided from your current email every time you buy.</p>
+{% if email_error %}<p class="error" role="alert">{{ email_error.message }}</p>{% endif %}
+<form class="stack" method="post" action="{{ url_for('web.account_email') }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <label for="new-email">New email</label>
+  <input id="new-email" name="new_email" type="email" autocomplete="email" required>
+  <label for="current-password">Current password</label>
+  <input id="current-password" name="current_password" type="password" autocomplete="current-password" required>
+  <button type="submit">Change email</button>
 </form>
 {% endblock %}

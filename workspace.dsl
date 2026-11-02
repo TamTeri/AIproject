@@ -1,9 +1,12 @@
-workspace "EventHub" "EventHub C4 model before and after Calls 3 and 4" {
+workspace "EventHub" "EventHub C4 model before and after Calls 3, 4 and 5" {
 
     !identifiers hierarchical
 
     model {
         buyer = person "Buyer" "Registers, browses events, buys tickets in a chosen currency, and reopens past orders."
+        tester = person "QA / developer" "Runs the system tests with one command (or the GitHub button) and reads the report." {
+            tags "PostCall5"
+        }
         administrator = person "Administrator" "Finance or EventHub staff who update exchange rates and read the purchase-attempt audit log. How an account becomes an administrator is an open decision." {
             tags "Administrator"
         }
@@ -28,6 +31,10 @@ workspace "EventHub" "EventHub C4 model before and after Calls 3 and 4" {
                         tags "AdministratorOnly"
                     }
                 }
+            }
+
+            systemTests = container "System test suite" "Selenium drives a real browser through every buyer and admin journey; each test names the requirement it proves. Runs with one command and on every code change, and writes an HTML report." "Python, pytest, Selenium, headless Chrome" {
+                tags "PostCall5" "TestTooling"
             }
 
             database = container "EventHub database" "All persistent application data: accounts, events, inventory, orders, purchase-attempt records." "PostgreSQL" {
@@ -93,6 +100,29 @@ workspace "EventHub" "EventHub C4 model before and after Calls 3 and 4" {
         eventHub.webApp.purchase -> eventHub.database "One transaction per attempt; SELECT ... FOR UPDATE on the event" "SQL" {
             tags "PostCall4"
         }
+
+        # ---- After Call 5: testing, security findings and requirement gaps
+        tester -> eventHub.systemTests "Runs at the press of a button; reads the pass/fail report" "run-system-tests.cmd / GitHub Actions" {
+            tags "PostCall5"
+        }
+        eventHub.systemTests -> eventHub.webApp "Drives a real browser through the journeys (Selenium WebDriver)" "HTTP" {
+            tags "PostCall5"
+        }
+        eventHub.systemTests -> eventHub.database "Resets and seeds a throwaway copy; fast-forwards hold and session time" "SQL" {
+            tags "PostCall5"
+        }
+        eventHub.webApp.purchase -> eventHub.database "idempotency_records: one-time form keys (a double click buys once)" "SQL" {
+            tags "PostCall5"
+        }
+        eventHub.webApp.purchase -> eventHub.database "purchase_rate_windows: 10 purchase requests per account per minute" "SQL" {
+            tags "PostCall5"
+        }
+        eventHub.webApp.purchase -> eventHub.webApp.pricing "discount_still_applies(): re-check the current email at payment" "Python call" {
+            tags "PostCall5"
+        }
+        buyer -> eventHub.webApp.identity "Changes email (needs current password); picks a home currency" "HTTPS /account, /register" {
+            tags "PostCall5"
+        }
     }
 
     views {
@@ -100,6 +130,8 @@ workspace "EventHub" "EventHub C4 model before and after Calls 3 and 4" {
         systemContext eventHub "Context_PreCall3" {
             include *
             exclude "relationship.tag==PostCall3"
+            exclude "relationship.tag==PostCall5"
+            exclude "element.tag==PostCall5"
             exclude "relationship.tag==PostCall4"
             exclude administrator
             autolayout lr
@@ -109,6 +141,8 @@ workspace "EventHub" "EventHub C4 model before and after Calls 3 and 4" {
         container eventHub "Container_PreCall3" {
             include *
             exclude "relationship.tag==PostCall3"
+            exclude "relationship.tag==PostCall5"
+            exclude "element.tag==PostCall5"
             exclude "relationship.tag==PostCall4"
             exclude administrator
             autolayout lr
@@ -119,6 +153,8 @@ workspace "EventHub" "EventHub C4 model before and after Calls 3 and 4" {
             include *
             exclude "relationship.tag==PostCall3"
             exclude "relationship.tag==PostCall4"
+            exclude "relationship.tag==PostCall5"
+            exclude "element.tag==PostCall5"
             exclude "element.tag==PostCall4"
             exclude administrator
             exclude eventHub.webApp.admin
@@ -129,6 +165,8 @@ workspace "EventHub" "EventHub C4 model before and after Calls 3 and 4" {
         # After Call 3: administrator actor, admin routes, Administration component.
         systemContext eventHub "Context_PostCall3" {
             include *
+            exclude "relationship.tag==PostCall5"
+            exclude "element.tag==PostCall5"
             exclude "relationship.tag==PostCall4"
             autolayout lr
             title "EventHub system context - after Call 3"
@@ -136,6 +174,8 @@ workspace "EventHub" "EventHub C4 model before and after Calls 3 and 4" {
 
         container eventHub "Container_PostCall3" {
             include *
+            exclude "relationship.tag==PostCall5"
+            exclude "element.tag==PostCall5"
             exclude "relationship.tag==PostCall4"
             autolayout lr
             title "EventHub containers - after Call 3"
@@ -144,6 +184,8 @@ workspace "EventHub" "EventHub C4 model before and after Calls 3 and 4" {
         component eventHub.webApp "Component_PostCall3" {
             include *
             exclude "relationship.tag==PostCall4"
+            exclude "relationship.tag==PostCall5"
+            exclude "element.tag==PostCall5"
             exclude "element.tag==PostCall4"
             autolayout lr 250 200
             title "Flask application components - after Call 3"
@@ -152,8 +194,26 @@ workspace "EventHub" "EventHub C4 model before and after Calls 3 and 4" {
         # After Call 4: separate eligibility function, quick-buy path, server-side sessions.
         component eventHub.webApp "Component_PostCall4" {
             include *
+            exclude "relationship.tag==PostCall5"
+            exclude "element.tag==PostCall5"
             autolayout lr 250 200
             title "Flask application components - after Call 4 (as built)"
+        }
+
+        # After Call 5: one-time form keys, request limit, discount re-check at
+        # payment, email change, and the Selenium system test suite.
+        container eventHub "Container_PostCall5" {
+            include *
+            autolayout lr
+            title "EventHub containers - after Call 5 (with the system test suite)"
+        }
+
+        component eventHub.webApp "Component_PostCall5" {
+            include *
+            exclude eventHub.systemTests
+            exclude tester
+            autolayout lr 250 200
+            title "Flask application components - after Call 5 (as built)"
         }
 
 
@@ -190,6 +250,10 @@ workspace "EventHub" "EventHub C4 model before and after Calls 3 and 4" {
             }
             element "Group" {
                 color #8f2d56
+            }
+            element "TestTooling" {
+                background #5c4d7d
+                color #ffffff
             }
         }
     }

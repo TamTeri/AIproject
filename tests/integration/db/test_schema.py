@@ -109,7 +109,7 @@ def test_fresh_migrate_seed_repeat_seed_and_reset_are_deterministic(
             } <= tables
 
             revision = connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one()
-            assert revision == "0005_schema_seams"
+            assert revision == "0006_call5_rate_windows"
 
             assert connection.execute(text("SELECT count(*) FROM currencies")).scalar_one() == 4
             assert connection.execute(text("SELECT count(*) FROM exchange_rates")).scalar_one() == 4
@@ -125,7 +125,7 @@ def test_fresh_migrate_seed_repeat_seed_and_reset_are_deterministic(
                     """
                 )
             ).one()
-            assert event == ("demo-usf-concert-2026-11-01", 2500, 100)
+            assert event == ("demo-usf-concert-2027-11-01", 2500, 100)
 
             currency = connection.execute(
                 text("SELECT code, minor_unit, enabled FROM currencies WHERE code = 'USD'")
@@ -157,11 +157,11 @@ def test_fresh_migrate_seed_repeat_seed_and_reset_are_deterministic(
                     """
                     SELECT catalog_key, available_quantity, held_quantity, sold_quantity
                     FROM event_availability
-                    WHERE catalog_key = 'demo-usf-concert-2026-11-01'
+                    WHERE catalog_key = 'demo-usf-concert-2027-11-01'
                     """
                 )
             ).one()
-            assert availability == ("demo-usf-concert-2026-11-01", 100, 0, 0)
+            assert availability == ("demo-usf-concert-2027-11-01", 100, 0, 0)
 
             assert connection.execute(text("SELECT count(*) FROM eventhub_bootstrap")).scalar_one() == 1
     finally:
@@ -178,7 +178,7 @@ def test_fresh_migrate_seed_repeat_seed_and_reset_are_deterministic(
             assert connection.execute(text("SELECT count(*) FROM app_config")).scalar_one() == 0
             assert (
                 connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one()
-                == "0005_schema_seams"
+                == "0006_call5_rate_windows"
             )
     finally:
         engine.dispose()
@@ -274,7 +274,7 @@ def test_postgresql_constraints_cover_ownership_state_and_bounded_temporary_reco
             },
         ).scalar_one()
         event_id = connection.execute(
-            text("SELECT id FROM events WHERE catalog_key = 'demo-usf-concert-2026-11-01'")
+            text("SELECT id FROM events WHERE catalog_key = 'demo-usf-concert-2027-11-01'")
         ).scalar_one()
 
     def assert_rejected(statement: str, parameters: dict[str, object] | None = None):

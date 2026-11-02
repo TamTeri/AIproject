@@ -18,4 +18,12 @@ These rows and values are implementation seams authorized for the local/demo buy
 
 ## Idempotency
 
+**Call 5 update:** the table is now used. Every purchase form carries a one-time key; the first request with a key stores its result and any repeat replays it (purchase-014, ADR-007). Keys are kept 24 hours (`IDEMPOTENCY_RETENTION_HOURS`, `[TEMPORARY_MVP_DEFAULT]`). A buyer's expired keys are deleted the next time that buyer claims a key.
+
+Original Part 3/4 note:
+
 `idempotency_records` is deliberately bounded and every row is constrained to `policy_status='[TEMPORARY_MVP_DEFAULT]'`. Buyer scope, a 64-character request hash, a bounded key, bounded JSON outcome payload, state, expiry, and replay fields are present for the local/demo retry seam. Frozen requirements exclude idempotency acceptance; operation scope, concurrent in-progress behavior, replay authorization, lifecycle, and production retention remain blocked.
+
+## Purchase request limit (Call 5)
+
+`purchase_rate_windows` (migration 0006) holds one fixed-window counter per account: 10 purchase requests per 60 seconds, `[TEMPORARY_MVP_DEFAULT]` (purchase-015, ADR-007). A row is replaced in place when its window ends, so the table never grows past one row per account.

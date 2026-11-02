@@ -11,3 +11,5 @@
 - **identity-011** (ubiquitous): The {EventHub} shall prevent buyer-facing flows from reaching administrator-only functions.
 - **identity-012** (event-driven): When the administrator identity and provisioning mechanism is approved, the {EventHub} shall enforce that mechanism for administrator access.
 - **identity-013** (ubiquitous) [Call 4 build]: The {EventHub} shall keep sessions on the server, storing only a hash of the session token, and shall end a session on logout.
+- **identity-014** (event-driven) [Call 5]: When a buyer changes their account email, the {EventHub} shall require their current password, reject an email that another account already uses, and use the new email for every later discount decision.
+- **identity-015** (event-driven) [Call 5]: When a person registers, the {EventHub} shall let them choose a home currency (USD unless they pick another) and explain that it preselects the currency at checkout and for Quick Buy.

@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{{ event.artist }} · EventHub{% endblock %}
 {% block content %}
+{% set user = current_user() %}
 <h1>{{ event.artist }}</h1>
 {% if event.title %}<p>{{ event.title }}</p>{% endif %}
 <dl class="summary">
@@ -8,32 +9,41 @@
   <dt>Starts</dt><dd>{{ event.starts_at|when }}</dd>
   {% if price %}<dt>Price</dt><dd>{{ price }} per ticket</dd>{% endif %}
   <dt>Availability</dt>
-  <dd>{% if event.available > 0 %}<strong>{{ event.available }}</strong> tickets left{% else %}<strong>Sold out</strong>{% endif %}</dd>
+  <dd>{% if event.sales_closed %}<strong>Sales closed</strong>{% elif event.available > 0 %}<strong>{{ event.available }}</strong> tickets left{% else %}<strong>Sold out</strong>{% endif %}</dd>
 </dl>
 
 {% if error %}<p class="error" role="alert" data-error-code="{{ error.code }}">{{ error.message }}</p>{% endif %}
 
+{% if event.sales_closed %}
+<p class="message" id="sales-closed" role="status">Ticket sales have closed for this event because it has already started.</p>
+{% else %}
 {% if currencies %}
 <h2>Buy tickets</h2>
-<form class="stack" method="post" action="{{ url_for('web.checkout_start', event_id=event.id) }}">
+<form class="stack" method="post" action="{{ url_for('web.checkout_start', event_id=event.id) }}" data-single-submit>
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="idempotency_key" value="{{ idempotency_key() }}">
   <label for="quantity">Quantity</label>
   <input id="quantity" name="quantity" type="number" min="1" step="1" value="{{ quantity }}" required>
   <label for="currency">Currency</label>
-  <select id="currency" name="currency">
+  <select id="currency" name="currency" aria-describedby="currency-source">
     {% for code in currencies %}<option value="{{ code }}" {% if code == preferred_currency %}selected{% endif %}>{{ code }}</option>{% endfor %}
   </select>
+  <p class="muted hint" id="currency-source">
+    {% if user %}Preselected: <strong>{{ saved_currency }}</strong>, your saved home currency. <a href="{{ url_for('web.account') }}">Change your home currency</a>{% else %}Preselected: <strong>USD</strong>. Log in to use your saved home currency (<a href="{{ url_for('web.account') }}">Account</a>).{% endif %}
+  </p>
   <button type="submit">Continue to checkout</button>
 </form>
 <p class="muted">USF students (@usf.edu email) get the student discount. Your tickets are held for 10 minutes while you check out.</p>
 {% endif %}
 
 <div class="actions">
-  <form method="post" action="{{ url_for('web.quick_buy', event_id=event.id) }}">
+  <form method="post" action="{{ url_for('web.quick_buy', event_id=event.id) }}" data-single-submit>
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <button class="secondary" type="submit">Quick Buy</button>
+    <input type="hidden" name="idempotency_key" value="{{ idempotency_key() }}">
+    <button class="secondary" type="submit">Quick Buy 1 ticket in {{ saved_currency }}</button>
   </form>
-  <span class="muted">One ticket in your saved currency.</span>
+  <span class="muted">Pays for one ticket straight away in your saved home currency ({{ saved_currency }}).</span>
 </div>
+{% endif %}
 <p><a href="{{ url_for('web.events') }}">Back to events</a></p>
 {% endblock %}
