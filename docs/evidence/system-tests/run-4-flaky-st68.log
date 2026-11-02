@@ -1,0 +1,119 @@
+Running: D:\AIproject\.venv\Scripts\python.exe -m pytest tests/system -m system -v --html=D:\AIproject\reports\system-tests.html --self-contained-html --junitxml=D:\AIproject\reports\system-tests.xml --tb=short
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-9.2.0, pluggy-1.7.0 -- D:\AIproject\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+metadata: {'Python': '3.12.10', 'Platform': 'Windows-11-10.0.26200-SP0', 'Packages': {'pytest': '9.2.0', 'pluggy': '1.7.0'}, 'Plugins': {'platformdirs': '4.14.3', 'html': '4.2.0', 'metadata': '3.1.1'}}
+rootdir: D:\AIproject
+configfile: pyproject.toml
+plugins: platformdirs-4.14.3, html-4.2.0, metadata-3.1.1
+collecting ... collected 87 items
+
+tests/system/test_st_buyer_journey.py::test_st01_full_journey_register_search_buy_in_euros_and_find_it_in_history PASSED [  1%]
+tests/system/test_st_buyer_journey.py::test_st02_order_history_asks_for_login_then_returns_to_it PASSED [  2%]
+tests/system/test_st_buyer_journey.py::test_st03_wrong_password_gives_a_generic_error PASSED [  3%]
+tests/system/test_st_buyer_journey.py::test_st04_search_by_venue_and_no_match_shows_everything PASSED [  4%]
+tests/system/test_st_buyer_journey.py::test_st05_double_click_on_a_card_quick_buys_one_ticket PASSED [  5%]
+tests/system/test_st_buyer_journey.py::test_st06_declined_card_releases_tickets_and_creates_no_order PASSED [  6%]
+tests/system/test_st_buyer_journey.py::test_st07_cancel_gives_held_tickets_back PASSED [  8%]
+tests/system/test_st_buyer_journey.py::test_st08_logout_ends_the_session PASSED [  9%]
+tests/system/test_st_buyer_journey.py::test_st09_phone_width_pages_do_not_scroll_sideways[/events] PASSED [ 10%]
+tests/system/test_st_buyer_journey.py::test_st09_phone_width_pages_do_not_scroll_sideways[/events/1] PASSED [ 11%]
+tests/system/test_st_buyer_journey.py::test_st09_phone_width_pages_do_not_scroll_sideways[/login] PASSED [ 12%]
+tests/system/test_st_buyer_journey.py::test_st09_phone_width_pages_do_not_scroll_sideways[/register] PASSED [ 13%]
+tests/system/test_st_buyer_journey.py::test_st10_purchase_limit_of_four_per_account_per_event PASSED [ 14%]
+tests/system/test_st_call5_changes.py::test_st30_pay_submitted_twice_at_once_creates_one_order PASSED [ 16%]
+tests/system/test_st_call5_changes.py::test_st31_quick_buy_submitted_twice_at_once_creates_one_order PASSED [ 17%]
+tests/system/test_st_call5_changes.py::test_st32_impatient_double_click_on_pay_shows_the_confirmation PASSED [ 18%]
+tests/system/test_st_call5_changes.py::test_st33_double_clicking_the_quick_buy_button_buys_one_ticket PASSED [ 19%]
+tests/system/test_st_call5_changes.py::test_st34_buying_again_on_purpose_still_works PASSED [ 20%]
+tests/system/test_st_call5_changes.py::test_st35_refreshing_the_confirmation_does_not_buy_again PASSED [ 21%]
+tests/system/test_st_call5_changes.py::test_st36_more_than_ten_purchase_requests_a_minute_are_slowed_down PASSED [ 22%]
+tests/system/test_st_call5_changes.py::test_st37_one_buyers_limit_does_not_slow_down_another_buyer PASSED [ 24%]
+tests/system/test_st_call5_changes.py::test_st38_changing_to_a_non_usf_email_removes_the_discount PASSED [ 25%]
+tests/system/test_st_call5_changes.py::test_st39_email_change_during_checkout_cancels_the_discounted_hold PASSED [ 26%]
+tests/system/test_st_call5_changes.py::test_st40_email_change_needs_the_password_and_a_free_address PASSED [ 27%]
+tests/system/test_st_call5_changes.py::test_st41_checkout_and_confirmation_show_one_clear_amount_charged PASSED [ 28%]
+tests/system/test_st_call5_changes.py::test_st42_preselected_currency_says_where_it_comes_from PASSED [ 29%]
+tests/system/test_st_call5_changes.py::test_st43_changing_the_saved_currency_changes_the_preselection PASSED [ 31%]
+tests/system/test_st_call5_changes.py::test_st44_no_tickets_are_sold_after_the_event_has_started PASSED [ 32%]
+tests/system/test_st_performance.py::test_st70_twenty_buyers_at_once_meet_the_performance_target PASSED [ 33%]
+tests/system/test_st_security.py::test_st50_search_text_is_shown_as_text_never_as_markup PASSED [ 34%]
+tests/system/test_st_security.py::test_st51_names_with_markup_or_accents_are_shown_as_typed PASSED [ 35%]
+tests/system/test_st_security.py::test_st52_login_never_redirects_to_another_site[https://evil.example/] PASSED [ 36%]
+tests/system/test_st_security.py::test_st52_login_never_redirects_to_another_site[//evil.example/] PASSED [ 37%]
+tests/system/test_st_security.py::test_st52_login_never_redirects_to_another_site[/\\evil.example] PASSED [ 39%]
+tests/system/test_st_security.py::test_st53_a_buyer_cannot_open_another_buyers_order_or_checkout PASSED [ 40%]
+tests/system/test_st_security.py::test_st54_buyers_cannot_reach_the_admin_area[/admin] PASSED [ 41%]
+tests/system/test_st_security.py::test_st54_buyers_cannot_reach_the_admin_area[/admin/rates] PASSED [ 42%]
+tests/system/test_st_security.py::test_st54_buyers_cannot_reach_the_admin_area[/admin/audit] PASSED [ 43%]
+tests/system/test_st_security.py::test_st55_a_form_with_a_forged_token_is_refused PASSED [ 44%]
+tests/system/test_st_security.py::test_st56_passwords_are_stored_only_as_hashes PASSED [ 45%]
+tests/system/test_st_security.py::test_st57_email_letter_case_does_not_matter_for_login PASSED [ 47%]
+tests/system/test_st_validation_edges.py::test_st11_thuys_six_rejections_have_distinct_messages_and_are_all_logged PASSED [ 48%]
+tests/system/test_st_validation_edges.py::test_st12_browser_blocks_zero_before_sending_it PASSED [ 49%]
+tests/system/test_st_validation_edges.py::test_st13_non_whole_quantities_are_rejected_without_a_crash[decimal] PASSED [ 50%]
+tests/system/test_st_validation_edges.py::test_st13_non_whole_quantities_are_rejected_without_a_crash[letters] PASSED [ 51%]
+tests/system/test_st_validation_edges.py::test_st13_non_whole_quantities_are_rejected_without_a_crash[blank] PASSED [ 52%]
+tests/system/test_st_validation_edges.py::test_st13_non_whole_quantities_are_rejected_without_a_crash[exponent] PASSED [ 54%]
+tests/system/test_st_validation_edges.py::test_st13_non_whole_quantities_are_rejected_without_a_crash[hex] PASSED [ 55%]
+tests/system/test_st_validation_edges.py::test_st14_whole_number_written_as_2_point_0_is_accepted PASSED [ 56%]
+tests/system/test_st_validation_edges.py::test_st15_buying_exactly_the_last_tickets_works_and_then_shows_sold_out PASSED [ 57%]
+tests/system/test_st_validation_edges.py::test_st16_unsupported_currencies_are_rejected[unknown] PASSED [ 58%]
+tests/system/test_st_validation_edges.py::test_st16_unsupported_currencies_are_rejected[four-letters] PASSED [ 59%]
+tests/system/test_st_validation_edges.py::test_st16_unsupported_currencies_are_rejected[blank] PASSED [ 60%]
+tests/system/test_st_validation_edges.py::test_st16_unsupported_currencies_are_rejected[spaces] PASSED [ 62%]
+tests/system/test_st_validation_edges.py::test_st17_logged_out_purchase_returns_to_the_event_after_login PASSED [ 63%]
+tests/system/test_st_validation_edges.py::test_st18_unknown_ids_show_not_found_not_a_crash[/events/999999999] PASSED [ 64%]
+tests/system/test_st_validation_edges.py::test_st18_unknown_ids_show_not_found_not_a_crash[/events/abc] PASSED [ 65%]
+tests/system/test_st_validation_edges.py::test_st18_unknown_ids_show_not_found_not_a_crash[/events/-1] PASSED [ 66%]
+tests/system/test_st_validation_edges.py::test_st18_unknown_ids_show_not_found_not_a_crash[/orders/999999999] PASSED [ 67%]
+tests/system/test_st_validation_edges.py::test_st19_registration_rejects_short_passwords_and_duplicate_emails_in_any_case PASSED [ 68%]
+tests/system/test_st_validation_edges.py::test_st20_unicode_digit_quantities_are_rejected_not_crashed[superscript-two] PASSED [ 70%]
+tests/system/test_st_validation_edges.py::test_st20_unicode_digit_quantities_are_rejected_not_crashed[circled-one] PASSED [ 71%]
+tests/system/test_st_validation_edges.py::test_st20_unicode_digit_quantities_are_rejected_not_crashed[arabic-three] PASSED [ 72%]
+tests/system/test_st_validation_edges.py::test_st21_unicode_digit_ids_in_urls_show_not_found[/events/\xb2] PASSED [ 73%]
+tests/system/test_st_validation_edges.py::test_st21_unicode_digit_ids_in_urls_show_not_found[/orders/\u2460] PASSED [ 74%]
+tests/system/test_st_validation_edges.py::test_st21_unicode_digit_ids_in_urls_show_not_found[/checkout/\xb2] PASSED [ 75%]
+tests/system/test_st_validation_edges.py::test_st22_very_large_whole_numbers_get_the_purchase_limit_message[five] PASSED [ 77%]
+tests/system/test_st_validation_edges.py::test_st22_very_large_whole_numbers_get_the_purchase_limit_message[over-cap] PASSED [ 78%]
+tests/system/test_st_validation_edges.py::test_st22_very_large_whole_numbers_get_the_purchase_limit_message[twenty-digits] PASSED [ 79%]
+tests/system/test_st_validation_edges.py::test_st23_a_five_thousand_digit_quantity_does_not_crash_the_server PASSED [ 80%]
+tests/system/test_st_whitebox.py::test_st60_paying_after_the_hold_expired_is_refused_and_tickets_return PASSED [ 81%]
+tests/system/test_st_whitebox.py::test_st61_rate_change_during_checkout_does_not_change_the_price PASSED [ 82%]
+tests/system/test_st_whitebox.py::test_st62_an_idle_session_expires_after_thirty_minutes PASSED [ 83%]
+tests/system/test_st_whitebox.py::test_st63_half_up_rounding_happens_once_on_the_final_amount PASSED [ 85%]
+tests/system/test_st_whitebox.py::test_st64_discount_eligibility_email_edge_cases[upper-case] PASSED [ 86%]
+tests/system/test_st_whitebox.py::test_st64_discount_eligibility_email_edge_cases[plus-address] PASSED [ 87%]
+tests/system/test_st_whitebox.py::test_st64_discount_eligibility_email_edge_cases[subdomain] PASSED [ 88%]
+tests/system/test_st_whitebox.py::test_st64_discount_eligibility_email_edge_cases[lookalike-suffix] PASSED [ 89%]
+tests/system/test_st_whitebox.py::test_st64_discount_eligibility_email_edge_cases[lookalike-prefix] PASSED [ 90%]
+tests/system/test_st_whitebox.py::test_st65_two_browsers_racing_for_the_last_ticket PASSED [ 91%]
+tests/system/test_st_whitebox.py::test_st66_search_wildcards_and_quotes_are_plain_text[%] PASSED [ 93%]
+tests/system/test_st_whitebox.py::test_st66_search_wildcards_and_quotes_are_plain_text[_] PASSED [ 94%]
+tests/system/test_st_whitebox.py::test_st66_search_wildcards_and_quotes_are_plain_text[\\] PASSED [ 95%]
+tests/system/test_st_whitebox.py::test_st66_search_wildcards_and_quotes_are_plain_text[' OR 1=1 --] PASSED [ 96%]
+tests/system/test_st_whitebox.py::test_st67_audit_log_has_time_buyer_event_quantity_currency_and_outcome PASSED [ 97%]
+tests/system/test_st_whitebox.py::test_st68_admin_rate_form_validates_input FAILED [ 98%]
+tests/system/test_st_whitebox.py::test_st69_event_starting_in_a_few_minutes_is_still_on_sale PASSED [100%]
+
+================================== FAILURES ===================================
+__________________ test_st68_admin_rate_form_validates_input __________________
+tests\system\test_st_whitebox.py:173: in test_st68_admin_rate_form_validates_input
+    assert admin_ui.exists(".error"), bad
+E   AssertionError: -1
+E   assert False
+E    +  where False = exists('.error')
+E    +    where exists = <tests.system.support.EventHub object at 0x0000023060599DF0>.exists
+============================== warnings summary ===============================
+tests/system/test_st_performance.py::test_st70_twenty_buyers_at_once_meet_the_performance_target
+  tests\system\test_st_performance.py:98: PytestWarning: record_property is incompatible with junit_family 'xunit2' (use 'legacy' or 'xunit1')
+    @pytest.mark.requirement("system-013", "inventory-004")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+---------- generated xml file: D:\AIproject\reports\system-tests.xml ----------
+---- Generated html report: file:///D:/AIproject/reports/system-tests.html ----
+=========================== short test summary info ===========================
+FAILED tests/system/test_st_whitebox.py::test_st68_admin_rate_form_validates_input
+============= 1 failed, 86 passed, 1 warning in 133.76s (0:02:13) =============
+
+Report: D:\AIproject\reports\system-tests.html

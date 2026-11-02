@@ -5,3 +5,4 @@
 - **audit-005** (ubiquitous) [Call 4]: The {EventHub} shall include the time, user, event, quantity, currency, and outcome in every purchase-attempt audit record.
 - **audit-006** (ubiquitous) [Call 4]: The {EventHub} shall allow only administrators to read purchase-attempt audit records. Retention is `[OPEN]`; the temporary default keeps records indefinitely and append-only.
 - **audit-007** (unwanted) [Call 4]: If a purchase attempt fails unexpectedly, then the {EventHub} shall still record the attempt with an internal-error outcome.
+- **audit-008** (ubiquitous) [Call 5]: The {EventHub} shall record replayed (duplicate), rate-limited, not-authenticated and sales-closed purchase attempts in the audit trail, each with its own reason code.

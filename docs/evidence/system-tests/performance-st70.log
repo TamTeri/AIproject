@@ -1,0 +1,6 @@
+performance: 120 purchase requests from 20 buyers; median 0.203s, p95 0.355s, max 0.460s (target p95 <= 1.00s)
+1 passed in 7.86s
+performance: 120 purchase requests from 20 buyers; median 0.191s, p95 0.292s, max 0.403s (target p95 <= 1.00s)
+1 passed in 7.95s
+performance: 120 purchase requests from 20 buyers; median 0.192s, p95 0.305s, max 0.420s (target p95 <= 1.00s)
+1 passed in 7.80s

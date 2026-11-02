@@ -11,6 +11,13 @@
   <input id="email" name="email" type="email" autocomplete="username" value="{{ form.email or '' }}" required>
   <label for="password">Password (at least 8 characters)</label>
   <input id="password" name="password" type="password" autocomplete="new-password" minlength="8" required>
+  {% if currencies %}
+  <label for="home-currency">Home currency</label>
+  <select id="home-currency" name="currency" aria-describedby="home-currency-help">
+    {% for code in currencies %}<option value="{{ code }}" {% if code == (form.currency or 'USD') %}selected{% endif %}>{{ code }}</option>{% endfor %}
+  </select>
+  <p class="muted hint" id="home-currency-help">Preselected at checkout and used for Quick Buy. You can change it any time on your Account page.</p>
+  {% endif %}
   <button type="submit">Create account</button>
 </form>
 <p class="muted">Anyone, anywhere can register. Use your @usf.edu email to get the student discount.</p>

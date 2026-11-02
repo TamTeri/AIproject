@@ -26,6 +26,7 @@ from app.identity.service import (
     IdentityService,
     InvalidCredentials,
     RegistrationValidationError,
+    WrongCurrentPassword,
 )
 from app.identity.sessions import SessionService
 from app.inventory.postgres import PostgresInventory
@@ -33,13 +34,16 @@ from app.orders.postgres import PostgresOrderReader, PostgresOrderWriter
 from app.orders.service import OrderHistoryService
 from app.pricing.calculator import format_minor, format_rate
 from app.pricing.config import PricingPolicy, PricingUnavailable, temporary_local_policy
+from app.pricing.eligibility import EventFacts, IdentityFacts, evaluate_student_eligibility
 from app.pricing.postgres import PostgresPricingRepository
 from app.pricing.service import QuoteService
 from app.purchase.models import PaymentRequest, PurchasePolicy, PurchaseRequest
 from app.purchase.postgres import (
     PostgresClock,
+    PostgresIdempotency,
     PostgresPurchasableEvents,
     PostgresPurchaseLimits,
+    PostgresRequestRate,
     SessionBuyer,
     SimulatedPayments,
 )
@@ -59,12 +63,19 @@ class IdentityAdapter:
     def _service(self, tx) -> IdentityService:
         return IdentityService(account_repository=PostgresAccountRepository(tx))
 
-    def register(self, *, name: str, email: str, password: str):
+    def register(self, *, name: str, email: str, password: str, currency: str | None = None):
+        """identity-001/002, identity-015: optional home currency chosen at registration."""
+        code = (currency or "").strip().upper()
         try:
             with unit_of_work(self._db) as tx:
-                return self._service(tx).register(
+                if code and code not in {c.code for c in PostgresPricingRepository().enabled_currencies(tx)}:
+                    raise ServiceError("unsupported-currency", "That currency is not supported.", 400)
+                account = self._service(tx).register(
                     RegisterInput(name=name, email=email, password=password), now=_now()
                 )
+                if code:
+                    PostgresAccountRepository(tx).set_preferred_currency(account.account_id, code)
+                return account
         except RegistrationValidationError as exc:
             raise ServiceError("invalid-registration", _sentence(str(exc)), 400) from exc
         except EmailAlreadyRegistered as exc:
@@ -97,6 +108,20 @@ class IdentityAdapter:
             SessionService(repository=PostgresSessionRepository(tx), policy=self._session_policy).end(
                 token, now=_now()
             )
+
+    def change_email(self, *, account_id: str, new_email: str, current_password: str) -> Principal:
+        """identity-014 (Call 5)."""
+        try:
+            with unit_of_work(self._db) as tx:
+                return self._service(tx).change_email(
+                    account_id=account_id, new_email=new_email, current_password=current_password
+                )
+        except WrongCurrentPassword as exc:
+            raise ServiceError("wrong-password", "Your current password is not correct.", 400) from exc
+        except RegistrationValidationError as exc:
+            raise ServiceError("invalid-email", _sentence(str(exc)), 400) from exc
+        except EmailAlreadyRegistered as exc:
+            raise ServiceError("email-taken", "That email is already used by another account.", 409) from exc
 
     def set_preferred_currency(self, *, account_id: str, currency: str) -> None:
         code = (currency or "").strip().upper()
@@ -139,6 +164,13 @@ class PricingAdapter:
     def eligibility_domain(self) -> str:
         return self._policy.eligibility_domain
 
+    def student_discount_applies(self, *, email: str) -> bool:
+        """Shown on the Account page: the discount follows the current email (pricing-011)."""
+        decision = evaluate_student_eligibility(
+            IdentityFacts(email=email or ""), EventFacts(event_id="account-page"), self._policy
+        )
+        return decision.eligible
+
 
 @dataclass
 class HoldView:
@@ -154,6 +186,7 @@ class HoldView:
     exchange_rate: str
     expires_at: datetime
     status: str
+    list_price: str = ""  # orders-006: the USD ticket price, shown as a reference only
 
 
 class CheckoutAdapter:
@@ -167,10 +200,10 @@ class CheckoutAdapter:
         self._purchase_policy = purchase_policy
         self._inventory = PostgresInventory()
 
-    def _coordinator(self, buyer_id: str) -> PurchaseCoordinator:
+    def _coordinator(self, buyer_id: str | None) -> PurchaseCoordinator:
         return PurchaseCoordinator(
             transactions=SqlTransactionProvider(self._db),
-            identity=SessionBuyer(buyer_id),
+            identity=SessionBuyer(buyer_id or ""),
             database_time=PostgresClock(),
             quotes=self._quotes,
             inventory=self._inventory,
@@ -180,11 +213,29 @@ class CheckoutAdapter:
             events=PostgresPurchasableEvents(),
             limits=PostgresPurchaseLimits(),
             policy=self._purchase_policy,
+            idempotency=PostgresIdempotency(),
+            request_rate=PostgresRequestRate(),
         )
 
-    def start(self, *, buyer_id: str, event_id: str, quantity: Any, currency: Any):
+    def start(
+        self,
+        *,
+        buyer_id: str,
+        event_id: str,
+        quantity: Any,
+        currency: Any,
+        idempotency_key: str | None = None,
+    ):
         return self._coordinator(buyer_id).start_checkout(
-            PurchaseRequest(event_id=str(event_id), quantity=quantity, currency=currency)
+            PurchaseRequest(
+                event_id=str(event_id), quantity=quantity, currency=currency, idempotency_key=idempotency_key
+            )
+        )
+
+    def record_unauthenticated(self, *, event_id: str | None, quantity: Any = None, currency: Any = None):
+        """purchase-016: someone not logged in tried to buy; record it, create nothing."""
+        return self._coordinator(None).reject_unauthenticated(
+            PurchaseRequest(event_id=str(event_id or ""), quantity=quantity, currency=currency)
         )
 
     def review(self, *, buyer_id: str, hold_id: str) -> HoldView | None:
@@ -209,19 +260,29 @@ class CheckoutAdapter:
             exchange_rate=format_rate(q.exchange_rate),
             expires_at=hold.expires_at,
             status=str(hold.status),
+            list_price=format_minor(q.unit_price_minor, "USD", 2) if q.unit_price_minor is not None else "",
         )
 
-    def pay(self, *, buyer_id: str, hold_id: str, payment_choice: str):
+    def pay(self, *, buyer_id: str, hold_id: str, payment_choice: str, idempotency_key: str | None = None):
         choice = "decline" if payment_choice == "decline" else "approve"
-        return self._coordinator(buyer_id).pay(PaymentRequest(hold_id=str(hold_id), payment_choice=choice))
+        return self._coordinator(buyer_id).pay(
+            PaymentRequest(hold_id=str(hold_id), payment_choice=choice, idempotency_key=idempotency_key)
+        )
 
     def cancel(self, *, buyer_id: str, hold_id: str):
         return self._coordinator(buyer_id).cancel(str(hold_id))
 
-    def quick_buy(self, *, buyer_id: str, event_id: str, currency: str | None):
+    def quick_buy(
+        self, *, buyer_id: str, event_id: str, currency: str | None, idempotency_key: str | None = None
+    ):
         """catalog-008: one ticket, buyer's saved currency, standard purchase path."""
         return self._coordinator(buyer_id).purchase(
-            PurchaseRequest(event_id=str(event_id), quantity=1, currency=currency or "USD")
+            PurchaseRequest(
+                event_id=str(event_id),
+                quantity=1,
+                currency=currency or "USD",
+                idempotency_key=idempotency_key,
+            )
         )
 
 

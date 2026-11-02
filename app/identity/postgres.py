@@ -68,6 +68,18 @@ class PostgresAccountRepository:
             raise DuplicateEmailError(normalized_email) from exc
         return _record(row)
 
+    def update_email(self, account_id: str, normalized_email: str) -> None:
+        savepoint = self._tx.connection.begin_nested()
+        try:
+            self._tx.execute(
+                "UPDATE accounts SET normalized_email = :email WHERE id = :id",
+                {"email": normalized_email, "id": db_id(account_id)},
+            )
+            savepoint.commit()
+        except IntegrityError as exc:
+            savepoint.rollback()
+            raise DuplicateEmailError(normalized_email) from exc
+
     def set_preferred_currency(self, account_id: str, currency: str) -> None:
         self._tx.execute(
             "UPDATE accounts SET preferred_currency = :currency WHERE id = :id",

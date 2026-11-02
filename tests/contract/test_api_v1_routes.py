@@ -72,6 +72,13 @@ class IdentityFake:
         if currency not in {"USD", "EUR"}:
             raise ServiceError("unsupported-currency", "That currency is not supported.", 400)
 
+    def change_email(self, *, account_id, new_email, current_password):
+        if current_password != "right-password":
+            raise ServiceError("wrong-password", "Your current password is not correct.", 400)
+        if new_email == "taken@example.com":
+            raise ServiceError("email-taken", "That email is already used by another account.", 409)
+        self.changed = (account_id, new_email)
+
 
 class PricingFake:
     def currencies(self):
@@ -80,16 +87,28 @@ class PricingFake:
     def base_price_display(self, *, base_price_minor):
         return f"{base_price_minor / 100:.2f} USD"
 
+    def student_discount_applies(self, *, email):
+        return email.endswith("@usf.edu")
+
 
 @dataclass
 class CheckoutFake:
     start_outcome: str = "hold_created"
     pay_outcome: str = "success"
+    available: int | None = None
+    replayed: bool = False
     calls: list[tuple] = field(default_factory=list)
+    unauthenticated: list[dict] = field(default_factory=list)
 
     def start(self, **kwargs):
         self.calls.append(("start", kwargs))
-        return SimpleNamespace(outcome=self.start_outcome, hold=SimpleNamespace(id="hold-1"))
+        return SimpleNamespace(
+            outcome=self.start_outcome, hold=SimpleNamespace(id="hold-1"), available=self.available
+        )
+
+    def record_unauthenticated(self, **kwargs):
+        self.unauthenticated.append(kwargs)
+        return SimpleNamespace(outcome="not_authenticated")
 
     def review(self, *, buyer_id, hold_id):
         if hold_id != "hold-1" or buyer_id != "buyer-1":
@@ -107,11 +126,14 @@ class CheckoutFake:
             exchange_rate="0.92",
             expires_at="2026-11-01 12:10",
             status="active",
+            list_price="25.00 USD",
         )
 
     def pay(self, **kwargs):
         self.calls.append(("pay", kwargs))
-        return SimpleNamespace(outcome=self.pay_outcome, order=SimpleNamespace(id="order-9"))
+        return SimpleNamespace(
+            outcome=self.pay_outcome, order=SimpleNamespace(id="order-9"), replayed=self.replayed
+        )
 
     def cancel(self, **kwargs):
         self.calls.append(("cancel", kwargs))
@@ -145,6 +167,7 @@ class OrdersFake:
             discount_applied=True,
             total="41.40 EUR",
             created_at="today",
+            list_price="25.00 USD",
         )
 
 
@@ -228,7 +251,8 @@ def test_catalog_search_escapes_query_and_event_detail_has_one_explicit_quick_bu
     detail = client.get("/events/event-1")
     assert detail.status_code == 200
     detail_body = detail.get_data(as_text=True)
-    assert detail_body.count(">Quick Buy<") == 1
+    # catalog-012 (Call 5): the button says which currency Quick Buy will use.
+    assert len(re.findall(r">Quick Buy 1 ticket in [A-Z]{3}<", detail_body)) == 1
     assert "ondblclick" not in detail_body
     assert "12</strong> tickets left" in detail_body  # catalog-007 availability
     assert "25.00 USD per ticket" in detail_body
@@ -341,7 +365,10 @@ def test_unauthenticated_checkout_post_creates_nothing(client, services):
     )
     assert response.status_code == 302
     assert response.location == "/login?next=/events/event-1"
-    assert services.checkout.calls == []
+    assert services.checkout.calls == []  # identity-009: nothing created
+    # purchase-016 (Call 5): but the attempt is recorded, and the login page says why.
+    assert services.checkout.unauthenticated == [{"event_id": "event-1", "quantity": "1", "currency": "USD"}]
+    assert "Please log in to buy tickets" in client.get(response.location).get_data(as_text=True)
 
 
 def test_other_buyers_order_is_not_found(client):
@@ -355,7 +382,8 @@ def test_other_buyers_order_is_not_found(client):
 def test_checkout_review_pay_and_confirmation(client, services):
     token = login_as(client)
     start = client.post(
-        "/events/event-1/checkout", data={"csrf_token": token, "quantity": "2", "currency": "EUR"}
+        "/events/event-1/checkout",
+        data={"csrf_token": token, "quantity": "2", "currency": "EUR", "idempotency_key": "k" * 32},
     )
     assert start.location == "/checkout/hold-1"
     assert services.checkout.calls[0][1] == {
@@ -363,6 +391,7 @@ def test_checkout_review_pay_and_confirmation(client, services):
         "event_id": "event-1",
         "quantity": "2",
         "currency": "EUR",
+        "idempotency_key": "k" * 32,  # purchase-014: the form's one-time key is passed on
     }
 
     review = client.get("/checkout/hold-1").get_data(as_text=True)
@@ -381,9 +410,14 @@ def test_checkout_review_pay_and_confirmation(client, services):
     ("outcome", "status", "message"),
     [
         ("invalid_quantity", 400, "whole number"),
+        ("quantity_zero", 400, "Choose at least 1 ticket"),
+        ("quantity_negative", 400, "cannot be negative"),
         ("unsupported_currency", 400, "currency is not supported"),
-        ("sold_out", 409, "not enough tickets"),
+        ("sold_out", 409, "this event is sold out"),
         ("limit_exceeded", 409, "ticket limit"),
+        ("sales_closed", 409, "sales have closed"),
+        ("rate_limited", 429, "wait a minute"),
+        ("idempotency_key_required", 400, "Reload the page"),
     ],
 )
 def test_checkout_rejections_show_specific_messages(client, services, outcome, status, message):
@@ -411,7 +445,10 @@ def test_quick_buy_uses_saved_currency_and_standard_path(client, services):
     response = client.post("/events/event-1/quick-buy", data={"csrf_token": token})
     assert response.location == "/orders/order-9?confirmed=1"
     assert services.checkout.calls == [
-        ("quick_buy", {"buyer_id": "buyer-1", "event_id": "event-1", "currency": "EUR"})
+        (
+            "quick_buy",
+            {"buyer_id": "buyer-1", "event_id": "event-1", "currency": "EUR", "idempotency_key": None},
+        )
     ]
 
 
@@ -494,3 +531,138 @@ def test_dates_are_shown_in_readable_form():
     assert format_when(moment, "time") == "7:05 PM"
     assert format_when(None) == ""
     assert format_when("already text") == "already text"
+
+
+# ------------------------------------------------------------------ Call 5
+
+
+def test_not_enough_tickets_says_how_many_are_left(client, services):
+    """purchase-017: "only N left" is a different message from "sold out"."""
+    services.checkout.start_outcome = "not_enough_tickets"
+    services.checkout.available = 3
+    token = login_as(client)
+    response = client.post(
+        "/events/event-1/checkout", data={"csrf_token": token, "quantity": "4", "currency": "EUR"}
+    )
+    assert response.status_code == 409
+    assert "Only 3 tickets left for this event. Choose 3 or fewer." in response.get_data(as_text=True)
+
+
+def test_every_purchase_form_carries_a_fresh_one_time_key(client):
+    """purchase-014: each purchase form shown gets its own key; pages are never cached."""
+    login_as(client)
+    first = client.get("/events/event-1")
+    second = client.get("/events/event-1").get_data(as_text=True)
+    keys = re.findall(r'name="idempotency_key" value="([^"]+)"', first.get_data(as_text=True))
+    assert len(keys) == 2 and len(set(keys)) == 2  # checkout form + Quick Buy form
+    assert not set(keys) & set(re.findall(r'name="idempotency_key" value="([^"]+)"', second))
+    assert first.headers["Cache-Control"] == "no-store"
+    review = client.get("/checkout/hold-1").get_data(as_text=True)
+    assert 'name="idempotency_key"' in review
+
+
+def test_a_replayed_payment_lands_on_the_same_order_with_a_note(client, services):
+    """purchase-014: the second submission shows the first result and says so."""
+    services.checkout.replayed = True
+    token = login_as(client)
+    paid = client.post("/checkout/hold-1/pay", data={"csrf_token": token, "idempotency_key": "k" * 32})
+    assert paid.location == "/orders/order-9?confirmed=1"
+    assert "processed it only once" in client.get(paid.location).get_data(as_text=True)
+
+
+def test_checkout_and_confirmation_label_the_amount_charged(client):
+    """orders-006: one labelled amount charged; the USD price is a reference only."""
+    login_as(client)
+    for path in ("/checkout/hold-1", "/orders/order-9"):
+        body = client.get(path).get_data(as_text=True)
+        assert 'id="amount-charged" class="amount">41.40 EUR<' in body, path
+        assert "charged to your card" in body
+        assert "25.00 USD each" in body and "not charged" in body
+
+
+def test_event_page_says_where_the_preselected_currency_comes_from(client):
+    """catalog-012: the preselected currency is the saved home currency, with a link to change it."""
+    login_as(client)
+    body = client.get("/events/event-1").get_data(as_text=True)
+    assert '<option value="EUR" selected>' in body
+    assert "your saved home currency" in body and 'href="/account"' in body
+    assert "Quick Buy 1 ticket in EUR" in body
+
+
+def test_register_offers_a_home_currency(client, services):
+    """identity-015: registration lets the person pick a home currency and explains it."""
+    page = client.get("/register").get_data(as_text=True)
+    assert 'id="home-currency"' in page and "used for Quick Buy" in page
+
+
+def test_events_that_have_started_show_sales_closed_and_no_buy_forms(client, services):
+    """purchase-018: no purchase forms for an event that already started."""
+    services.catalog.events[0]["sales_closed"] = True
+    login_as(client)
+    body = client.get("/events/event-1").get_data(as_text=True)
+    assert "Ticket sales have closed" in body
+    assert "/checkout" not in body and "quick-buy" not in body
+    listing = client.get("/events").get_data(as_text=True)
+    assert "Sales closed" in listing and "quick-buy" not in listing
+
+
+def test_account_email_change_needs_the_password(client, services):
+    """identity-014: wrong password and taken email are refused; success says discounts follow."""
+    token = login_as(client)
+    wrong = client.post(
+        "/account/email",
+        data={"csrf_token": token, "new_email": "new@example.com", "current_password": "nope"},
+    )
+    assert wrong.status_code == 400 and "current password is not correct" in wrong.get_data(as_text=True)
+    taken = client.post(
+        "/account/email",
+        data={"csrf_token": token, "new_email": "taken@example.com", "current_password": "right-password"},
+    )
+    assert taken.status_code == 409
+    done = client.post(
+        "/account/email",
+        data={"csrf_token": token, "new_email": "new@example.com", "current_password": "right-password"},
+    )
+    assert done.location == "/account"
+    assert services.identity.changed == ("buyer-1", "new@example.com")
+    assert "discounts now follow your new email" in client.get("/account").get_data(as_text=True)
+
+
+def test_account_page_shows_whether_the_discount_applies(client):
+    """pricing-011: the account page tells the buyer if their current email gets the discount."""
+    login_as(client)
+    body = client.get("/account").get_data(as_text=True)
+    assert "Yes: your current email is a USF address." in body
+
+
+def test_not_logged_in_purchase_still_redirects_if_recording_fails(client, services):
+    """purchase-016: the audit write is best effort; the visitor always reaches login."""
+
+    def broken(**_):
+        raise RuntimeError("database unavailable")
+
+    services.checkout.record_unauthenticated = broken
+    login_as(client, token="none")
+    response = client.post("/events/event-1/checkout", data={"csrf_token": "csrf-test", "quantity": "1"})
+    assert response.status_code == 302 and response.location.startswith("/login")
+
+
+def test_not_logged_in_attempts_are_recorded_at_most_once_per_session_every_few_seconds(client, services):
+    """purchase-016: a script cannot flood the audit log from one session."""
+    login_as(client, token="none")
+    for _ in range(5):
+        client.post("/events/event-1/quick-buy", data={"csrf_token": "csrf-test"})
+    assert len(services.checkout.unauthenticated) == 1
+
+
+def test_five_wrong_passwords_on_email_change_end_the_session(client, services):
+    """identity-014: a stolen session cannot be used to guess the password."""
+    token = login_as(client)
+    for _ in range(5):
+        response = client.post(
+            "/account/email",
+            data={"csrf_token": token, "new_email": "x@example.com", "current_password": "guess"},
+        )
+    assert response.location == "/login"
+    assert services.identity.ended == ["buyer-token"]
+    assert "you have been logged out" in client.get("/login").get_data(as_text=True)

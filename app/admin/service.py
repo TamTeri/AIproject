@@ -101,7 +101,9 @@ class AdminService:
 
     def audit_page(self, actor: Principal | None, *, before_id: str | None = None) -> AuditPage:
         _require_admin(actor)
-        if before_id is not None and (not str(before_id).isdigit() or len(str(before_id)) > 18):
+        if before_id is not None and (
+            not (str(before_id).isascii() and str(before_id).isdigit()) or len(str(before_id)) > 18
+        ):
             before_id = None
         rows = self._repository.list_attempts(limit=AUDIT_PAGE_SIZE + 1, before_id=before_id)
         more = len(rows) > AUDIT_PAGE_SIZE

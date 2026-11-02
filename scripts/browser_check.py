@@ -1,5 +1,9 @@
 """Real-browser check of a running EventHub (Google Chrome via Playwright).
 
+Part 4 evidence, kept for the record. Since Part 5 the official system tests are
+the Selenium suite in tests/system (python scripts/run_system_tests.py); some
+messages this script expects were reworded by Call 5 (for example "Only 2 tickets left").
+
 Optional: needs Chrome and `pip install playwright`. It RESETS the database in
 DATABASE_URL (local/dev only), seeds it, creates an admin, then clicks through
 15 scenarios. Start the server first in another terminal:

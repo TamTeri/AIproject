@@ -56,6 +56,26 @@ class QuoteService:
     def supported_currencies(self, tx: Any) -> set[str]:
         return {c.code for c in self._repository.enabled_currencies(tx)}
 
+    def discount_still_applies(self, *, tx: Any, buyer_id: str, quote: QuoteSnapshot) -> bool:
+        """pricing-011 (Call 5): re-check eligibility from the account's *current*
+        email when the buyer pays, because the email may have changed since the
+        quote was frozen on the hold."""
+        email = self._repository.buyer_email(tx, buyer_id)
+        event = self._repository.event_price(tx, quote.event_id)
+        if email is None or event is None:
+            return False
+        return self._eligibility(
+            email=email, buyer_id=buyer_id, event_id=quote.event_id, event=event
+        ).eligible
+
+    def _eligibility(self, *, email: str, buyer_id: str, event_id: str, event: EventPrice):
+        """The one place the student-discount rule is applied (pricing-009, pricing-011)."""
+        return evaluate_student_eligibility(
+            IdentityFacts(email=email, identity_id=buyer_id),
+            EventFacts(event_id=event_id, classification=event.host_type),
+            self._policy,
+        )
+
     def quote(self, *, tx: Any, buyer_id: str, event_id: str, quantity: int, currency: str) -> QuoteSnapshot:
         email = self._repository.buyer_email(tx, buyer_id)
         event = self._repository.event_price(tx, event_id)
@@ -63,11 +83,7 @@ class QuoteService:
         if email is None or event is None or info is None:
             raise QuoteUnavailable("quote inputs are unavailable")
 
-        decision = evaluate_student_eligibility(
-            IdentityFacts(email=email, identity_id=buyer_id),
-            EventFacts(event_id=event_id, classification=event.host_type),
-            self._policy,
-        )
+        decision = self._eligibility(email=email, buyer_id=buyer_id, event_id=event_id, event=event)
         price = calculate_price(
             base_price_minor=event.base_price_minor,
             quantity=quantity,

@@ -1,4 +1,4 @@
-"""The single pricing function (pricing-001/002/003, ADR-005)."""
+"""The single pricing function (pricing-001, pricing-002, pricing-003, pricing-007, pricing-008; ADR-005)."""
 
 from __future__ import annotations
 

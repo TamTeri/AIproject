@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
+from datetime import datetime
 from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
     from app.inventory.models import Hold
-    from app.purchase.models import IdempotencyClaim, PaymentResult, PurchaseResult, QuoteSnapshot
+    from app.purchase.models import IdempotencyClaim, PaymentResult, QuoteSnapshot
 
 
 @runtime_checkable
@@ -55,11 +56,27 @@ class QuoteCurrenciesPort(Protocol):
     def supported_currencies(self, tx: PostgresTransactionContext) -> set[str]: ...
 
 
+class DiscountRecheckPort(Protocol):
+    """pricing-011: is the buyer still eligible for the discount frozen in this quote?"""
+
+    def discount_still_applies(
+        self, *, tx: PostgresTransactionContext, buyer_id: str, quote: QuoteSnapshot
+    ) -> bool: ...
+
+
 class PurchasableEventPort(Protocol):
     """Locks the event row (SELECT ... FOR UPDATE) so limit and capacity checks
     for one event run one at a time. False if the event is missing/inactive."""
 
     def lock_event(self, tx: PostgresTransactionContext, event_id: str) -> bool: ...
+
+    def event_exists(self, tx: PostgresTransactionContext, event_id: str) -> bool:
+        """Same check without a lock (used for not-logged-in attempts)."""
+        ...
+
+    def sales_closed(self, tx: PostgresTransactionContext, event_id: str, now: datetime) -> bool:
+        """purchase-018: True once the event has started."""
+        ...
 
 
 class PurchaseLimitPort(Protocol):
@@ -83,25 +100,29 @@ class PaymentPort(Protocol):
 
 
 class IdempotencyPort(Protocol):
-    """Optional local/demo seam; durable PostgreSQL storage is a later schema task."""
+    """purchase-014: one-time form keys, stored in ``idempotency_records``.
+
+    ``claim`` inserts the key inside the purchase transaction. A second request
+    with the same key waits for the first transaction, then sees its stored
+    result (REPLAY) or a different request hash (CONFLICT).
+    """
 
     def claim(
-        self,
-        *,
-        tx: PostgresTransactionContext,
-        buyer_id: str,
-        operation: str,
-        key: str,
-        request_hash: str,
+        self, *, tx: PostgresTransactionContext, buyer_id: str, key: str, request_hash: str
     ) -> IdempotencyClaim: ...
 
     def complete(
-        self,
-        *,
-        tx: PostgresTransactionContext,
-        buyer_id: str,
-        operation: str,
-        key: str,
-        request_hash: str,
-        result: PurchaseResult,
+        self, *, tx: PostgresTransactionContext, buyer_id: str, key: str, payload: Mapping[str, object]
     ) -> None: ...
+
+    def release(self, *, tx: PostgresTransactionContext, buyer_id: str, key: str) -> None:
+        """Forget a key this request claimed but did not use (it was over the request limit)."""
+        ...
+
+
+class RequestRatePort(Protocol):
+    """purchase-015: count this request in the buyer's current window; return the count."""
+
+    def count_request(
+        self, *, tx: PostgresTransactionContext, buyer_id: str, now: datetime, window_seconds: int
+    ) -> int: ...

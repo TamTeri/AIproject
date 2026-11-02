@@ -25,3 +25,7 @@ class AccountRepository(Protocol):
         password_hash: str,
         created_at: datetime,
     ) -> AccountRecord: ...
+
+    def update_email(self, account_id: str, normalized_email: str) -> None:
+        """identity-014. Raises DuplicateEmailError if the unique index wins a race."""
+        ...

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor
 from decimal import Decimal
+from uuid import uuid4
 
 import pytest
 from sqlalchemy import text
@@ -17,6 +18,11 @@ pytestmark = pytest.mark.postgres
 
 POETRY_SLAM = "6"  # seed: capacity 2
 DEMO_NIGHT = "1"  # seed: capacity 100, 25.00 USD
+
+
+def key() -> str:
+    """A fresh one-time form key, as every purchase form carries (purchase-014)."""
+    return uuid4().hex
 
 
 def scalar(database, sql: str, **params):
@@ -35,11 +41,15 @@ def make_buyers(services, count: int, domain: str = "example.com") -> list[str]:
 
 
 def test_concurrent_buyers_never_oversell_the_last_tickets(seeded_database):
+    """inventory-001, inventory-002, inventory-003, inventory-004: fixed capacity, one atomic
+    check-and-hold, no overselling."""
     services = build_services(seeded_database, environment="test")
     buyers = make_buyers(services, 10)
 
     def attempt(buyer_id: str):
-        return services.purchase.quick_buy(buyer_id=buyer_id, event_id=POETRY_SLAM, currency="USD").outcome
+        return services.purchase.quick_buy(
+            idempotency_key=key(), buyer_id=buyer_id, event_id=POETRY_SLAM, currency="USD"
+        ).outcome
 
     with ThreadPoolExecutor(max_workers=10) as pool:
         outcomes = list(pool.map(attempt, buyers))
@@ -61,7 +71,9 @@ def test_concurrent_requests_from_one_buyer_respect_the_limit(seeded_database):
         outcomes = list(
             pool.map(
                 lambda _: (
-                    services.purchase.quick_buy(buyer_id=buyer, event_id=DEMO_NIGHT, currency="USD").outcome
+                    services.purchase.quick_buy(
+                        idempotency_key=key(), buyer_id=buyer, event_id=DEMO_NIGHT, currency="USD"
+                    ).outcome
                 ),
                 range(8),
             )
@@ -75,14 +87,18 @@ def test_checkout_hold_then_pay_creates_order_with_snapshot(seeded_database):
     services = build_services(seeded_database, environment="test")
     (student,) = make_buyers(services, 1, domain="usf.edu")
 
-    started = services.checkout.start(buyer_id=student, event_id=DEMO_NIGHT, quantity="2", currency="EUR")
+    started = services.checkout.start(
+        idempotency_key=key(), buyer_id=student, event_id=DEMO_NIGHT, quantity="2", currency="EUR"
+    )
     assert started.outcome is PurchaseOutcome.HOLD_CREATED
     assert scalar(seeded_database, "SELECT held_quantity FROM event_availability WHERE event_id = 1") == 2
 
     review = services.checkout.review(buyer_id=student, hold_id=started.hold.id)
     assert (review.total, review.discount) == ("41.40 EUR", "4.60 EUR")
 
-    paid = services.checkout.pay(buyer_id=student, hold_id=started.hold.id, payment_choice="approve")
+    paid = services.checkout.pay(
+        idempotency_key=key(), buyer_id=student, hold_id=started.hold.id, payment_choice="approve"
+    )
     assert paid.outcome is PurchaseOutcome.SUCCESS
     assert scalar(seeded_database, "SELECT sold_quantity FROM event_availability WHERE event_id = 1") == 2
     assert scalar(seeded_database, "SELECT held_quantity FROM event_availability WHERE event_id = 1") == 0
@@ -96,17 +112,23 @@ def test_checkout_hold_then_pay_creates_order_with_snapshot(seeded_database):
 def test_rate_change_after_hold_does_not_change_the_price(seeded_database):
     services = build_services(seeded_database, environment="test")
     (buyer,) = make_buyers(services, 1)
-    started = services.checkout.start(buyer_id=buyer, event_id=DEMO_NIGHT, quantity="1", currency="EUR")
+    started = services.checkout.start(
+        idempotency_key=key(), buyer_id=buyer, event_id=DEMO_NIGHT, quantity="1", currency="EUR"
+    )
     with seeded_database.engine.begin() as connection:
         connection.execute(text("UPDATE exchange_rates SET rate = 2 WHERE currency_code = 'EUR'"))
-    paid = services.checkout.pay(buyer_id=buyer, hold_id=started.hold.id, payment_choice="approve")
+    paid = services.checkout.pay(
+        idempotency_key=key(), buyer_id=buyer, hold_id=started.hold.id, payment_choice="approve"
+    )
     assert paid.order.total_minor == 2300  # 25.00 x 0.92, frozen at hold time
 
 
 def test_expired_hold_is_released_and_cannot_be_paid(seeded_database):
     services = build_services(seeded_database, environment="test")
     (buyer,) = make_buyers(services, 1)
-    started = services.checkout.start(buyer_id=buyer, event_id=POETRY_SLAM, quantity="2", currency="USD")
+    started = services.checkout.start(
+        idempotency_key=key(), buyer_id=buyer, event_id=POETRY_SLAM, quantity="2", currency="USD"
+    )
     with seeded_database.engine.begin() as connection:
         connection.execute(
             text(
@@ -117,7 +139,9 @@ def test_expired_hold_is_released_and_cannot_be_paid(seeded_database):
         scalar(seeded_database, "SELECT available_quantity FROM event_availability WHERE event_id = 6") == 2
     )
 
-    paid = services.checkout.pay(buyer_id=buyer, hold_id=started.hold.id, payment_choice="approve")
+    paid = services.checkout.pay(
+        idempotency_key=key(), buyer_id=buyer, hold_id=started.hold.id, payment_choice="approve"
+    )
 
     assert paid.outcome is PurchaseOutcome.HOLD_EXPIRED
     assert scalar(seeded_database, "SELECT status FROM holds") == "expired"
@@ -127,9 +151,13 @@ def test_expired_hold_is_released_and_cannot_be_paid(seeded_database):
 def test_declined_payment_releases_hold_and_audits_failure(seeded_database):
     services = build_services(seeded_database, environment="test")
     (buyer,) = make_buyers(services, 1)
-    started = services.checkout.start(buyer_id=buyer, event_id=POETRY_SLAM, quantity="2", currency="USD")
+    started = services.checkout.start(
+        idempotency_key=key(), buyer_id=buyer, event_id=POETRY_SLAM, quantity="2", currency="USD"
+    )
 
-    paid = services.checkout.pay(buyer_id=buyer, hold_id=started.hold.id, payment_choice="decline")
+    paid = services.checkout.pay(
+        idempotency_key=key(), buyer_id=buyer, hold_id=started.hold.id, payment_choice="decline"
+    )
 
     assert paid.outcome is PurchaseOutcome.PAYMENT_FAILED
     assert scalar(seeded_database, "SELECT status FROM holds") == "payment_failed"
@@ -145,9 +173,15 @@ def test_declined_payment_releases_hold_and_audits_failure(seeded_database):
 def test_rejections_are_audited_with_raw_values(seeded_database):
     services = build_services(seeded_database, environment="test")
     (buyer,) = make_buyers(services, 1)
-    services.checkout.start(buyer_id=buyer, event_id=DEMO_NIGHT, quantity="-5", currency="USD")
-    services.checkout.start(buyer_id=buyer, event_id=DEMO_NIGHT, quantity="1", currency="XYZ")
-    services.checkout.start(buyer_id=buyer, event_id="999", quantity="1", currency="USD")
+    services.checkout.start(
+        idempotency_key=key(), buyer_id=buyer, event_id=DEMO_NIGHT, quantity="-5", currency="USD"
+    )
+    services.checkout.start(
+        idempotency_key=key(), buyer_id=buyer, event_id=DEMO_NIGHT, quantity="1", currency="XYZ"
+    )
+    services.checkout.start(
+        idempotency_key=key(), buyer_id=buyer, event_id="999", quantity="1", currency="USD"
+    )
     with seeded_database.engine.connect() as connection:
         rows = connection.execute(
             text(
@@ -155,7 +189,7 @@ def test_rejections_are_audited_with_raw_values(seeded_database):
             )
         ).all()
     assert [tuple(r) for r in rows] == [
-        ("invalid_quantity", None, "USD", 1),
+        ("quantity_negative", None, "USD", 1),  # purchase-017: its own reason (Call 5)
         ("unsupported_currency", 1, "XYZ", 1),
         ("event_not_found", 1, "USD", None),
     ]
@@ -164,7 +198,7 @@ def test_rejections_are_audited_with_raw_values(seeded_database):
 def test_audit_table_is_append_only(seeded_database):
     services = build_services(seeded_database, environment="test")
     (buyer,) = make_buyers(services, 1)
-    services.purchase.quick_buy(buyer_id=buyer, event_id=DEMO_NIGHT, currency="USD")
+    services.purchase.quick_buy(idempotency_key=key(), buyer_id=buyer, event_id=DEMO_NIGHT, currency="USD")
     for statement in ("UPDATE purchase_attempts SET outcome = 'failed'", "DELETE FROM purchase_attempts"):
         with pytest.raises(DBAPIError, match="append-only"):
             with seeded_database.engine.begin() as connection:
@@ -174,7 +208,9 @@ def test_audit_table_is_append_only(seeded_database):
 def test_buyers_only_see_their_own_orders(seeded_database):
     services = build_services(seeded_database, environment="test")
     alice, bob = make_buyers(services, 2)
-    order = services.purchase.quick_buy(buyer_id=alice, event_id=DEMO_NIGHT, currency="USD").order
+    order = services.purchase.quick_buy(
+        idempotency_key=key(), buyer_id=alice, event_id=DEMO_NIGHT, currency="USD"
+    ).order
     assert services.orders.get_for_buyer(buyer_id=alice, order_id=order.id) is not None
     assert services.orders.get_for_buyer(buyer_id=bob, order_id=order.id) is None
     assert services.orders.list_for_buyer(buyer_id=bob) == []
@@ -212,13 +248,16 @@ def test_admin_rate_update_is_validated_and_applies_to_new_quotes(seeded_databas
     with pytest.raises(ServiceError):
         services.admin.set_rate(actor=admin, currency="EUR", rate="0")
 
-    order = services.purchase.quick_buy(buyer_id=buyer, event_id=DEMO_NIGHT, currency="EUR").order
+    order = services.purchase.quick_buy(
+        idempotency_key=key(), buyer_id=buyer, event_id=DEMO_NIGHT, currency="EUR"
+    ).order
     assert order.total_minor == 1250
     page = services.admin.audit_page(actor=admin)
     assert page.rows[0].buyer_email == "buyer0@example.com"
 
 
 def test_production_environment_fails_closed_for_pricing(seeded_database):
+    """pricing-010: the placeholder discount never prices outside local/dev/test."""
     services = build_services(seeded_database, environment="development")
     assert services.pricing.currencies()  # local/dev works
     import os
@@ -229,5 +268,5 @@ def test_production_environment_fails_closed_for_pricing(seeded_database):
     finally:
         del os.environ["EVENTHUB_SESSION_IDLE_TIMEOUT_SECONDS"]
     with pytest.raises(ServiceError) as unavailable:
-        locked.purchase.quick_buy(buyer_id="1", event_id=DEMO_NIGHT, currency="USD")
+        locked.purchase.quick_buy(idempotency_key=key(), buyer_id="1", event_id=DEMO_NIGHT, currency="USD")
     assert unavailable.value.status_code == 503

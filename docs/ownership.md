@@ -33,7 +33,8 @@ The bootstrap implementer is the only writer for the shared foundation paths abo
 - discount, then conversion, then half-up final rounding;
 - ten-minute hold duration; database-time-at-mutation; PostgreSQL transaction/row-conditional allocation; no second inventory subtraction on conversion;
 - temporary four-ticket per-account/per-event limit;
-- buyer-scoped idempotency/hash/replay (acceptance remains blocked because the frozen target excludes it);
+- buyer-scoped idempotency/hash/replay. Call 5 made this a requirement (purchase-014); it is now used for every purchase form (ADR-007);
+- Call 5: 10 purchase requests per account per minute; sales close at the event's start; the 1-second p95 performance placeholder;
 - recommended validation precedence;
 - payment failure means no order, exactly-once release, and failure audit;
 - thirty-minute session timeout;

@@ -1,4 +1,4 @@
-"""Order history and confirmation view (orders-001..004, identity-010)."""
+"""Order history and confirmation view (orders-001, orders-002, orders-003, orders-004, orders-005, identity-010)."""
 
 from __future__ import annotations
 

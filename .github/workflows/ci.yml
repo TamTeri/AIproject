@@ -41,5 +41,7 @@ jobs:
       - name: Spec alignment (warning only)
         if: github.event_name == 'pull_request'
         run: python scripts/check_spec_alignment.py --base origin/${{ github.base_ref }}
+      - name: Every testable requirement is named by a test (Call 5)
+        run: python scripts/check_requirement_coverage.py --strict
       - name: All tests against real PostgreSQL
         run: python -m pytest -q

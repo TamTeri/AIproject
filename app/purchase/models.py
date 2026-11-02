@@ -29,6 +29,15 @@ class PurchaseOutcome(StrEnum):
     INTERNAL_ERROR = "internal_error"
     IDEMPOTENCY_KEY_REQUIRED = "idempotency_key_required"
     IDEMPOTENCY_CONFLICT = "idempotency_conflict"
+    # Call 5 (purchase-014..018, pricing-011, audit-008)
+    QUANTITY_ZERO = "quantity_zero"
+    QUANTITY_NEGATIVE = "quantity_negative"
+    NOT_ENOUGH_TICKETS = "not_enough_tickets"
+    SALES_CLOSED = "sales_closed"
+    RATE_LIMITED = "rate_limited"
+    NOT_AUTHENTICATED = "not_authenticated"
+    ELIGIBILITY_CHANGED = "eligibility_changed"
+    REPLAYED = "replayed"
 
 
 class AuditCategory(StrEnum):
@@ -46,6 +55,8 @@ _FAILED = {PurchaseOutcome.PAYMENT_FAILED, PurchaseOutcome.INTERNAL_ERROR}
 def audit_category(outcome: PurchaseOutcome) -> AuditCategory:
     if outcome is PurchaseOutcome.SUCCESS:
         return AuditCategory.SUCCESS
+    if outcome is PurchaseOutcome.REPLAYED:
+        return AuditCategory.REPLAYED
     if outcome in _FAILED:
         return AuditCategory.FAILED
     return AuditCategory.REJECTED
@@ -138,14 +149,19 @@ class CheckoutResult:
     hold: Hold | None
     quote: QuoteSnapshot | None
     audit: PurchaseAttemptAudit | None
+    available: int | None = None  # tickets left, for the not_enough_tickets message
+    replayed: bool = False  # purchase-014: a repeat of an earlier submission
 
 
 @dataclass(frozen=True, slots=True)
 class PurchasePolicy:
-    """[TEMPORARY_MVP_DEFAULT] purchase rules from seed/config.example.json."""
+    """[TEMPORARY_MVP_DEFAULT] purchase rules from seed/config.example.json and Call 5."""
 
     hold_minutes: int = 10
     per_account_event_limit: int = 4
+    # purchase-015 (Kenji's finding 2): requests per account per window.
+    rate_limit_requests: int = 10
+    rate_limit_window_seconds: int = 60
 
 
 @dataclass(frozen=True, slots=True)
@@ -156,6 +172,15 @@ class PurchaseResult:
     hold: Hold | None
     order: OrderSnapshot | None
     audit: PurchaseAttemptAudit
+    available: int | None = None
+    replayed: bool = False
+
+
+@dataclass(frozen=True, slots=True)
+class RecordRef:
+    """Just the id of a hold or order, returned when a submission is replayed."""
+
+    id: str
 
 
 class IdempotencyDecision(StrEnum):
@@ -166,5 +191,11 @@ class IdempotencyDecision(StrEnum):
 
 @dataclass(frozen=True, slots=True)
 class IdempotencyClaim:
+    """Result of claiming a one-time form key (purchase-014).
+
+    NEW: first use, go ahead. REPLAY: already processed, ``payload`` holds the
+    first result. CONFLICT: the key was used for a different request.
+    """
+
     decision: IdempotencyDecision
-    result: PurchaseResult | None = None
+    payload: dict[str, object] | None = None

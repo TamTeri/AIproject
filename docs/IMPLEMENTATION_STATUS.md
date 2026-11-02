@@ -2,8 +2,8 @@
 
 **Status:** every version-one feature is built and tested. Policy values the customer has not confirmed run as labelled temporary defaults, which work in local, development and test environments only.
 
-**Branch:** `eventhub/part4` (based on `main` @ `7ebc3a7`)
-**Tests:** 216 passing against PostgreSQL. Without a database, 195 pass and 21 skip.
+**Branch:** `eventhub/part5` (based on `main` @ `5a98b90`, the merged Part 4)
+**Tests:** 286 passing against PostgreSQL (without a database, the PostgreSQL ones skip), plus **87 Selenium system test runs** passing against the final application (`python scripts/run_system_tests.py`).
 
 ## Built and tested
 
@@ -34,10 +34,27 @@
 - The organizational-account exception to the purchase limit (purchase-010).
 - Administrator provisioning lifecycle (ADR-004).
 - Audit retention and who besides administrators may read the audit log.
-- Production session policy, load and performance targets, and production deployment.
-- Idempotent retry of payments. The `idempotency_records` table exists but is not used, because the frozen requirements exclude it.
+- Production session policy and production deployment.
+- Call 5 placeholders the customer must confirm: the double-purchase behaviour (purchase-014), 10 purchase requests per minute (purchase-015), sales closing at the start time (purchase-018), and the performance sentence (system-013, Marcus).
+- Proof of USF email ownership for the discount (pricing-012).
 
 ## Not done here
 
 - `diagrams/*.png` were exported before Call 4. `workspace.dsl` now has a `Component_PostCall4` view. Re-export the PNGs from Structurizr to include it.
-- Browser tests are not part of CI. `scripts/browser_check.py` drives Chrome through 15 scenarios, including single click and double click, and passed on the final code. It is run by hand because it needs Chrome and Playwright.
+- The Call 5 views (`diagrams/structurizr-1-Container_PostCall5.png`, `...Component_PostCall5.png`) were rendered from Structurizr's Mermaid export (`diagrams/call5-export/`), so their layout differs from the earlier Structurizr Lite PNGs. Re-export them from Structurizr Lite for a matching look.
+
+## Added in Part 5 (Call 5: testing)
+
+| What | Code | Tests |
+|---|---|---|
+| Selenium system tests: one command, double-click file, CI on every change and a Run button, HTML report with failure screenshots | `tests/system/`, `scripts/run_system_tests.py`, `run-system-tests.cmd`, `.github/workflows/system-tests.yml` | 57 cases / 87 runs |
+| Same form submitted twice: processed once (purchase-014) | `app/purchase/service.py`, `PostgresIdempotency` | ST-30..35, `test_call5_rules.py`, 5-thread PostgreSQL test |
+| 10 purchase requests per account per minute (purchase-015) | `PostgresRequestRate`, migration `0006` | ST-36, ST-37, unit, PostgreSQL |
+| Discount re-checked at payment; email change (pricing-011, identity-014) | `QuoteService.discount_still_applies`, `IdentityService.change_email` | ST-38..40, unit, PostgreSQL |
+| Labelled amount charged (orders-006); home currency explained (identity-015, catalog-012) | templates | ST-41..43, contract |
+| Specific rejection messages; logged-out attempts audited (purchase-016/017, audit-008) | `classify_quantity`, `OUTCOME_MESSAGES` | ST-11..23, unit, contract |
+| No sales after the event starts (purchase-018) | `PostgresPurchasableEvents.sales_closed` | ST-44, ST-69, unit, PostgreSQL |
+| ASCII-only number parsing: "²" no longer crashes the server | `db_id`, catalog, orders, admin, `classify_quantity` | ST-20, ST-21, ST-23 |
+| Last-ticket race 200 times (inventory-009) | — | `test_call5_postgres.py` |
+| Performance target (system-013, temporary) | — | ST-70 |
+| Every requirement named by a test; catalogue generated from the tests | `scripts/check_requirement_coverage.py`, `scripts/list_system_tests.py` | `tests/test_project_process.py`, CI |

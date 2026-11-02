@@ -30,6 +30,7 @@ class OrderView:
     discount_applied: bool
     total: str
     created_at: datetime
+    list_price: str = ""  # orders-006: the USD ticket price, shown as a reference only
 
 
 class OrderReadRepository(Protocol):
@@ -60,6 +61,11 @@ def to_view(row: dict) -> OrderView:
         discount_applied=discount > 0,
         total=format_minor(total, currency, exponent),
         created_at=row["created_at"],
+        list_price=(
+            format_minor(int(snapshot["unit_price_minor"]), "USD", 2)
+            if snapshot.get("unit_price_minor") is not None
+            else ""
+        ),
     )
 
 
@@ -73,7 +79,7 @@ class OrderHistoryService:
 
     def get_for_buyer(self, *, buyer_id: str, order_id: str) -> OrderView | None:
         order_id = str(order_id or "").strip()
-        if not order_id.isdigit() or len(order_id) > 18:
+        if not (order_id.isascii() and order_id.isdigit()) or len(order_id) > 18:
             return None
         row = self._repository.get_for_buyer(buyer_id, order_id)
         return to_view(row) if row else None

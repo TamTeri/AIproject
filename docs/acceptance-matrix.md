@@ -36,3 +36,26 @@
 | system-007 no native app, no seat map | (nothing built) | PASS |
 | system-009/010/011 CI, pre-commit, definition of done | `.github/workflows/ci.yml`, `.pre-commit-config.yaml`, `CONTRIBUTING.md` | PASS |
 | system-012 standalone modules, main program includes all | `tests/test_main_program.py`, ADR-006 | PASS |
+
+## Call 5 additions
+
+`ST-nn` are Selenium system tests in `tests/system/` (see `docs/testing/system-test-catalogue.md`).
+
+| Requirement | Proof | Status |
+|---|---|---|
+| purchase-014 same form submitted twice | ST-30..35; unit `test_call5_rules.py`; PostgreSQL 5-thread same-key test | PASS (temporary: customer to confirm) |
+| purchase-015 request limit | ST-36, ST-37; unit; PostgreSQL concurrent counter | PASS (temporary: 10 per 60 s) |
+| purchase-016 logged-out purchase | ST-11, ST-17; contract; PostgreSQL | PASS |
+| purchase-017 specific messages | ST-11, ST-13, ST-22; unit `classify_quantity`; contract | PASS |
+| purchase-018 sales close at start | ST-44, ST-69; unit; PostgreSQL | PASS (temporary cut-off) |
+| pricing-011 discount re-checked at payment | ST-38, ST-39; unit; PostgreSQL | PASS |
+| pricing-012 email ownership verification | — | OPEN |
+| identity-014 email change | ST-40; unit; contract | PASS |
+| identity-015 home currency at registration | ST-42; contract; PostgreSQL | PASS |
+| orders-006 labelled amount charged | ST-41; contract | PASS |
+| catalog-012 currency source shown | ST-42, ST-43; contract | PASS |
+| inventory-009 last-ticket race | `test_last_ticket_race_repeated_200_times`, ST-65 | PASS |
+| audit-008 new reason codes | ST-11, ST-30, ST-36, ST-44 | PASS |
+| system-013 performance | ST-70 (p95 ≈ 0.3 s, target 1 s) | PASS (temporary target) |
+| system-014 system tests at a button | `tests/test_project_process.py`, the suite itself | PASS |
+| system-015 tests trace to requirements | collection check in `tests/system/conftest.py`; `check_requirement_coverage.py` in CI | PASS |

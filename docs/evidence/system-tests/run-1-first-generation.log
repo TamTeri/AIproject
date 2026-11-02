@@ -1,0 +1,589 @@
+Running: D:\AIproject\.venv\Scripts\python.exe -m pytest tests/system -m system -v --html=D:\AIproject\reports\system-tests.html --self-contained-html --junitxml=D:\AIproject\reports\system-tests.xml --tb=line -p no:randomly
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-9.2.0, pluggy-1.7.0 -- D:\AIproject\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+metadata: {'Python': '3.12.10', 'Platform': 'Windows-11-10.0.26200-SP0', 'Packages': {'pytest': '9.2.0', 'pluggy': '1.7.0'}, 'Plugins': {'platformdirs': '4.14.3', 'html': '4.2.0', 'metadata': '3.1.1'}}
+rootdir: D:\AIproject
+configfile: pyproject.toml
+plugins: platformdirs-4.14.3, html-4.2.0, metadata-3.1.1
+collecting ... collected 84 items
+
+tests/system/test_st_buyer_journey.py::test_st01_full_journey_register_search_buy_in_euros_and_find_it_in_history PASSED [  1%]
+tests/system/test_st_buyer_journey.py::test_st02_order_history_asks_for_login_then_returns_to_it PASSED [  2%]
+tests/system/test_st_buyer_journey.py::test_st03_wrong_password_gives_a_generic_error PASSED [  3%]
+tests/system/test_st_buyer_journey.py::test_st04_search_by_venue_and_no_match_shows_everything PASSED [  4%]
+tests/system/test_st_buyer_journey.py::test_st05_double_click_on_a_card_quick_buys_one_ticket PASSED [  5%]
+tests/system/test_st_buyer_journey.py::test_st06_declined_card_releases_tickets_and_creates_no_order PASSED [  7%]
+tests/system/test_st_buyer_journey.py::test_st07_cancel_gives_held_tickets_back PASSED [  8%]
+tests/system/test_st_buyer_journey.py::test_st08_logout_ends_the_session PASSED [  9%]
+tests/system/test_st_buyer_journey.py::test_st09_phone_width_pages_do_not_scroll_sideways[/events] PASSED [ 10%]
+tests/system/test_st_buyer_journey.py::test_st09_phone_width_pages_do_not_scroll_sideways[/events/1] PASSED [ 11%]
+tests/system/test_st_buyer_journey.py::test_st09_phone_width_pages_do_not_scroll_sideways[/login] PASSED [ 13%]
+tests/system/test_st_buyer_journey.py::test_st09_phone_width_pages_do_not_scroll_sideways[/register] PASSED [ 14%]
+tests/system/test_st_buyer_journey.py::test_st10_purchase_limit_of_four_per_account_per_event PASSED [ 15%]
+tests/system/test_st_call5_changes.py::test_st30_pay_submitted_twice_at_once_creates_one_order FAILED [ 16%]
+tests/system/test_st_call5_changes.py::test_st31_quick_buy_submitted_twice_at_once_creates_one_order FAILED [ 17%]
+tests/system/test_st_call5_changes.py::test_st32_impatient_double_click_on_pay_shows_the_confirmation PASSED [ 19%]
+tests/system/test_st_call5_changes.py::test_st33_double_clicking_the_quick_buy_button_buys_one_ticket PASSED [ 20%]
+tests/system/test_st_call5_changes.py::test_st34_buying_again_on_purpose_still_works PASSED [ 21%]
+tests/system/test_st_call5_changes.py::test_st35_refreshing_the_confirmation_does_not_buy_again PASSED [ 22%]
+tests/system/test_st_call5_changes.py::test_st36_more_than_ten_purchase_requests_a_minute_are_slowed_down FAILED [ 23%]
+tests/system/test_st_call5_changes.py::test_st37_one_buyers_limit_does_not_slow_down_another_buyer PASSED [ 25%]
+tests/system/test_st_call5_changes.py::test_st38_changing_to_a_non_usf_email_removes_the_discount FAILED [ 26%]
+tests/system/test_st_call5_changes.py::test_st39_email_change_during_checkout_cancels_the_discounted_hold FAILED [ 27%]
+tests/system/test_st_call5_changes.py::test_st40_email_change_needs_the_password_and_a_free_address FAILED [ 28%]
+tests/system/test_st_call5_changes.py::test_st41_checkout_and_confirmation_show_one_clear_amount_charged FAILED [ 29%]
+tests/system/test_st_call5_changes.py::test_st42_preselected_currency_says_where_it_comes_from FAILED [ 30%]
+tests/system/test_st_call5_changes.py::test_st43_changing_the_saved_currency_changes_the_preselection FAILED [ 32%]
+tests/system/test_st_call5_changes.py::test_st44_no_tickets_are_sold_after_the_event_has_started FAILED [ 33%]
+tests/system/test_st_performance.py::test_st70_twenty_buyers_at_once_meet_the_performance_target PASSED [ 34%]
+tests/system/test_st_security.py::test_st50_search_text_is_shown_as_text_never_as_markup PASSED [ 35%]
+tests/system/test_st_security.py::test_st51_names_with_markup_or_accents_are_shown_as_typed PASSED [ 36%]
+tests/system/test_st_security.py::test_st52_login_never_redirects_to_another_site[https://evil.example/] PASSED [ 38%]
+tests/system/test_st_security.py::test_st52_login_never_redirects_to_another_site[//evil.example/] PASSED [ 39%]
+tests/system/test_st_security.py::test_st52_login_never_redirects_to_another_site[/\\evil.example] PASSED [ 40%]
+tests/system/test_st_security.py::test_st53_a_buyer_cannot_open_another_buyers_order_or_checkout PASSED [ 41%]
+tests/system/test_st_security.py::test_st54_buyers_cannot_reach_the_admin_area[/admin] PASSED [ 42%]
+tests/system/test_st_security.py::test_st54_buyers_cannot_reach_the_admin_area[/admin/rates] PASSED [ 44%]
+tests/system/test_st_security.py::test_st54_buyers_cannot_reach_the_admin_area[/admin/audit] PASSED [ 45%]
+tests/system/test_st_security.py::test_st55_a_form_with_a_forged_token_is_refused PASSED [ 46%]
+tests/system/test_st_security.py::test_st56_passwords_are_stored_only_as_hashes PASSED [ 47%]
+tests/system/test_st_security.py::test_st57_email_letter_case_does_not_matter_for_login PASSED [ 48%]
+tests/system/test_st_validation_edges.py::test_st11_thuys_six_rejections_have_distinct_messages_and_are_all_logged FAILED [ 50%]
+tests/system/test_st_validation_edges.py::test_st12_browser_blocks_zero_before_sending_it PASSED [ 51%]
+tests/system/test_st_validation_edges.py::test_st13_non_whole_quantities_are_rejected_without_a_crash[decimal] PASSED [ 52%]
+tests/system/test_st_validation_edges.py::test_st13_non_whole_quantities_are_rejected_without_a_crash[letters] PASSED [ 53%]
+tests/system/test_st_validation_edges.py::test_st13_non_whole_quantities_are_rejected_without_a_crash[blank] PASSED [ 54%]
+tests/system/test_st_validation_edges.py::test_st13_non_whole_quantities_are_rejected_without_a_crash[exponent] PASSED [ 55%]
+tests/system/test_st_validation_edges.py::test_st13_non_whole_quantities_are_rejected_without_a_crash[huge] PASSED [ 57%]
+tests/system/test_st_validation_edges.py::test_st13_non_whole_quantities_are_rejected_without_a_crash[hex] PASSED [ 58%]
+tests/system/test_st_validation_edges.py::test_st14_whole_number_written_as_2_point_0_is_accepted FAILED [ 59%]
+tests/system/test_st_validation_edges.py::test_st15_buying_exactly_the_last_tickets_works_and_then_shows_sold_out PASSED [ 60%]
+tests/system/test_st_validation_edges.py::test_st16_unsupported_currencies_are_rejected[unknown] PASSED [ 61%]
+tests/system/test_st_validation_edges.py::test_st16_unsupported_currencies_are_rejected[four-letters] PASSED [ 63%]
+tests/system/test_st_validation_edges.py::test_st16_unsupported_currencies_are_rejected[blank] PASSED [ 64%]
+tests/system/test_st_validation_edges.py::test_st16_unsupported_currencies_are_rejected[spaces] PASSED [ 65%]
+tests/system/test_st_validation_edges.py::test_st17_logged_out_purchase_returns_to_the_event_after_login FAILED [ 66%]
+tests/system/test_st_validation_edges.py::test_st18_unknown_ids_show_not_found_not_a_crash[/events/999999999] PASSED [ 67%]
+tests/system/test_st_validation_edges.py::test_st18_unknown_ids_show_not_found_not_a_crash[/events/abc] PASSED [ 69%]
+tests/system/test_st_validation_edges.py::test_st18_unknown_ids_show_not_found_not_a_crash[/events/-1] PASSED [ 70%]
+tests/system/test_st_validation_edges.py::test_st18_unknown_ids_show_not_found_not_a_crash[/orders/999999999] PASSED [ 71%]
+tests/system/test_st_validation_edges.py::test_st19_registration_rejects_short_passwords_and_duplicate_emails_in_any_case PASSED [ 72%]
+tests/system/test_st_validation_edges.py::test_st20_unicode_digit_quantities_are_rejected_not_crashed[superscript-two] FAILED [ 73%]
+tests/system/test_st_validation_edges.py::test_st20_unicode_digit_quantities_are_rejected_not_crashed[circled-one] FAILED [ 75%]
+tests/system/test_st_validation_edges.py::test_st20_unicode_digit_quantities_are_rejected_not_crashed[arabic-three] FAILED [ 76%]
+tests/system/test_st_validation_edges.py::test_st21_unicode_digit_ids_in_urls_show_not_found[/events/\xb2] FAILED [ 77%]
+tests/system/test_st_validation_edges.py::test_st21_unicode_digit_ids_in_urls_show_not_found[/orders/\u2460] FAILED [ 78%]
+tests/system/test_st_validation_edges.py::test_st21_unicode_digit_ids_in_urls_show_not_found[/checkout/\xb2] FAILED [ 79%]
+tests/system/test_st_whitebox.py::test_st60_paying_after_the_hold_expired_is_refused_and_tickets_return PASSED [ 80%]
+tests/system/test_st_whitebox.py::test_st61_rate_change_during_checkout_does_not_change_the_price PASSED [ 82%]
+tests/system/test_st_whitebox.py::test_st62_an_idle_session_expires_after_thirty_minutes PASSED [ 83%]
+tests/system/test_st_whitebox.py::test_st63_half_up_rounding_happens_once_on_the_final_amount PASSED [ 84%]
+tests/system/test_st_whitebox.py::test_st64_discount_eligibility_email_edge_cases[upper-case] PASSED [ 85%]
+tests/system/test_st_whitebox.py::test_st64_discount_eligibility_email_edge_cases[plus-address] PASSED [ 86%]
+tests/system/test_st_whitebox.py::test_st64_discount_eligibility_email_edge_cases[subdomain] PASSED [ 88%]
+tests/system/test_st_whitebox.py::test_st64_discount_eligibility_email_edge_cases[lookalike-suffix] PASSED [ 89%]
+tests/system/test_st_whitebox.py::test_st64_discount_eligibility_email_edge_cases[lookalike-prefix] PASSED [ 90%]
+tests/system/test_st_whitebox.py::test_st65_two_browsers_racing_for_the_last_ticket FAILED [ 91%]
+tests/system/test_st_whitebox.py::test_st66_search_wildcards_and_quotes_are_plain_text[%] PASSED [ 92%]
+tests/system/test_st_whitebox.py::test_st66_search_wildcards_and_quotes_are_plain_text[_] PASSED [ 94%]
+tests/system/test_st_whitebox.py::test_st66_search_wildcards_and_quotes_are_plain_text[\\] PASSED [ 95%]
+tests/system/test_st_whitebox.py::test_st66_search_wildcards_and_quotes_are_plain_text[' OR 1=1 --] PASSED [ 96%]
+tests/system/test_st_whitebox.py::test_st67_audit_log_has_time_buyer_event_quantity_currency_and_outcome PASSED [ 97%]
+tests/system/test_st_whitebox.py::test_st68_admin_rate_form_validates_input PASSED [ 98%]
+tests/system/test_st_whitebox.py::test_st69_event_starting_in_a_few_minutes_is_still_on_sale PASSED [100%]
+
+================================== FAILURES ===================================
+E   AssertionError: [{'status': 200, 'url': '/orders/5'}, {'status': 409, 'url': '/checkout/7/pay'}]
+    assert [200, 409] == [200, 200]
+      
+      At index 1 diff: 409 != 200
+      
+      Full diff: (-: missing in left side, +: extra in left side)
+        [
+            200,
+      -     200,...
+      
+      ...Full output truncated, use '-vv' to show
+D:\AIproject\tests\system\test_st_call5_changes.py:46: AssertionError: [{'status': 200, 'url': '/orders/5'}, {'status': 409, 'url': '/checkout/7/pay'}]
+E   AssertionError: [{'status': 200, 'url': '/orders/6'}, {'status': 200, 'url': '/orders/7'}]
+    assert 2 == 1
+     +  where 2 = order_count('buyer-4d4ed56bac@example.com', '11')
+     +    where order_count = <tests.system.support.Database object at 0x0000027B004EBB60>.order_count
+     +    and   'buyer-4d4ed56bac@example.com' = Account(name='Test Buyer', email='buyer-4d4ed56bac@example.com', password='password-123').email
+D:\AIproject\tests\system\test_st_call5_changes.py:60: AssertionError: [{'status': 200, 'url': '/orders/6'}, {'status': 200, 'url': '/orders/7'}]
+E   selenium.common.exceptions.WebDriverException: Message: unknown error: unhandled inspector error: {"code":-32000,"message":"Node with given id does not belong to the document"}
+      (Session info: chrome=156.0.8078.49)
+    Stacktrace:
+    	chromedriver!GetHandleVerifier [0x7ff6e734be65+4135]
+    	chromedriver!(No symbol) [0x7ff6e72535f0]
+    	chromedriver!(No symbol) [0x7ff6e70c26d3]
+    	chromedriver!GetHandleVerifier [0x7ff6e788e657+546927]
+    	chromedriver!(No symbol) [0x7ff6e70b6566]
+    	chromedriver!(No symbol) [0x7ff6e70b725f]
+    	chromedriver!GetHandleVerifier [0x7ff6e78a481a+55caea]
+    	chromedriver!GetHandleVerifier [0x7ff6e78a6ee8+55f1b8]
+    	chromedriver!GetHandleVerifier [0x7ff6e78a6109+55e3d9]
+    	chromedriver!(No symbol) [0x7ff6e70c66ff]
+    	chromedriver!(No symbol) [0x7ff6e70c44ba]
+    	chromedriver!GetHandleVerifier [0x7ff6e789e2a0+556570]
+    	chromedriver!GetHandleVerifier [0x7ff6e789e40f+5566df]
+    	chromedriver!GetHandleVerifier [0x7ff6e78c931c+5815ec]
+    	chromedriver!GetHandleVerifier [0x7ff6e78e07da+598aaa]
+    	chromedriver!GetHandleVerifier [0x7ff6e78c3b39+57be09]
+    	chromedriver!GetHandleVerifier [0x7ff6e78c3ad0+57bda0]
+    	chromedriver!(No symbol) [0x7ff6e70f6661]
+    	chromedriver!(No symbol) [0x7ff6e70db969]
+    	chromedriver!(No symbol) [0x7ff6e70dcca3]
+    	chromedriver!GetHandleVerifier [0x7ff6e77c5af1+47ddc1]
+    	chromedriver!GetHandleVerifier [0x7ff6e77e67f7+49eac7]
+    	chromedriver!GetHandleVerifier [0x7ff6e77dce20+4950f0]
+    	chromedriver!GetHandleVerifier [0x7ff6e746ff8e+12825e]
+    	chromedriver!(No symbol) [0x7ff6e7262865]
+    	chromedriver!(No symbol) [0x7ff6e725d1d4]
+    	chromedriver!(No symbol) [0x7ff6e725d364]
+    	chromedriver!(No symbol) [0x7ff6e724644c]
+    	KERNEL32!BaseThreadInitThunk [0x7ff89a81dda7+17]
+    	ntdll!RtlUserThreadStart [0x7ff89b59ee4c+2c]
+D:\AIproject\.venv\Lib\site-packages\selenium\webdriver\remote\errorhandler.py:234: selenium.common.exceptions.WebDriverException: Message: unknown error: unhandled inspector error: {"code":-32000,"message":"Node with given id does not belong to the document"}
+E   selenium.common.exceptions.TimeoutException: Message: 
+    Stacktrace:
+    	chromedriver!GetHandleVerifier [0x7ff6e734be65+4135]
+    	chromedriver!(No symbol) [0x7ff6e72535f0]
+    	chromedriver!(No symbol) [0x7ff6e70c26d3]
+    	chromedriver!GetHandleVerifier [0x7ff6e78cd8e1+585bb1]
+    	chromedriver!GetHandleVerifier [0x7ff6e78cdb3c+585e0c]
+    	chromedriver!GetHandleVerifier [0x7ff6e78fbbb7+5b3e87]
+    	chromedriver!(No symbol) [0x7ff6e70f6661]
+    	chromedriver!(No symbol) [0x7ff6e70db969]
+    	chromedriver!(No symbol) [0x7ff6e70dcca3]
+    	chromedriver!GetHandleVerifier [0x7ff6e77c5af1+47ddc1]
+    	chromedriver!GetHandleVerifier [0x7ff6e77e67f7+49eac7]
+    	chromedriver!GetHandleVerifier [0x7ff6e77dce20+4950f0]
+    	chromedriver!GetHandleVerifier [0x7ff6e746ff8e+12825e]
+    	chromedriver!(No symbol) [0x7ff6e7262865]
+    	chromedriver!(No symbol) [0x7ff6e725d1d4]
+    	chromedriver!(No symbol) [0x7ff6e725d364]
+    	chromedriver!(No symbol) [0x7ff6e724644c]
+    	KERNEL32!BaseThreadInitThunk [0x7ff89a81dda7+17]
+    	ntdll!RtlUserThreadStart [0x7ff89b59ee4c+2c]
+D:\AIproject\.venv\Lib\site-packages\selenium\webdriver\support\wait.py:121: selenium.common.exceptions.TimeoutException: Message:
+E   selenium.common.exceptions.TimeoutException: Message: 
+    Stacktrace:
+    	chromedriver!GetHandleVerifier [0x7ff6e734be65+4135]
+    	chromedriver!(No symbol) [0x7ff6e72535f0]
+    	chromedriver!(No symbol) [0x7ff6e70c26d3]
+    	chromedriver!GetHandleVerifier [0x7ff6e78cd8e1+585bb1]
+    	chromedriver!GetHandleVerifier [0x7ff6e78cdb3c+585e0c]
+    	chromedriver!GetHandleVerifier [0x7ff6e78fbbb7+5b3e87]
+    	chromedriver!(No symbol) [0x7ff6e70f6661]
+    	chromedriver!(No symbol) [0x7ff6e70db969]
+    	chromedriver!(No symbol) [0x7ff6e70dcca3]
+    	chromedriver!GetHandleVerifier [0x7ff6e77c5af1+47ddc1]
+    	chromedriver!GetHandleVerifier [0x7ff6e77e67f7+49eac7]
+    	chromedriver!GetHandleVerifier [0x7ff6e77dce20+4950f0]
+    	chromedriver!GetHandleVerifier [0x7ff6e746ff8e+12825e]
+    	chromedriver!(No symbol) [0x7ff6e7262865]
+    	chromedriver!(No symbol) [0x7ff6e725d1d4]
+    	chromedriver!(No symbol) [0x7ff6e725d364]
+    	chromedriver!(No symbol) [0x7ff6e724644c]
+    	KERNEL32!BaseThreadInitThunk [0x7ff89a81dda7+17]
+    	ntdll!RtlUserThreadStart [0x7ff89b59ee4c+2c]
+D:\AIproject\.venv\Lib\site-packages\selenium\webdriver\support\wait.py:121: selenium.common.exceptions.TimeoutException: Message:
+E   selenium.common.exceptions.TimeoutException: Message: 
+    Stacktrace:
+    	chromedriver!GetHandleVerifier [0x7ff6e734be65+4135]
+    	chromedriver!(No symbol) [0x7ff6e72535f0]
+    	chromedriver!(No symbol) [0x7ff6e70c26d3]
+    	chromedriver!GetHandleVerifier [0x7ff6e78cd8e1+585bb1]
+    	chromedriver!GetHandleVerifier [0x7ff6e78cdb3c+585e0c]
+    	chromedriver!GetHandleVerifier [0x7ff6e78fbbb7+5b3e87]
+    	chromedriver!(No symbol) [0x7ff6e70f6661]
+    	chromedriver!(No symbol) [0x7ff6e70db969]
+    	chromedriver!(No symbol) [0x7ff6e70dcca3]
+    	chromedriver!GetHandleVerifier [0x7ff6e77c5af1+47ddc1]
+    	chromedriver!GetHandleVerifier [0x7ff6e77e67f7+49eac7]
+    	chromedriver!GetHandleVerifier [0x7ff6e77dce20+4950f0]
+    	chromedriver!GetHandleVerifier [0x7ff6e746ff8e+12825e]
+    	chromedriver!(No symbol) [0x7ff6e7262865]
+    	chromedriver!(No symbol) [0x7ff6e725d1d4]
+    	chromedriver!(No symbol) [0x7ff6e725d364]
+    	chromedriver!(No symbol) [0x7ff6e724644c]
+    	KERNEL32!BaseThreadInitThunk [0x7ff89a81dda7+17]
+    	ntdll!RtlUserThreadStart [0x7ff89b59ee4c+2c]
+D:\AIproject\.venv\Lib\site-packages\selenium\webdriver\support\wait.py:121: selenium.common.exceptions.TimeoutException: Message:
+E   selenium.common.exceptions.TimeoutException: Message: 
+    Stacktrace:
+    	chromedriver!GetHandleVerifier [0x7ff6e734be65+4135]
+    	chromedriver!(No symbol) [0x7ff6e72535f0]
+    	chromedriver!(No symbol) [0x7ff6e70c26d3]
+    	chromedriver!GetHandleVerifier [0x7ff6e78cd8e1+585bb1]
+    	chromedriver!GetHandleVerifier [0x7ff6e78cdb3c+585e0c]
+    	chromedriver!GetHandleVerifier [0x7ff6e78fbbb7+5b3e87]
+    	chromedriver!(No symbol) [0x7ff6e70f6661]
+    	chromedriver!(No symbol) [0x7ff6e70db969]
+    	chromedriver!(No symbol) [0x7ff6e70dcca3]
+    	chromedriver!GetHandleVerifier [0x7ff6e77c5af1+47ddc1]
+    	chromedriver!GetHandleVerifier [0x7ff6e77e67f7+49eac7]
+    	chromedriver!GetHandleVerifier [0x7ff6e77dce20+4950f0]
+    	chromedriver!GetHandleVerifier [0x7ff6e746ff8e+12825e]
+    	chromedriver!(No symbol) [0x7ff6e7262865]
+    	chromedriver!(No symbol) [0x7ff6e725d1d4]
+    	chromedriver!(No symbol) [0x7ff6e725d364]
+    	chromedriver!(No symbol) [0x7ff6e724644c]
+    	KERNEL32!BaseThreadInitThunk [0x7ff89a81dda7+17]
+    	ntdll!RtlUserThreadStart [0x7ff89b59ee4c+2c]
+D:\AIproject\.venv\Lib\site-packages\selenium\webdriver\support\wait.py:121: selenium.common.exceptions.TimeoutException: Message:
+E   selenium.common.exceptions.TimeoutException: Message: 
+    Stacktrace:
+    	chromedriver!GetHandleVerifier [0x7ff6e734be65+4135]
+    	chromedriver!(No symbol) [0x7ff6e72535f0]
+    	chromedriver!(No symbol) [0x7ff6e70c26d3]
+    	chromedriver!GetHandleVerifier [0x7ff6e78cd8e1+585bb1]
+    	chromedriver!GetHandleVerifier [0x7ff6e78cdb3c+585e0c]
+    	chromedriver!GetHandleVerifier [0x7ff6e78fbbb7+5b3e87]
+    	chromedriver!(No symbol) [0x7ff6e70f6661]
+    	chromedriver!(No symbol) [0x7ff6e70db969]
+    	chromedriver!(No symbol) [0x7ff6e70dcca3]
+    	chromedriver!GetHandleVerifier [0x7ff6e77c5af1+47ddc1]
+    	chromedriver!GetHandleVerifier [0x7ff6e77e67f7+49eac7]
+    	chromedriver!GetHandleVerifier [0x7ff6e77dce20+4950f0]
+    	chromedriver!GetHandleVerifier [0x7ff6e746ff8e+12825e]
+    	chromedriver!(No symbol) [0x7ff6e7262865]
+    	chromedriver!(No symbol) [0x7ff6e725d1d4]
+    	chromedriver!(No symbol) [0x7ff6e725d364]
+    	chromedriver!(No symbol) [0x7ff6e724644c]
+    	KERNEL32!BaseThreadInitThunk [0x7ff89a81dda7+17]
+    	ntdll!RtlUserThreadStart [0x7ff89b59ee4c+2c]
+D:\AIproject\.venv\Lib\site-packages\selenium\webdriver\support\wait.py:121: selenium.common.exceptions.TimeoutException: Message:
+E   selenium.common.exceptions.TimeoutException: Message: 
+    Stacktrace:
+    	chromedriver!GetHandleVerifier [0x7ff6e734be65+4135]
+    	chromedriver!(No symbol) [0x7ff6e72535f0]
+    	chromedriver!(No symbol) [0x7ff6e70c26d3]
+    	chromedriver!GetHandleVerifier [0x7ff6e78cd8e1+585bb1]
+    	chromedriver!GetHandleVerifier [0x7ff6e78cdb3c+585e0c]
+    	chromedriver!GetHandleVerifier [0x7ff6e78fbbb7+5b3e87]
+    	chromedriver!(No symbol) [0x7ff6e70f6661]
+    	chromedriver!(No symbol) [0x7ff6e70db969]
+    	chromedriver!(No symbol) [0x7ff6e70dcca3]
+    	chromedriver!GetHandleVerifier [0x7ff6e77c5af1+47ddc1]
+    	chromedriver!GetHandleVerifier [0x7ff6e77e67f7+49eac7]
+    	chromedriver!GetHandleVerifier [0x7ff6e77dce20+4950f0]
+    	chromedriver!GetHandleVerifier [0x7ff6e746ff8e+12825e]
+    	chromedriver!(No symbol) [0x7ff6e7262865]
+    	chromedriver!(No symbol) [0x7ff6e725d1d4]
+    	chromedriver!(No symbol) [0x7ff6e725d364]
+    	chromedriver!(No symbol) [0x7ff6e724644c]
+    	KERNEL32!BaseThreadInitThunk [0x7ff89a81dda7+17]
+    	ntdll!RtlUserThreadStart [0x7ff89b59ee4c+2c]
+D:\AIproject\.venv\Lib\site-packages\selenium\webdriver\support\wait.py:121: selenium.common.exceptions.TimeoutException: Message:
+E   assert 'sales have closed' in "eventhub\nevents\norder history\naccount\nlog out (test buyer)\nyesterday's band\nyesterday's band live\nvenue\nsystem test hall\nstarts\nsun, nov 1, 2026 · 7:08 pm\nprice\n20.00 usd per ticket\navailability\n50 tickets left\nbuy tickets\nquantity\ncurrency\n    cad\neur\ngbp\nusd\n   continue to checkout\nusf students (@usf.edu email) get the student discount. your tickets are held for 10 minutes while you check out.\nquick buy\none ticket in your saved currency.\nback to events"
+     +  where "eventhub\nevents\norder history\naccount\nlog out (test buyer)\nyesterday's band\nyesterday's band live\nvenue\nsystem test hall\nstarts\nsun, nov 1, 2026 · 7:08 pm\nprice\n20.00 usd per ticket\navailability\n50 tickets left\nbuy tickets\nquantity\ncurrency\n    cad\neur\ngbp\nusd\n   continue to checkout\nusf students (@usf.edu email) get the student discount. your tickets are held for 10 minutes while you check out.\nquick buy\none ticket in your saved currency.\nback to events" = <built-in method lower of str object at 0x0000027B7EED2370>()
+     +    where <built-in method lower of str object at 0x0000027B7EED2370> = "EventHub\nEvents\nOrder history\nAccount\nLog out (Test Buyer)\nYesterday's Band\nYesterday's Band live\nVenue\nSystem Test Hall\nStarts\nSun, Nov 1, 2026 · 7:08 PM\nPrice\n20.00 USD per ticket\nAvailability\n50 tickets left\nBuy tickets\nQuantity\nCurrency\n    CAD\nEUR\nGBP\nUSD\n   Continue to checkout\nUSF students (@usf.edu email) get the student discount. Your tickets are held for 10 minutes while you check out.\nQuick Buy\nOne ticket in your saved currency.\nBack to events".lower
+     +      where "EventHub\nEvents\nOrder history\nAccount\nLog out (Test Buyer)\nYesterday's Band\nYesterday's Band live\nVenue\nSystem Test Hall\nStarts\nSun, Nov 1, 2026 · 7:08 PM\nPrice\n20.00 USD per ticket\nAvailability\n50 tickets left\nBuy tickets\nQuantity\nCurrency\n    CAD\nEUR\nGBP\nUSD\n   Continue to checkout\nUSF students (@usf.edu email) get the student discount. Your tickets are held for 10 minutes while you check out.\nQuick Buy\nOne ticket in your saved currency.\nBack to events" = page_text()
+     +        where page_text = <tests.system.support.EventHub object at 0x0000027B00AE4590>.page_text
+D:\AIproject\tests\system\test_st_call5_changes.py:281: assert 'sales have closed' in "eventhub\nevents\norder history\naccount\nlog out (test buyer)\nyesterday's band\nyesterday's band live\nvenue\nsystem test hall\nstarts\nsun, nov 1, 2026 · 7:08 pm\nprice\n20.00 usd per ticket\navailability\n50 tickets left\nbuy tickets\nquantity\ncurrency\n    cad\neur\ngbp\nusd\n   continue to checkout\nusf students (@usf.edu email) get the student discount. your tickets are held for 10 minutes while you check out.\nquick buy\none ticket in your saved currency.\nback to events"
+E   AssertionError: {'zero': 'Choose a whole number of tickets, at least 1.', 'negative': 'Choose a whole number of tickets, at least 1.', 'too_many': 'Sorry, there are not enough tickets left for that quantity.', 'sold_out': 'Sorry, there are not enough tickets left for that quantity.', ...}
+    assert False
+     +  where False = all(dict_values(['Choose a whole number of tickets, at least 1.', 'Choose a whole number of tickets, at least 1.', 'Sorry, there are not enough tickets left for that quantity.', 'Sorry, there are not enough tickets left for that quantity.', 'That currency is not supported. Choose one from the list.', '']))
+     +    where dict_values(['Choose a whole number of tickets, at least 1.', 'Choose a whole number of tickets, at least 1.', 'Sorry, there are not enough tickets left for that quantity.', 'Sorry, there are not enough tickets left for that quantity.', 'That currency is not supported. Choose one from the list.', '']) = <built-in method values of dict object at 0x0000027B00B5CDC0>()
+     +      where <built-in method values of dict object at 0x0000027B00B5CDC0> = {'zero': 'Choose a whole number of tickets, at least 1.', 'negative': 'Choose a whole number of tickets, at least 1.', 'too_many': 'Sorry, there are not enough tickets left for that quantity.', 'sold_out': 'Sorry, there are not enough tickets left for that quantity.', ...}.values
+D:\AIproject\tests\system\test_st_validation_edges.py:57: AssertionError: {'zero': 'Choose a whole number of tickets, at least 1.', 'negative': 'Choose a whole number of tickets, at least 1.', 'too_many': 'Sorry, there are not enough tickets left for that quantity.', 'sold_out': 'Sorry, there are not enough tickets left for that quantity.', ...}
+E   selenium.common.exceptions.TimeoutException: Message:
+
+The above exception was the direct cause of the following exception:
+E   AssertionError: expected URL matching '^/checkout/\\d+$', still on '/events/35/checkout'
+D:\AIproject\tests\system\support.py:116: AssertionError: expected URL matching '^/checkout/\\d+$', still on '/events/35/checkout'
+E   AssertionError: assert 'log in' in ''
+     +  where '' = <built-in method lower of str object at 0x00007FFFB4B29CA0>()
+     +    where <built-in method lower of str object at 0x00007FFFB4B29CA0> = ''.lower
+     +      where '' = flash()
+     +        where flash = <tests.system.support.EventHub object at 0x0000027B00B4CC80>.flash
+D:\AIproject\tests\system\test_st_validation_edges.py:141: AssertionError: assert 'log in' in ''
+E   selenium.common.exceptions.TimeoutException: Message: 
+    Stacktrace:
+    	chromedriver!GetHandleVerifier [0x7ff6e734be65+4135]
+    	chromedriver!(No symbol) [0x7ff6e72535f0]
+    	chromedriver!(No symbol) [0x7ff6e70c26d3]
+    	chromedriver!GetHandleVerifier [0x7ff6e78cd8e1+585bb1]
+    	chromedriver!GetHandleVerifier [0x7ff6e78cdb3c+585e0c]
+    	chromedriver!GetHandleVerifier [0x7ff6e78fbbb7+5b3e87]
+    	chromedriver!(No symbol) [0x7ff6e70f6661]
+    	chromedriver!(No symbol) [0x7ff6e70db969]
+    	chromedriver!(No symbol) [0x7ff6e70dcca3]
+    	chromedriver!GetHandleVerifier [0x7ff6e77c5af1+47ddc1]
+    	chromedriver!GetHandleVerifier [0x7ff6e77e67f7+49eac7]
+    	chromedriver!GetHandleVerifier [0x7ff6e77dce20+4950f0]
+    	chromedriver!GetHandleVerifier [0x7ff6e746ff8e+12825e]
+    	chromedriver!(No symbol) [0x7ff6e7262865]
+    	chromedriver!(No symbol) [0x7ff6e725d1d4]
+    	chromedriver!(No symbol) [0x7ff6e725d364]
+    	chromedriver!(No symbol) [0x7ff6e724644c]
+    	KERNEL32!BaseThreadInitThunk [0x7ff89a81dda7+17]
+    	ntdll!RtlUserThreadStart [0x7ff89b59ee4c+2c]
+------------------------------ Captured log call ------------------------------
+ERROR    app:app.py:875 Exception on /events/42/checkout [POST]
+Traceback (most recent call last):
+  File "D:\AIproject\.venv\Lib\site-packages\flask\app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AIproject\.venv\Lib\site-packages\flask\app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AIproject\.venv\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AIproject\.venv\Lib\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AIproject\app\web\__init__.py", line 378, in checkout_start
+    result = _services().checkout.start(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AIproject\app\wiring.py", line 186, in start
+    return self._coordinator(buyer_id).start_checkout(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AIproject\app\purchase\service.py", line 151, in start_checkout
+    return self._run(work, facts)
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AIproject\app\purchase\service.py", line 214, in _run
+    result = work(tx)
+             ^^^^^^^^
+  File "D:\AIproject\app\purchase\service.py", line 145, in work
+    hold, quote = self._reserve(tx, buyer_id, now, request, facts)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AIproject\app\purchase\service.py", line 231, in _reserve
+    facts.quantity = _audit_quantity(request.quantity)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AIproject\app\purchase\service.py", line 91, in _audit_quantity
+    return int(raw.strip())
+           ^^^^^^^^^^^^^^^^
+ValueError: invalid literal for int() with base 10: '²'
+D:\AIproject\.venv\Lib\site-packages\selenium\webdriver\support\wait.py:121: selenium.common.exceptions.TimeoutException: Message:
+E   selenium.common.exceptions.TimeoutException: Message: 
+    Stacktrace:
+    	chromedriver!GetHandleVerifier [0x7ff6e734be65+4135]
+    	chromedriver!(No symbol) [0x7ff6e72535f0]
+    	chromedriver!(No symbol) [0x7ff6e70c26d3]
+    	chromedriver!GetHandleVerifier [0x7ff6e78cd8e1+585bb1]
+    	chromedriver!GetHandleVerifier [0x7ff6e78cdb3c+585e0c]
+    	chromedriver!GetHandleVerifier [0x7ff6e78fbbb7+5b3e87]
+    	chromedriver!(No symbol) [0x7ff6e70f6661]
+    	chromedriver!(No symbol) [0x7ff6e70db969]
+    	chromedriver!(No symbol) [0x7ff6e70dcca3]
+    	chromedriver!GetHandleVerifier [0x7ff6e77c5af1+47ddc1]
+    	chromedriver!GetHandleVerifier [0x7ff6e77e67f7+49eac7]
+    	chromedriver!GetHandleVerifier [0x7ff6e77dce20+4950f0]
+    	chromedriver!GetHandleVerifier [0x7ff6e746ff8e+12825e]
+    	chromedriver!(No symbol) [0x7ff6e7262865]
+    	chromedriver!(No symbol) [0x7ff6e725d1d4]
+    	chromedriver!(No symbol) [0x7ff6e725d364]
+    	chromedriver!(No symbol) [0x7ff6e724644c]
+    	KERNEL32!BaseThreadInitThunk [0x7ff89a81dda7+17]
+    	ntdll!RtlUserThreadStart [0x7ff89b59ee4c+2c]
+------------------------------ Captured log call ------------------------------
+ERROR    app:app.py:875 Exception on /events/43/checkout [POST]
+Traceback (most recent call last):
+  File "D:\AIproject\.venv\Lib\site-packages\flask\app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AIproject\.venv\Lib\site-packages\flask\app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AIproject\.venv\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AIproject\.venv\Lib\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AIproject\app\web\__init__.py", line 378, in checkout_start
+    result = _services().checkout.start(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AIproject\app\wiring.py", line 186, in start
+    return self._coordinator(buyer_id).start_checkout(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AIproject\app\purchase\service.py", line 151, in start_checkout
+    return self._run(work, facts)
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AIproject\app\purchase\service.py", line 214, in _run
+    result = work(tx)
+             ^^^^^^^^
+  File "D:\AIproject\app\purchase\service.py", line 145, in work
+    hold, quote = self._reserve(tx, buyer_id, now, request, facts)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AIproject\app\purchase\service.py", line 231, in _reserve
+    facts.quantity = _audit_quantity(request.quantity)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AIproject\app\purchase\service.py", line 91, in _audit_quantity
+    return int(raw.strip())
+           ^^^^^^^^^^^^^^^^
+ValueError: invalid literal for int() with base 10: '①'
+D:\AIproject\.venv\Lib\site-packages\selenium\webdriver\support\wait.py:121: selenium.common.exceptions.TimeoutException: Message:
+E   selenium.common.exceptions.TimeoutException: Message: 
+    Stacktrace:
+    	chromedriver!GetHandleVerifier [0x7ff6e734be65+4135]
+    	chromedriver!(No symbol) [0x7ff6e72535f0]
+    	chromedriver!(No symbol) [0x7ff6e70c26d3]
+    	chromedriver!GetHandleVerifier [0x7ff6e78cd8e1+585bb1]
+    	chromedriver!GetHandleVerifier [0x7ff6e78cdb3c+585e0c]
+    	chromedriver!GetHandleVerifier [0x7ff6e78fbbb7+5b3e87]
+    	chromedriver!(No symbol) [0x7ff6e70f6661]
+    	chromedriver!(No symbol) [0x7ff6e70db969]
+    	chromedriver!(No symbol) [0x7ff6e70dcca3]
+    	chromedriver!GetHandleVerifier [0x7ff6e77c5af1+47ddc1]
+    	chromedriver!GetHandleVerifier [0x7ff6e77e67f7+49eac7]
+    	chromedriver!GetHandleVerifier [0x7ff6e77dce20+4950f0]
+    	chromedriver!GetHandleVerifier [0x7ff6e746ff8e+12825e]
+    	chromedriver!(No symbol) [0x7ff6e7262865]
+    	chromedriver!(No symbol) [0x7ff6e725d1d4]
+    	chromedriver!(No symbol) [0x7ff6e725d364]
+    	chromedriver!(No symbol) [0x7ff6e724644c]
+    	KERNEL32!BaseThreadInitThunk [0x7ff89a81dda7+17]
+    	ntdll!RtlUserThreadStart [0x7ff89b59ee4c+2c]
+D:\AIproject\.venv\Lib\site-packages\selenium\webdriver\support\wait.py:121: selenium.common.exceptions.TimeoutException: Message:
+E   AssertionError: Internal Server Error
+      The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.
+    assert 'could not find' in 'internal server error\nthe server encountered an internal error and was unable to complete your request. either the server is overloaded or there is an error in the application.'
+     +  where 'internal server error\nthe server encountered an internal error and was unable to complete your request. either the server is overloaded or there is an error in the application.' = <built-in method lower of str object at 0x0000027B00B56330>()
+     +    where <built-in method lower of str object at 0x0000027B00B56330> = 'Internal Server Error\nThe server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.'.lower
+     +      where 'Internal Server Error\nThe server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.' = page_text()
+     +        where page_text = <tests.system.support.EventHub object at 0x0000027B00CFB1D0>.page_text
+------------------------------ Captured log call ------------------------------
+ERROR    app:app.py:875 Exception on /events/² [GET]
+Traceback (most recent call last):
+  File "D:\AIproject\.venv\Lib\site-packages\flask\app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AIproject\.venv\Lib\site-packages\flask\app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AIproject\.venv\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AIproject\.venv\Lib\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AIproject\app\web\__init__.py", line 258, in event_detail
+    event = _services().catalog.get_event(event_id=event_id)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AIproject\app\wiring.py", line 119, in get_event
+    return CatalogService(repository=PostgresCatalogRepository(tx)).get_event(event_id=event_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AIproject\app\catalog\service.py", line 67, in get_event
+    return self._repository.get_active(event_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AIproject\app\catalog\postgres.py", line 55, in get_active
+    key = db_id(event_id)
+          ^^^^^^^^^^^^^^^
+  File "D:\AIproject\app\db\transaction.py", line 131, in db_id
+    return int(text_value)
+           ^^^^^^^^^^^^^^^
+ValueError: invalid literal for int() with base 10: '²'
+D:\AIproject\tests\system\test_st_validation_edges.py:200: AssertionError: Internal Server Error
+E   AssertionError: Internal Server Error
+      The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.
+    assert 'could not find' in 'internal server error\nthe server encountered an internal error and was unable to complete your request. either the server is overloaded or there is an error in the application.'
+     +  where 'internal server error\nthe server encountered an internal error and was unable to complete your request. either the server is overloaded or there is an error in the application.' = <built-in method lower of str object at 0x0000027B00B550D0>()
+     +    where <built-in method lower of str object at 0x0000027B00B550D0> = 'Internal Server Error\nThe server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.'.lower
+     +      where 'Internal Server Error\nThe server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.' = page_text()
+     +        where page_text = <tests.system.support.EventHub object at 0x0000027B00AA60F0>.page_text
+------------------------------ Captured log call ------------------------------
+ERROR    app:app.py:875 Exception on /orders/① [GET]
+Traceback (most recent call last):
+  File "D:\AIproject\.venv\Lib\site-packages\flask\app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AIproject\.venv\Lib\site-packages\flask\app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AIproject\.venv\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AIproject\.venv\Lib\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AIproject\app\web\__init__.py", line 479, in order_detail
+    order = _services().orders.get_for_buyer(buyer_id=_buyer_id(), order_id=order_id)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AIproject\app\wiring.py", line 238, in get_for_buyer
+    return OrderHistoryService(repository=PostgresOrderReader(tx)).get_for_buyer(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AIproject\app\orders\service.py", line 78, in get_for_buyer
+    row = self._repository.get_for_buyer(buyer_id, order_id)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AIproject\app\orders\postgres.py", line 71, in get_for_buyer
+    _READ + " AND o.id = :order_id", {"buyer_id": db_id(buyer_id), "order_id": db_id(order_id)}
+                                                                               ^^^^^^^^^^^^^^^
+  File "D:\AIproject\app\db\transaction.py", line 131, in db_id
+    return int(text_value)
+           ^^^^^^^^^^^^^^^
+ValueError: invalid literal for int() with base 10: '①'
+D:\AIproject\tests\system\test_st_validation_edges.py:200: AssertionError: Internal Server Error
+E   AssertionError: Internal Server Error
+      The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.
+    assert 'could not find' in 'internal server error\nthe server encountered an internal error and was unable to complete your request. either the server is overloaded or there is an error in the application.'
+     +  where 'internal server error\nthe server encountered an internal error and was unable to complete your request. either the server is overloaded or there is an error in the application.' = <built-in method lower of str object at 0x0000027B00B566B0>()
+     +    where <built-in method lower of str object at 0x0000027B00B566B0> = 'Internal Server Error\nThe server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.'.lower
+     +      where 'Internal Server Error\nThe server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.' = page_text()
+     +        where page_text = <tests.system.support.EventHub object at 0x0000027B00CFAD80>.page_text
+------------------------------ Captured log call ------------------------------
+ERROR    app:app.py:875 Exception on /checkout/² [GET]
+Traceback (most recent call last):
+  File "D:\AIproject\.venv\Lib\site-packages\flask\app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AIproject\.venv\Lib\site-packages\flask\app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AIproject\.venv\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AIproject\.venv\Lib\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AIproject\app\web\__init__.py", line 397, in checkout_review
+    hold = _services().checkout.review(buyer_id=_buyer_id(), hold_id=hold_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AIproject\app\wiring.py", line 192, in review
+    hold = self._inventory.get_hold_for_buyer(tx=tx, hold_id=hold_id, buyer_id=buyer_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\AIproject\app\inventory\postgres.py", line 94, in get_hold_for_buyer
+    hold_key, buyer_key = db_id(hold_id), db_id(buyer_id)
+                          ^^^^^^^^^^^^^^
+  File "D:\AIproject\app\db\transaction.py", line 131, in db_id
+    return int(text_value)
+           ^^^^^^^^^^^^^^^
+ValueError: invalid literal for int() with base 10: '²'
+D:\AIproject\tests\system\test_st_validation_edges.py:200: AssertionError: Internal Server Error
+E   AssertionError: assert 'sold out' in 'sorry, there are not enough tickets left for that quantity.'
+     +  where 'sorry, there are not enough tickets left for that quantity.' = <built-in method lower of str object at 0x0000027B00B94FF0>()
+     +    where <built-in method lower of str object at 0x0000027B00B94FF0> = 'Sorry, there are not enough tickets left for that quantity.'.lower
+     +      where 'Sorry, there are not enough tickets left for that quantity.' = error()
+     +        where error = <tests.system.support.EventHub object at 0x0000027B00B72F00>.error
+D:\AIproject\tests\system\test_st_whitebox.py:127: AssertionError: assert 'sold out' in 'sorry, there are not enough tickets left for that quantity.'
+---------- generated xml file: D:\AIproject\reports\system-tests.xml ----------
+---- Generated html report: file:///D:/AIproject/reports/system-tests.html ----
+=========================== short test summary info ===========================
+FAILED tests/system/test_st_call5_changes.py::test_st30_pay_submitted_twice_at_once_creates_one_order
+FAILED tests/system/test_st_call5_changes.py::test_st31_quick_buy_submitted_twice_at_once_creates_one_order
+FAILED tests/system/test_st_call5_changes.py::test_st36_more_than_ten_purchase_requests_a_minute_are_slowed_down
+FAILED tests/system/test_st_call5_changes.py::test_st38_changing_to_a_non_usf_email_removes_the_discount
+FAILED tests/system/test_st_call5_changes.py::test_st39_email_change_during_checkout_cancels_the_discounted_hold
+FAILED tests/system/test_st_call5_changes.py::test_st40_email_change_needs_the_password_and_a_free_address
+FAILED tests/system/test_st_call5_changes.py::test_st41_checkout_and_confirmation_show_one_clear_amount_charged
+FAILED tests/system/test_st_call5_changes.py::test_st42_preselected_currency_says_where_it_comes_from
+FAILED tests/system/test_st_call5_changes.py::test_st43_changing_the_saved_currency_changes_the_preselection
+FAILED tests/system/test_st_call5_changes.py::test_st44_no_tickets_are_sold_after_the_event_has_started
+FAILED tests/system/test_st_validation_edges.py::test_st11_thuys_six_rejections_have_distinct_messages_and_are_all_logged
+FAILED tests/system/test_st_validation_edges.py::test_st14_whole_number_written_as_2_point_0_is_accepted
+FAILED tests/system/test_st_validation_edges.py::test_st17_logged_out_purchase_returns_to_the_event_after_login
+FAILED tests/system/test_st_validation_edges.py::test_st20_unicode_digit_quantities_are_rejected_not_crashed[superscript-two]
+FAILED tests/system/test_st_validation_edges.py::test_st20_unicode_digit_quantities_are_rejected_not_crashed[circled-one]
+FAILED tests/system/test_st_validation_edges.py::test_st20_unicode_digit_quantities_are_rejected_not_crashed[arabic-three]
+FAILED tests/system/test_st_validation_edges.py::test_st21_unicode_digit_ids_in_urls_show_not_found[/events/\xb2]
+FAILED tests/system/test_st_validation_edges.py::test_st21_unicode_digit_ids_in_urls_show_not_found[/orders/\u2460]
+FAILED tests/system/test_st_validation_edges.py::test_st21_unicode_digit_ids_in_urls_show_not_found[/checkout/\xb2]
+FAILED tests/system/test_st_whitebox.py::test_st65_two_browsers_racing_for_the_last_ticket
+================== 20 failed, 64 passed in 495.28s (0:08:15) ==================
+
+Report: D:\AIproject\reports\system-tests.html

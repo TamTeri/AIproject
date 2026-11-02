@@ -37,17 +37,26 @@ def test_parse_currency_normalizes_or_rejects(raw, expected):
     assert parse_currency(raw) == expected
 
 
-@pytest.mark.parametrize("quantity", [0, -3, "two", "1.5"])
-def test_invalid_quantity_is_rejected_and_audited(quantity):
+@pytest.mark.parametrize(
+    ("quantity", "outcome"),
+    [
+        (0, PurchaseOutcome.QUANTITY_ZERO),
+        (-3, PurchaseOutcome.QUANTITY_NEGATIVE),
+        ("two", PurchaseOutcome.INVALID_QUANTITY),
+        ("1.5", PurchaseOutcome.INVALID_QUANTITY),
+    ],
+)
+def test_invalid_quantity_is_rejected_and_audited(quantity, outcome):
+    """purchase-002, and purchase-017 (Call 5): each kind of bad quantity has its own reason."""
     h = make_harness()
     result = h.coordinator.start_checkout(request(quantity=quantity))
 
-    assert result.outcome is PurchaseOutcome.INVALID_QUANTITY
+    assert result.outcome is outcome
     assert result.hold is None
     assert h.world.holds == {}
     assert len(h.world.audit) == 1
     record = h.world.audit[0]
-    assert (record.outcome, record.reason_code) == ("rejected", "invalid_quantity")
+    assert (record.outcome, record.reason_code) == ("rejected", str(outcome))
     assert h.transactions.opened[0].committed  # the audit row is kept
 
 
@@ -80,12 +89,24 @@ def test_start_checkout_creates_ten_minute_hold_and_reserves_tickets():
     assert h.world.audit == []  # holding is not yet a purchase attempt outcome
 
 
-def test_sold_out_when_not_enough_tickets_left():
+def test_asking_for_more_than_are_left_says_how_many_are_left():
+    """purchase-017 (Call 5): "only 2 left" is not the same message as "sold out"."""
     world = World(capacity={"1": 2})
     h = make_harness(world=world)
     result = h.coordinator.start_checkout(request(quantity=3))
+    assert result.outcome is PurchaseOutcome.NOT_ENOUGH_TICKETS
+    assert result.available == 2
+    assert world.audit[0].reason_code == "not_enough_tickets"
+
+
+def test_sold_out_when_no_tickets_are_left():
+    world = World(capacity={"1": 2})
+    first = make_harness(buyer_id="1", world=world)
+    first.coordinator.purchase(request(quantity=2))
+    second = make_harness(buyer_id="2", world=world, clock=first.clock)
+    result = second.coordinator.start_checkout(request(quantity=1))
     assert result.outcome is PurchaseOutcome.SOLD_OUT
-    assert world.audit[0].reason_code == "sold_out"
+    assert world.audit[-1].reason_code == "sold_out"
 
 
 def test_two_buyers_never_get_the_same_last_ticket():
@@ -209,6 +230,7 @@ def test_limit_is_per_event():
 
 
 def test_quick_buy_uses_the_same_validation_as_checkout():
+    """purchase-011, audit-004: quick buy cannot skip validation or the audit write."""
     h = make_harness()
     result = h.coordinator.purchase(request(quantity=1, currency="GBP"))  # not enabled
     assert result.outcome is PurchaseOutcome.UNSUPPORTED_CURRENCY
@@ -236,6 +258,7 @@ class ExplodingOrders:
 
 
 def test_unexpected_error_rolls_back_and_still_leaves_an_audit_record():
+    """audit-007: a crash is rolled back and recorded as internal_error."""
     h = make_harness()
     h.coordinator._orders = ExplodingOrders()
 
