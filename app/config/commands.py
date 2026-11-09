@@ -70,14 +70,37 @@ def reset() -> int:
     return 0
 
 
+def check_orders(since_minutes: int | None = None) -> int:
+    """Flag orders priced far outside their event's range (audit-009). Exit 1 when any are found."""
+    from app.audit.anomaly import find_anomalies, notify
+    from app.db.transaction import PostgresDatabase, unit_of_work
+
+    database = PostgresDatabase(Settings.from_values().database_url)
+    try:
+        with unit_of_work(database) as tx:
+            findings = find_anomalies(tx, **({"since_minutes": since_minutes} if since_minutes else {}))
+    finally:
+        database.dispose()
+    if findings:
+        notify(findings)
+        print(f"{len(findings)} order(s) out of price range", file=sys.stderr)
+        return 1
+    print("no out-of-range orders")
+    return 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="EventHub bootstrap database commands")
     subparsers = parser.add_subparsers(dest="command", required=True)
     for name in ("migrate", "seed", "reset"):
         subparsers.add_parser(name)
+    watch = subparsers.add_parser("check-orders", help="exit 1 if any order total is out of range")
+    watch.add_argument("--since-minutes", type=int, default=None, help="only orders newer than this")
 
     args = parser.parse_args(argv)
     try:
+        if args.command == "check-orders":
+            return check_orders(args.since_minutes)
         return {"migrate": migrate, "seed": seed, "reset": reset}[args.command]()
     except (ConfigurationError, OSError, RuntimeError) as exc:
         print(f"eventhub bootstrap error: {exc}", file=sys.stderr)
