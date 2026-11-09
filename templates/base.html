@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="{{ locale() }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -55,22 +55,22 @@
 </head>
 <body>
   <header>
-    <nav aria-label="Primary">
+    <nav aria-label="{{ _('nav_primary') }}">
       <a class="brand" href="{{ url_for('web.events') }}">EventHub</a>
-      <a href="{{ url_for('web.events') }}">Events</a>
+      <a href="{{ url_for('web.events') }}">{{ _('nav_events') }}</a>
       {% set user = current_user() %}
       {% if user %}
-        <a href="{{ url_for('web.orders') }}">Order history</a>
-        <a href="{{ url_for('web.account') }}">Account</a>
-        {% if user.is_admin %}<a href="{{ url_for('web.admin_rates') }}">Admin</a>{% endif %}
+        <a href="{{ url_for('web.orders') }}">{{ _('nav_orders') }}</a>
+        <a href="{{ url_for('web.account') }}">{{ _('nav_account') }}</a>
+        {% if user.is_admin %}<a href="{{ url_for('web.admin_rates') }}">{{ _('nav_admin') }}</a>{% endif %}
         <form method="post" action="{{ url_for('web.logout') }}">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-          <button class="linklike" type="submit">Log out ({{ user.name }})</button>
+          <button class="linklike" type="submit">{{ _('nav_logout', name=user.name) }}</button>
         </form>
       {% else %}
-        <a href="{{ url_for('web.orders') }}">Order history</a>
-        <a href="{{ url_for('web.login') }}">Log in</a>
-        <a href="{{ url_for('web.register') }}">Register</a>
+        <a href="{{ url_for('web.orders') }}">{{ _('nav_orders') }}</a>
+        <a href="{{ url_for('web.login') }}">{{ _('nav_login') }}</a>
+        <a href="{{ url_for('web.register') }}">{{ _('nav_register') }}</a>
       {% endif %}
     </nav>
   </header>
@@ -80,6 +80,11 @@
     {% endwith %}
     {% block content %}{% endblock %}
   </main>
+  <footer>
+    <p class="muted" id="language-switcher">{{ _('footer_language') }}:
+      {% for code, name in languages %}{% if not loop.first %} · {% endif %}{% if code == locale() %}<strong lang="{{ code }}">{{ name }}</strong>{% else %}<a lang="{{ code }}" hreflang="{{ code }}" href="{{ request.path }}?lang={{ code }}">{{ name }}</a>{% endif %}{% endfor %}
+    </p>
+  </footer>
   <script src="{{ url_for('web.static', filename='eventhub.js') }}" defer></script>
   {% block scripts %}{% endblock %}
 </body>

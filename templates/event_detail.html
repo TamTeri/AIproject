@@ -5,45 +5,45 @@
 <h1>{{ event.artist }}</h1>
 {% if event.title %}<p>{{ event.title }}</p>{% endif %}
 <dl class="summary">
-  <dt>Venue</dt><dd>{{ event.venue }}</dd>
-  <dt>Starts</dt><dd>{{ event.starts_at|when }}</dd>
-  {% if price %}<dt>Price</dt><dd>{{ price }} per ticket</dd>{% endif %}
-  <dt>Availability</dt>
-  <dd>{% if event.sales_closed %}<strong>Sales closed</strong>{% elif event.available > 0 %}<strong>{{ event.available }}</strong> tickets left{% else %}<strong>Sold out</strong>{% endif %}</dd>
+  <dt>{{ _('detail_venue') }}</dt><dd>{{ event.venue }}</dd>
+  <dt>{{ _('detail_starts') }}</dt><dd>{{ event.starts_at|when }}</dd>
+  {% if price %}<dt>{{ _('detail_price') }}</dt><dd>{{ _('detail_price_each', price=price|money) }}</dd>{% endif %}
+  <dt>{{ _('detail_availability') }}</dt>
+  <dd>{% if event.sales_closed %}<strong>{{ _('sales_closed') }}</strong>{% elif event.available > 0 %}<strong>{{ event.available }}</strong> {{ _('tickets_left_suffix') }}{% else %}<strong>{{ _('sold_out') }}</strong>{% endif %}</dd>
 </dl>
 
 {% if error %}<p class="error" role="alert" data-error-code="{{ error.code }}">{{ error.message }}</p>{% endif %}
 
 {% if event.sales_closed %}
-<p class="message" id="sales-closed" role="status">Ticket sales have closed for this event because it has already started.</p>
+<p class="message" id="sales-closed" role="status">{{ _('detail_sales_closed_notice') }}</p>
 {% else %}
 {% if currencies %}
-<h2>Buy tickets</h2>
+<h2>{{ _('detail_buy') }}</h2>
 <form class="stack" method="post" action="{{ url_for('web.checkout_start', event_id=event.id) }}" data-single-submit>
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <input type="hidden" name="idempotency_key" value="{{ idempotency_key() }}">
-  <label for="quantity">Quantity</label>
+  <label for="quantity">{{ _('detail_quantity') }}</label>
   <input id="quantity" name="quantity" type="number" min="1" step="1" value="{{ quantity }}" required>
-  <label for="currency">Currency</label>
+  <label for="currency">{{ _('detail_currency') }}</label>
   <select id="currency" name="currency" aria-describedby="currency-source">
     {% for code in currencies %}<option value="{{ code }}" {% if code == preferred_currency %}selected{% endif %}>{{ code }}</option>{% endfor %}
   </select>
   <p class="muted hint" id="currency-source">
-    {% if user %}Preselected: <strong>{{ saved_currency }}</strong>, your saved home currency. <a href="{{ url_for('web.account') }}">Change your home currency</a>{% else %}Preselected: <strong>USD</strong>. Log in to use your saved home currency (<a href="{{ url_for('web.account') }}">Account</a>).{% endif %}
+    {% if user %}{{ _('detail_preselected') }} <strong>{{ saved_currency }}</strong>{{ _('detail_saved_home_currency') }} <a href="{{ url_for('web.account') }}">{{ _('detail_change_home_currency') }}</a>{% else %}{{ _('detail_preselected') }} <strong>USD</strong>{{ _('detail_guest_after') }}<a href="{{ url_for('web.account') }}">{{ _('detail_guest_account') }}</a>{{ _('detail_guest_end') }}{% endif %}
   </p>
-  <button type="submit">Continue to checkout</button>
+  <button type="submit">{{ _('detail_continue') }}</button>
 </form>
-<p class="muted">USF students (@usf.edu email) get the student discount. Your tickets are held for 10 minutes while you check out.</p>
+<p class="muted">{{ _('detail_student') }}</p>
 {% endif %}
 
 <div class="actions">
   <form method="post" action="{{ url_for('web.quick_buy', event_id=event.id) }}" data-single-submit>
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <input type="hidden" name="idempotency_key" value="{{ idempotency_key() }}">
-    <button class="secondary" type="submit">Quick Buy 1 ticket in {{ saved_currency }}</button>
+    <button class="secondary" type="submit">{{ _('detail_quick_buy', currency=saved_currency) }}</button>
   </form>
-  <span class="muted">Pays for one ticket straight away in your saved home currency ({{ saved_currency }}).</span>
+  <span class="muted">{{ _('detail_quick_buy_help', currency=saved_currency) }}</span>
 </div>
 {% endif %}
-<p><a href="{{ url_for('web.events') }}">Back to events</a></p>
+<p><a href="{{ url_for('web.events') }}">{{ _('detail_back') }}</a></p>
 {% endblock %}
