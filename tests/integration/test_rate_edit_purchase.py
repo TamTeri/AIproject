@@ -80,7 +80,7 @@ def test_next_purchase_uses_the_edited_jpy_rate_and_history_is_written(world):
 @pytest.mark.requirement("admin-006")
 def test_ten_times_typo_is_refused_unless_confirmed(world):
     db, services, admin, _buyer = world
-    with pytest.raises(ServiceError):
+    with pytest.raises(ServiceError, match="25%"):
         services.admin.set_rate(actor=admin, currency="JPY", rate="15")
     assert scalar(db, "SELECT rate FROM exchange_rates WHERE currency_code = 'JPY'") == Decimal("150")
     assert scalar(db, "SELECT count(*) FROM exchange_rate_history") == 0

@@ -9,6 +9,9 @@ on:
     - cron: "*/15 * * * *"
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   check-orders:
     runs-on: ubuntu-latest
@@ -31,4 +34,4 @@ jobs:
         if: env.HAS_DB == 'true'
         env:
           EVENTHUB_DATABASE_URL: ${{ secrets.EVENTHUB_DATABASE_URL }}
-        run: python -m app.config.commands check-orders --since-minutes 30
+        run: python -m app.config.commands check-orders --since-minutes 60  # overlaps the 15-min cron on purpose: GitHub cron can run late; a bad order may alert 2-4 times

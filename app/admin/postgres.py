@@ -31,6 +31,9 @@ class PostgresAdminRepository:
         return row is not None
 
     def current_rate(self, code: str) -> Decimal | None:
+        # lock the currency row first: it always exists, so two admins editing a currency that has
+        # no rate yet still serialize and the second one sees the first one's rate
+        self._tx.fetch_one("SELECT 1 AS ok FROM currencies WHERE code = :code FOR UPDATE", {"code": code})
         row = self._tx.fetch_one(
             "SELECT rate FROM exchange_rates WHERE currency_code = :code FOR UPDATE", {"code": code}
         )

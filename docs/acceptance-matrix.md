@@ -76,5 +76,5 @@ Written before the code and tests were merged, so every row starts `OPEN` or `PA
 | system-023 localization keeps the yen test green | yen test run with localization on (A + C) | OPEN (until merged tests are green) |
 | audit-009 out-of-range order flagged and a human notified | `check-orders` tests (Stream D) | OPEN (rotation deferred; threshold 50%-200% is `[TEMPORARY_MVP_DEFAULT]`) |
 | system-017 no promotion until corrective tests green; skipped tests fail the gate | CI gate (Stream D) | OPEN (until merged tests are green) |
-| system-018 every release restorable | tags `v1.2.0`, `v1.3.0`; switch-back steps in CONTRIBUTING.md | PASS (temporary: documented, restore drill not yet run) |
+| system-018 every release restorable | tags `v1.2.0`, `v1.3.0`; switch-back steps in CONTRIBUTING.md | OPEN (documented; `v1.3.0` is tagged only after the merged CI run is green, and the restore drill has not been run) |
 | system-019 database backup owner, nightly `pg_dump`, restore drill | — | OPEN (no owner named) |

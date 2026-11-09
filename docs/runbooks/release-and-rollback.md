@@ -25,7 +25,7 @@ real release and record the measured time here.
 
 ## Database schema and the downgrade caveat
 
-Migrations `0001` to `0006` all have `downgrade()`, and CI checks `downgrade -1` then
+Migrations `0001` to `0007` all have `downgrade()`, and CI checks `downgrade -1` then
 `upgrade head` on every change. But a downgrade can drop columns or tables **and their data**.
 
 - Prefer rolling back the code only, when the older code still works with the newer schema
@@ -33,8 +33,10 @@ Migrations `0001` to `0006` all have `downgrade()`, and CI checks `downgrade -1`
   expects (`git show v1.2.0:migrations/versions` lists its migrations).
 - If the old code needs an older schema, take a backup first (`scripts/backup.sh`, see
   `backup-restore.md`), then `alembic downgrade <revision>` for exactly the extra migrations.
-- v1.3.0 adds no migration, so v1.2.0 and v1.3.0 are schema-compatible. A future release that
-  adds a migration must state its compatibility in its release notes.
+- v1.3.0 adds migration `0007` (the `exchange_rate_history` table). It is additive, so v1.2.0
+  code runs against the v1.3.0 schema: roll back the code only and leave the table in place.
+  `alembic downgrade 0006` would drop the table and its history, so do not do it unless the
+  history is backed up. A future release that adds a migration must state its compatibility.
 
 ## Before every release
 

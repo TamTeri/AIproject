@@ -13,9 +13,11 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Any
 
+from app.pricing.calculator import BASE_CURRENCY
+
 log = logging.getLogger("eventhub.order_watch")
 
-BASE_EXPONENT = 2  # USD cents
+BASE_EXPONENT = BASE_CURRENCY.exponent  # USD cents (ADR-008: never write a literal 2)
 
 
 @dataclass(frozen=True, slots=True)
@@ -50,7 +52,7 @@ _QUERY = """
 """
 
 
-def find_anomalies(tx: Any, *, since_minutes: int = 10_000_000) -> list[Finding]:
+def find_anomalies(tx: Any, *, since_minutes: int = 60) -> list[Finding]:
     """``tx`` is any object with ``fetch_all(sql, params)`` (an ``SqlTransaction``)."""
     findings = []
     for r in tx.fetch_all(_QUERY, {"minutes": since_minutes}):

@@ -68,4 +68,5 @@ def test_snapshot_json_without_exponent_is_rejected():
 def test_pricing_policy_requires_currency_and_exponent():
     with pytest.raises(TypeError):
         PricingPolicy(revision="r", discount_percent="10", eligibility_domain="usf.edu")  # type: ignore[call-arg]
-    assert temporary_local_policy().currency_exponent == 2
+    policy = temporary_local_policy()
+    assert (policy.currency_code, policy.currency_exponent) == ("USD", 2)  # USD cents, written by hand

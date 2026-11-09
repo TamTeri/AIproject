@@ -3,7 +3,7 @@
 **Status:** `[TEAM]` accepted (Call 6). Refines [ADR-005](ADR-005-money-representation.md); it does not replace it. Supports pricing-014, system-016, system-022.
 
 ## Context
-ADR-005 already said amounts are integers in the currency's minor unit and that JPY has 0 decimals. Release 1.3 still shipped a display cleanup that formatted all money with two decimals and divided every amount by 100 at display and at charge. A 4,500-yen ticket became 45 yen, and three students bought tickets at about 1% of the price. No automated test purchased in yen, so nothing failed.
+ADR-005 already said amounts are integers in the currency's minor unit and that JPY has 0 decimals. A display cleanup (in the Call 6 scenario, release 1.3; this repository never shipped it, and our own `v1.3.0` is the fix release) formatted all money with two decimals and divided every amount by 100 at display and at charge. A 4,500-yen ticket became 45 yen, and three students bought tickets at about 1% of the price. No automated test purchased in yen, so nothing failed.
 
 The rule was written down but not enforced in the one place where display and charge are formatted.
 

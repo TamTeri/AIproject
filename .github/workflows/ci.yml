@@ -45,7 +45,7 @@ jobs:
         run: python scripts/check_requirement_coverage.py --strict
       - name: All tests against real PostgreSQL
         run: python -m pytest -q --junitxml=reports/junit.xml
-      - name: Fail if anything was skipped or nothing ran (system-018)
+      - name: Fail if anything was skipped or nothing ran (system-017)
         run: python scripts/fail_on_skips.py reports/junit.xml
       - name: Migrations round-trip (downgrade one step, upgrade to head)
         # The alembic CLI has no URL of its own here, so build the config the app uses.

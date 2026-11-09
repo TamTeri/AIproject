@@ -78,7 +78,9 @@ def check_orders(since_minutes: int | None = None) -> int:
     database = PostgresDatabase(Settings.from_values().database_url)
     try:
         with unit_of_work(database) as tx:
-            findings = find_anomalies(tx, **({"since_minutes": since_minutes} if since_minutes else {}))
+            findings = find_anomalies(
+                tx, **({"since_minutes": since_minutes} if since_minutes is not None else {})
+            )
     finally:
         database.dispose()
     if findings:

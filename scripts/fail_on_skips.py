@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail (exit 1) if a JUnit XML file has any skipped test or no tests at all (system-018).
+"""Fail (exit 1) if a JUnit XML file has any skipped test or no tests at all (system-017).
 
     python scripts/fail_on_skips.py reports/junit.xml [more.xml ...]
 
