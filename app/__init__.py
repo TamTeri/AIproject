@@ -47,9 +47,42 @@ def create_app(test_config: Mapping[str, Any] | None = None) -> Flask:
 
     @app.get("/healthz")
     def healthz() -> tuple[dict[str, str], int]:
-        return {"service": "eventhub", "status": "ok"}, 200
+        return {
+            "service": "eventhub",
+            "status": "ok",
+            "version": _version(),
+            "alembic_head": _alembic_head(database),
+        }, 200
 
     return app
+
+
+def _version() -> str:
+    from importlib.metadata import PackageNotFoundError, version
+
+    try:
+        return version("eventhub")
+    except PackageNotFoundError:
+        return "unknown"
+
+
+def _probe_engine(database_url: str) -> Any:
+    from sqlalchemy import create_engine
+    from sqlalchemy.pool import NullPool
+
+    # Short connect timeout: a health probe must answer even when the database host drops packets.
+    return create_engine(database_url, poolclass=NullPool, connect_args={"connect_timeout": 2})
+
+
+def _alembic_head(database: Any) -> str:
+    from sqlalchemy import text
+
+    try:
+        engine = _probe_engine(database.database_url)
+        with engine.connect() as connection:
+            return str(connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one())
+    except Exception:  # DB down or not migrated: /healthz must still answer
+        return "unknown"
 
 
 def _secret_key(environment: str, overrides: Mapping[str, Any] | None) -> str:

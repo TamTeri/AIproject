@@ -51,6 +51,9 @@ jobs:
           else
             python scripts/run_system_tests.py --no-docker
           fi
+      - name: Fail if any system test was skipped (system-018)
+        if: inputs.keyword == ''
+        run: python scripts/fail_on_skips.py reports/system-tests.xml
       - name: Upload the test report
         if: always()
         uses: actions/upload-artifact@v4

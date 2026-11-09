@@ -1,0 +1,34 @@
+# audit-009: look for orders priced far outside their event's range (the 1% incident).
+# Runs only when the repository secret EVENTHUB_DATABASE_URL exists (a read-only DB user is
+# enough); without it the job is skipped. A failing run is the alert: GitHub emails the
+# workflow's watchers. The secret is never written to a file.
+name: Order watch
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+jobs:
+  check-orders:
+    runs-on: ubuntu-latest
+    env:
+      HAS_DB: ${{ secrets.EVENTHUB_DATABASE_URL != '' }}
+    steps:
+      - name: Skip notice
+        if: env.HAS_DB != 'true'
+        run: echo "EVENTHUB_DATABASE_URL secret not set; order watch skipped."
+      - uses: actions/checkout@v4
+        if: env.HAS_DB == 'true'
+      - uses: actions/setup-python@v5
+        if: env.HAS_DB == 'true'
+        with:
+          python-version: "3.12"
+      - name: Install
+        if: env.HAS_DB == 'true'
+        run: pip install -e .
+      - name: Check recent orders
+        if: env.HAS_DB == 'true'
+        env:
+          EVENTHUB_DATABASE_URL: ${{ secrets.EVENTHUB_DATABASE_URL }}
+        run: python -m app.config.commands check-orders --since-minutes 30
