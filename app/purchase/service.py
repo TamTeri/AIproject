@@ -27,7 +27,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Any
 from uuid import uuid4
@@ -68,7 +68,6 @@ class _AttemptFacts:
     request_id: str | None = None
     idempotency_key: str | None = None
     claimed_key: str | None = None  # set once this request owns its one-time key
-    extra: dict[str, Any] = field(default_factory=dict)
 
 
 class _Rejected(Exception):

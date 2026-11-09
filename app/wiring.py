@@ -157,14 +157,6 @@ class PricingAdapter:
     def base_price_display(self, *, base_price_minor: int) -> str:
         return format_minor(base_price_minor, self._policy.currency_code, self._policy.currency_exponent)
 
-    @property
-    def discount_percent(self) -> str:
-        return f"{self._policy.discount_percent.normalize():f}"
-
-    @property
-    def eligibility_domain(self) -> str:
-        return self._policy.eligibility_domain
-
     def student_discount_applies(self, *, email: str) -> bool:
         """Shown on the Account page: the discount follows the current email (pricing-011)."""
         decision = evaluate_student_eligibility(

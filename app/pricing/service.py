@@ -49,10 +49,6 @@ class QuoteService:
         self._repository = repository
         self._policy = policy
 
-    @property
-    def policy(self) -> PricingPolicy:
-        return self._policy
-
     def supported_currencies(self, tx: Any) -> set[str]:
         return {c.code for c in self._repository.enabled_currencies(tx)}
 
