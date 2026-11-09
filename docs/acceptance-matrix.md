@@ -59,3 +59,22 @@
 | system-013 performance | ST-70 (p95 ≈ 0.3 s, target 1 s) | PASS (temporary target) |
 | system-014 system tests at a button | `tests/test_project_process.py`, the suite itself | PASS |
 | system-015 tests trace to requirements | collection check in `tests/system/conftest.py`; `check_requirement_coverage.py` in CI | PASS |
+
+## Call 6 additions (maintenance)
+
+Written before the code and tests were merged, so every row starts `OPEN` or `PASS (temporary)`. Rows move to `PASS` only after the merged test run shows the named proof green. Do not claim `PASS` earlier.
+
+| Requirement | Proof (planned) | Status |
+|---|---|---|
+| system-016 every currency purchased, exact total, JPY | per-currency purchase test (Stream A) | OPEN (until merged tests are green) |
+| pricing-014 minor unit for display and charge; missing exponent is an error | formatting/calculator tests incl. JPY (Stream A) | OPEN (until merged tests are green) |
+| pricing-014 JPY as a real supported currency | customer sign-off needed | OPEN (JPY seeded only for testing) |
+| admin-006, pricing-013 rate edit used by next purchase; >25% confirmation; history row | admin rate-path tests (Stream B) | OPEN (until merged tests are green) |
+| system-020 Spanish + English, allowlisted locale, order of precedence | localization tests (Stream C) | OPEN (until merged tests are green) |
+| system-021 regional date format | localization tests (Stream C) | OPEN (until merged tests are green) |
+| system-022 currency formatted by its own conventions | localization tests (Stream C) | OPEN (until merged tests are green) |
+| system-023 localization keeps the yen test green | yen test run with localization on (A + C) | OPEN (until merged tests are green) |
+| audit-009 out-of-range order flagged and a human notified | `check-orders` tests (Stream D) | OPEN (rotation deferred; threshold 50%-200% is `[TEMPORARY_MVP_DEFAULT]`) |
+| system-017 no promotion until corrective tests green; skipped tests fail the gate | CI gate (Stream D) | OPEN (until merged tests are green) |
+| system-018 every release restorable | tags `v1.2.0`, `v1.3.0`; switch-back steps in CONTRIBUTING.md | PASS (temporary: documented, restore drill not yet run) |
+| system-019 database backup owner, nightly `pg_dump`, restore drill | — | OPEN (no owner named) |

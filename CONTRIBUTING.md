@@ -37,6 +37,13 @@ CI (`.github/workflows/ci.yml`) runs the same checks plus the PostgreSQL tests a
 - Write the expected result from the requirement, not from what the code does today (Priya, Call 5).
 - After adding or renaming a system test, run `python scripts/list_system_tests.py --write` (a test checks the catalogue is current).
 
+## Release checklist (Call 6)
+1. All tests pass, **including the system tests** (`python scripts/run_system_tests.py`). The CI gate fails if any test is skipped, so a skip is not a pass.
+2. The corrective tests for the release are green (system-017). If not, the release is not promoted and the previous one stays live.
+3. Tag the release (for example `v1.3.0`). Every release stays restorable (system-018): the previous tag (`v1.2.0` before 1.3) must still check out, install and start.
+4. Know the switch back before you need it: check out the previous tag and restart. If the new release ran a migration, test its Alembic `downgrade` first; if it is not reversible, say so in the release notes.
+5. If something goes wrong live, roll back first, debug in a test environment second.
+
 ## Where code goes
 - Feature rules belong in `app/<feature>/service.py`. Plain Python only, no Flask and no SQL.
 - SQL belongs in `app/<feature>/postgres.py`.
