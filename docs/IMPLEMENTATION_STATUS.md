@@ -61,7 +61,7 @@
 
 ## Part 6 (Call 6: maintenance), release 1.3.0
 
-**Branch/tag:** work branched from tag `v1.2.0` (the known-good baseline); the maintenance release is tagged `v1.3.0` when the lead merges the five streams. Test counts below are filled in after the merge.
+**Branch/tag:** work branched from tag `v1.2.0` (the known-good baseline); the maintenance release is tagged `v1.3.0` when the lead merges the five streams. Integrated unit+contract run: 383 passed, 39 skipped (Postgres), 87 deselected (Selenium); the Postgres and Selenium layers are proven only by the CI run.
 
 | What | Requirements | Status |
 |---|---|---|

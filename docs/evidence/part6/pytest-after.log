@@ -1,0 +1,44 @@
+# unit+contract run on integrated tip c94e807; Postgres and Selenium layers NOT run (no Docker/Postgres on this machine)
+..........................................................ssssssssssssss [ 17%]
+ssssssssssssssssssssssss.s.............................................. [ 34%]
+........................................................................ [ 51%]
+........................................................................ [ 68%]
+........................................................................ [ 85%]
+..............................................................           [100%]
+=========================== short test summary info ===========================
+SKIPPED [1] tests\integration\db\test_schema.py:67: EVENTHUB_TEST_DATABASE_URL is required for PostgreSQL integration tests
+SKIPPED [1] tests\integration\db\test_schema.py:187: EVENTHUB_TEST_DATABASE_URL is required for PostgreSQL integration tests
+SKIPPED [1] tests\integration\db\test_schema.py:257: EVENTHUB_TEST_DATABASE_URL is required for PostgreSQL integration tests
+SKIPPED [1] tests\integration\test_call5_postgres.py:79: EVENTHUB_TEST_DATABASE_URL is required for PostgreSQL integration tests
+SKIPPED [1] tests\integration\test_call5_postgres.py:110: EVENTHUB_TEST_DATABASE_URL is required for PostgreSQL integration tests
+SKIPPED [1] tests\integration\test_call5_postgres.py:139: EVENTHUB_TEST_DATABASE_URL is required for PostgreSQL integration tests
+SKIPPED [1] tests\integration\test_call5_postgres.py:164: EVENTHUB_TEST_DATABASE_URL is required for PostgreSQL integration tests
+SKIPPED [1] tests\integration\test_call5_postgres.py:191: EVENTHUB_TEST_DATABASE_URL is required for PostgreSQL integration tests
+SKIPPED [1] tests\integration\test_call5_postgres.py:203: EVENTHUB_TEST_DATABASE_URL is required for PostgreSQL integration tests
+SKIPPED [1] tests\integration\test_call5_postgres.py:217: EVENTHUB_TEST_DATABASE_URL is required for PostgreSQL integration tests
+SKIPPED [1] tests\integration\test_call5_postgres.py:233: EVENTHUB_TEST_DATABASE_URL is required for PostgreSQL integration tests
+SKIPPED [1] tests\integration\test_end_to_end.py:42: EVENTHUB_TEST_DATABASE_URL is required for PostgreSQL integration tests
+SKIPPED [1] tests\integration\test_end_to_end.py:79: EVENTHUB_TEST_DATABASE_URL is required for PostgreSQL integration tests
+SKIPPED [1] tests\integration\test_end_to_end.py:92: EVENTHUB_TEST_DATABASE_URL is required for PostgreSQL integration tests
+SKIPPED [1] tests\integration\test_end_to_end.py:118: EVENTHUB_TEST_DATABASE_URL is required for PostgreSQL integration tests
+SKIPPED [1] tests\integration\test_end_to_end.py:155: EVENTHUB_TEST_DATABASE_URL is required for PostgreSQL integration tests
+SKIPPED [5] tests\integration\test_multicurrency.py:36: EVENTHUB_TEST_DATABASE_URL is required for PostgreSQL integration tests
+SKIPPED [1] tests\integration\test_order_watch.py:20: EVENTHUB_TEST_DATABASE_URL is required for PostgreSQL integration tests
+SKIPPED [1] tests\integration\test_postgres_adapters.py:43: EVENTHUB_TEST_DATABASE_URL is required for PostgreSQL integration tests
+SKIPPED [1] tests\integration\test_postgres_adapters.py:66: EVENTHUB_TEST_DATABASE_URL is required for PostgreSQL integration tests
+SKIPPED [1] tests\integration\test_postgres_adapters.py:86: EVENTHUB_TEST_DATABASE_URL is required for PostgreSQL integration tests
+SKIPPED [1] tests\integration\test_postgres_adapters.py:112: EVENTHUB_TEST_DATABASE_URL is required for PostgreSQL integration tests
+SKIPPED [1] tests\integration\test_postgres_adapters.py:126: EVENTHUB_TEST_DATABASE_URL is required for PostgreSQL integration tests
+SKIPPED [1] tests\integration\test_postgres_adapters.py:151: EVENTHUB_TEST_DATABASE_URL is required for PostgreSQL integration tests
+SKIPPED [1] tests\integration\test_postgres_adapters.py:173: EVENTHUB_TEST_DATABASE_URL is required for PostgreSQL integration tests
+SKIPPED [1] tests\integration\test_postgres_adapters.py:198: EVENTHUB_TEST_DATABASE_URL is required for PostgreSQL integration tests
+SKIPPED [1] tests\integration\test_postgres_adapters.py:208: EVENTHUB_TEST_DATABASE_URL is required for PostgreSQL integration tests
+SKIPPED [1] tests\integration\test_postgres_adapters.py:219: EVENTHUB_TEST_DATABASE_URL is required for PostgreSQL integration tests
+SKIPPED [1] tests\integration\test_postgres_adapters.py:240: EVENTHUB_TEST_DATABASE_URL is required for PostgreSQL integration tests
+SKIPPED [1] tests\integration\test_postgres_adapters.py:259: EVENTHUB_TEST_DATABASE_URL is required for PostgreSQL integration tests
+SKIPPED [1] tests\integration\test_rate_edit_purchase.py:60: EVENTHUB_TEST_DATABASE_URL is required for PostgreSQL integration tests
+SKIPPED [1] tests\integration\test_rate_edit_purchase.py:80: EVENTHUB_TEST_DATABASE_URL is required for PostgreSQL integration tests
+SKIPPED [1] tests\integration\test_rate_edit_purchase.py:93: EVENTHUB_TEST_DATABASE_URL is required for PostgreSQL integration tests
+SKIPPED [1] tests\integration\test_rate_edit_purchase.py:110: EVENTHUB_TEST_DATABASE_URL is required for PostgreSQL integration tests
+SKIPPED [1] tests\test_bootstrap.py:31: EVENTHUB_TEST_DATABASE_URL is required for the real PostgreSQL bootstrap check
+383 passed, 39 skipped, 87 deselected in 8.46s

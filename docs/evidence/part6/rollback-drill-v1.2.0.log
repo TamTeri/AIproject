@@ -1,0 +1,2 @@
+# restorability drill: checked out tag v1.2.0 (ede191a) and ran the unit+contract suite; Postgres/Selenium not run here
+257 passed, 29 skipped, 87 deselected in 3.75s
