@@ -111,8 +111,8 @@ def test_fresh_migrate_seed_repeat_seed_and_reset_are_deterministic(
             revision = connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one()
             assert revision == "0007_rate_history"
 
-            assert connection.execute(text("SELECT count(*) FROM currencies")).scalar_one() == 4
-            assert connection.execute(text("SELECT count(*) FROM exchange_rates")).scalar_one() == 4
+            assert connection.execute(text("SELECT count(*) FROM currencies")).scalar_one() == 5
+            assert connection.execute(text("SELECT count(*) FROM exchange_rates")).scalar_one() == 5
             assert connection.execute(text("SELECT count(*) FROM app_config")).scalar_one() >= 4
             assert connection.execute(text("SELECT count(*) FROM events")).scalar_one() == 6
             event = connection.execute(

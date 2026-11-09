@@ -45,7 +45,7 @@ def test_st61_rate_change_during_checkout_does_not_change_the_price(ui, admin_ui
         row = next(r for r in admin_ui.find_all("tbody tr") if "CAD" in r.text)
         field = row.find_element("css selector", "input[name=rate]")
         field.clear()
-        field.send_keys("2.00")
+        field.send_keys("1.50")  # +8.7%: under the 25% confirmation guard (admin-006)
         admin_ui.submit_with(row.find_element("css selector", "button"))
         assert "saved" in admin_ui.flash().lower()
 
@@ -54,7 +54,7 @@ def test_st61_rate_change_during_checkout_does_not_change_the_price(ui, admin_ui
         assert ui.text("dd.total") == shown
         ui.start_checkout("4", quantity="2", currency="CAD")
         ui.wait_for_path(r"^/checkout/\d+$")
-        assert ui.text("dd.total") == "40.00 CAD"  # new buyers see the new rate
+        assert ui.text("dd.total") == "30.00 CAD"  # new buyers see the new rate (20.00 x 1.50)
     finally:
         db.set_rate("CAD", original)
 
