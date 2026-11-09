@@ -112,6 +112,7 @@ class Quotes:
             quantity=quantity,
             currency=currency,
             exchange_rate=Decimal("1"),
+            currency_exponent=2,
             total_minor=self.unit * quantity,
             unit_price_minor=self.unit,
             subtotal_minor=self.unit * quantity,

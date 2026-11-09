@@ -14,6 +14,7 @@ from types import SimpleNamespace
 import pytest
 
 from app.identity.contracts import Principal
+from app.pricing.calculator import format_minor
 from app.web import create_web_app
 from app.web.services import ServiceError
 
@@ -85,7 +86,7 @@ class PricingFake:
         return ["EUR", "USD"]
 
     def base_price_display(self, *, base_price_minor):
-        return f"{base_price_minor / 100:.2f} USD"
+        return format_minor(base_price_minor, "USD", 2)
 
     def student_discount_applies(self, *, email):
         return email.endswith("@usf.edu")

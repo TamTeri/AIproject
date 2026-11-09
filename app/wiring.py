@@ -32,10 +32,11 @@ from app.identity.sessions import SessionService
 from app.inventory.postgres import PostgresInventory
 from app.orders.postgres import PostgresOrderReader, PostgresOrderWriter
 from app.orders.service import OrderHistoryService
-from app.pricing.calculator import format_minor, format_rate
+from app.pricing.calculator import Currency, format_minor, format_rate
 from app.pricing.config import PricingPolicy, PricingUnavailable, temporary_local_policy
 from app.pricing.eligibility import EventFacts, IdentityFacts, evaluate_student_eligibility
 from app.pricing.postgres import PostgresPricingRepository
+from app.pricing.presenter import present_breakdown
 from app.pricing.service import QuoteService
 from app.purchase.models import PaymentRequest, PurchasePolicy, PurchaseRequest
 from app.purchase.postgres import (
@@ -198,6 +199,7 @@ class CheckoutAdapter:
         self._db = database
         self._quotes = QuoteService(repository=PostgresPricingRepository(), policy=pricing_policy)
         self._purchase_policy = purchase_policy
+        self._base_currency = Currency(pricing_policy.currency_code, pricing_policy.currency_exponent)
         self._inventory = PostgresInventory()
 
     def _coordinator(self, buyer_id: str | None) -> PurchaseCoordinator:
@@ -245,22 +247,29 @@ class CheckoutAdapter:
                 return None
             event = tx.fetch_one("SELECT title FROM events WHERE id = :id", {"id": db_id(hold.event_id)})
         q = hold.quote_snapshot
-        exp = q.currency_exponent
-        subtotal = q.subtotal_minor if q.subtotal_minor is not None else q.total_minor + q.discount_minor
+        shown = present_breakdown(
+            currency=q.currency,
+            exponent=q.currency_exponent,
+            total_minor=q.total_minor,
+            discount_minor=q.discount_minor,
+            subtotal_minor=q.subtotal_minor,
+            unit_price_minor=q.unit_price_minor,
+            base=self._base_currency,
+        )
         return HoldView(
             hold_id=hold.id,
             event_id=hold.event_id,
             event_title=event["title"] if event else "",
             quantity=hold.quantity,
             currency=q.currency,
-            subtotal=format_minor(subtotal, q.currency, exp),
-            discount=format_minor(q.discount_minor, q.currency, exp),
-            discount_applied=q.discount_minor > 0,
-            total=format_minor(q.total_minor, q.currency, exp),
+            subtotal=shown.subtotal,
+            discount=shown.discount,
+            discount_applied=shown.discount_applied,
+            total=shown.total,
             exchange_rate=format_rate(q.exchange_rate),
             expires_at=hold.expires_at,
             status=str(hold.status),
-            list_price=format_minor(q.unit_price_minor, "USD", 2) if q.unit_price_minor is not None else "",
+            list_price=shown.list_price,
         )
 
     def pay(self, *, buyer_id: str, hold_id: str, payment_choice: str, idempotency_key: str | None = None):

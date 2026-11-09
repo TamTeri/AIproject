@@ -11,7 +11,8 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Protocol
 
-from app.pricing.calculator import format_minor, format_rate
+from app.pricing.calculator import BASE_CURRENCY, format_rate
+from app.pricing.presenter import present_breakdown
 
 
 @dataclass(frozen=True)
@@ -41,11 +42,19 @@ class OrderReadRepository(Protocol):
 
 def to_view(row: dict) -> OrderView:
     snapshot = row.get("quote_snapshot") or {}
-    exponent = int(snapshot.get("currency_exponent", 2))
+    exponent = int(snapshot["currency_exponent"])
     currency = row["currency"]
     total = int(row["total_minor"])
     discount = int(row.get("discount_minor") or 0)
-    subtotal = int(snapshot.get("subtotal_minor") or total + discount)
+    shown = present_breakdown(
+        currency=currency,
+        exponent=exponent,
+        total_minor=total,
+        discount_minor=discount,
+        subtotal_minor=snapshot.get("subtotal_minor"),
+        unit_price_minor=snapshot.get("unit_price_minor"),
+        base=BASE_CURRENCY,
+    )
     return OrderView(
         id=str(row["id"]),
         event_title=row["title"],
@@ -56,16 +65,12 @@ def to_view(row: dict) -> OrderView:
         currency=currency,
         exchange_rate=Decimal(str(row["rate_applied"])),
         exchange_rate_display=format_rate(Decimal(str(row["rate_applied"]))),
-        subtotal=format_minor(subtotal, currency, exponent),
-        discount=format_minor(discount, currency, exponent),
-        discount_applied=discount > 0,
-        total=format_minor(total, currency, exponent),
+        subtotal=shown.subtotal,
+        discount=shown.discount,
+        discount_applied=shown.discount_applied,
+        total=shown.total,
         created_at=row["created_at"],
-        list_price=(
-            format_minor(int(snapshot["unit_price_minor"]), "USD", 2)
-            if snapshot.get("unit_price_minor") is not None
-            else ""
-        ),
+        list_price=shown.list_price,
     )
 
 

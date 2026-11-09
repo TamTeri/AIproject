@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from decimal import Decimal
 from enum import StrEnum
 from typing import TYPE_CHECKING
@@ -92,7 +92,7 @@ class QuoteSnapshot:
     total_minor: int
     unit_price_minor: int | None = None
     snapshot_version: str = "quote-v1"
-    currency_exponent: int = 2
+    currency_exponent: int = field(kw_only=True)  # required: no silent default (pricing-014)
     subtotal_minor: int | None = None
     discount_minor: int = 0
     discount_percent: Decimal = Decimal(0)
@@ -126,7 +126,7 @@ class QuoteSnapshot:
             total_minor=int(data["total_minor"]),
             unit_price_minor=data.get("unit_price_minor"),
             snapshot_version=str(data.get("snapshot_version", "quote-v1")),
-            currency_exponent=int(data.get("currency_exponent", 2)),
+            currency_exponent=int(data["currency_exponent"]),
             subtotal_minor=data.get("subtotal_minor"),
             discount_minor=int(data.get("discount_minor", 0)),
             discount_percent=Decimal(str(data.get("discount_percent", "0"))),
