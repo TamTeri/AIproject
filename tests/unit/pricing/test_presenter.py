@@ -52,7 +52,12 @@ def test_quote_snapshot_requires_exponent():
 
 def test_snapshot_json_without_exponent_is_rejected():
     data = QuoteSnapshot(
-        event_id="1", quantity=1, currency="JPY", exchange_rate=Decimal(150), total_minor=4500, currency_exponent=0
+        event_id="1",
+        quantity=1,
+        currency="JPY",
+        exchange_rate=Decimal(150),
+        total_minor=4500,
+        currency_exponent=0,
     ).to_json()
     assert QuoteSnapshot.from_json(data).currency_exponent == 0
     del data["currency_exponent"]

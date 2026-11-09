@@ -114,4 +114,13 @@ def format_rate(rate: Decimal) -> str:
     return text
 
 
-__all__ = ["BASE_CURRENCY", "MAX_QUANTITY", "Currency", "PriceBreakdown", "PriceError", "calculate_price", "format_minor", "format_rate"]
+__all__ = [
+    "BASE_CURRENCY",
+    "MAX_QUANTITY",
+    "Currency",
+    "PriceBreakdown",
+    "PriceError",
+    "calculate_price",
+    "format_minor",
+    "format_rate",
+]
