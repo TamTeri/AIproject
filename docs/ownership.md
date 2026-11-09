@@ -49,3 +49,11 @@ The bootstrap foundation does not consume these product defaults. Production, CI
 - `docs/evidence/tdd/` contains raw focused RED/GREEN logs and exit codes.
 - `docs/evidence/tdd/index.json` is the bootstrap evidence index.
 - PostgreSQL evidence belongs to this bootstrap lane only for migration/seed/reset plumbing; product persistence and concurrency evidence belongs to later lanes.
+
+## Operational ownership (Call 6)
+
+| Responsibility | Owner | Status |
+|---|---|---|
+| Database backup: nightly `pg_dump` and restore drill (system-019) | not yet named | `[OPEN]` (Adaeze asked for an owner by Friday; the team must not assume the hosting side does it) |
+| Out-of-range order alert: someone who receives the notification (audit-009) | not yet named; on-call rotation deferred | `[OPEN]` |
+| Release tags and the rollback switch (system-018) | lead developer (Priya's role) | `[TEAM]` |

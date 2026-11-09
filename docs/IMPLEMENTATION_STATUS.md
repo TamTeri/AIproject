@@ -58,3 +58,24 @@
 | Last-ticket race 200 times (inventory-009) | — | `test_call5_postgres.py` |
 | Performance target (system-013, temporary) | — | ST-70 |
 | Every requirement named by a test; catalogue generated from the tests | `scripts/check_requirement_coverage.py`, `scripts/list_system_tests.py` | `tests/test_project_process.py`, CI |
+
+## Part 6 (Call 6: maintenance), release 1.3.0
+
+**Branch/tag:** work branched from tag `v1.2.0` (the known-good baseline); the maintenance release is tagged `v1.3.0` when the lead merges the five streams. Test counts below are filled in after the merge.
+
+| What | Requirements | Status |
+|---|---|---|
+| Purchase test for every currency including JPY; minor-unit display and charge (the 1.3 yen incident) | system-016, pricing-014 | planned, see `docs/acceptance-matrix.md` |
+| Admin rate edit used by next purchase; large-change confirmation; `exchange_rate_history` | admin-006, pricing-013 | planned |
+| Localization: Spanish + English, regional dates and currency formats | system-020..023 | planned |
+| Out-of-range order alert (`check-orders`) | audit-009 | planned; rotation `[OPEN]` |
+| Release gate (skipped tests fail), restorable releases, backup | system-017..019 | planned; backup owner `[OPEN]` |
+
+### Still open after Call 6
+- Backup owner and the first restore drill (system-019).
+- Who receives the order alert, and any on-call rotation (audit-009). Thresholds 50% and 200% and the 25% rate-edit confirmation are `[TEMPORARY_MVP_DEFAULT]`.
+- Customer sign-off before JPY (or any currency) is offered to real buyers (pricing-014).
+- Native-speaker review of the Spanish text.
+
+### Diagrams to export
+`workspace.dsl` has new views `Container_PostCall6` and `Component_PostCall6`. The PNGs are not regenerated here (no tooling). Export both from Structurizr, and re-export the PostCall3/4/5 views to check they did not change.
