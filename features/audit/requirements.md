@@ -6,3 +6,4 @@
 - **audit-006** (ubiquitous) [Call 4]: The {EventHub} shall allow only administrators to read purchase-attempt audit records. Retention is `[OPEN]`; the temporary default keeps records indefinitely and append-only.
 - **audit-007** (unwanted) [Call 4]: If a purchase attempt fails unexpectedly, then the {EventHub} shall still record the attempt with an internal-error outcome.
 - **audit-008** (ubiquitous) [Call 5]: The {EventHub} shall record replayed (duplicate), rate-limited, not-authenticated and sales-closed purchase attempts in the audit trail, each with its own reason code.
+- **audit-009** (event-driven) [Call 6, rotation `[OPEN]`]: When an order's per-ticket USD-equivalent total is below 50% or above 200% of the event's base price, the {EventHub} shall flag the order and notify a human. The notification payload shall contain no personal data. The check runs from a scheduled `check-orders` command. An on-call rotation is explicitly deferred (`[OPEN]`).
