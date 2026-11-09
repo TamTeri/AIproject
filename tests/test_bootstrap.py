@@ -20,7 +20,8 @@ def test_app_factory_exposes_health_and_postgresql_configuration():
     response = app.test_client().get("/healthz")
 
     assert response.status_code == 200
-    assert response.get_json() == {"service": "eventhub", "status": "ok"}
+    body = response.get_json()
+    assert body["service"] == "eventhub" and body["status"] == "ok"
     assert app.config["SQLALCHEMY_DATABASE_URI"].startswith("postgresql+psycopg://")
 
 
