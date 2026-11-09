@@ -30,7 +30,20 @@ class PostgresAdminRepository:
         )
         return row is not None
 
-    def upsert_rate(self, *, currency: str, rate: Decimal, admin_id: str) -> None:
+    def current_rate(self, code: str) -> Decimal | None:
+        row = self._tx.fetch_one(
+            "SELECT rate FROM exchange_rates WHERE currency_code = :code FOR UPDATE", {"code": code}
+        )
+        return Decimal(str(row["rate"])) if row else None
+
+    def upsert_rate(self, *, currency: str, rate: Decimal, admin_id: str, old_rate: Decimal | None) -> None:
+        self._tx.execute(
+            """
+            INSERT INTO exchange_rate_history (currency, old_rate, new_rate, changed_by)
+            VALUES (:code, :old, :rate, :admin)
+            """,
+            {"code": currency, "old": old_rate, "rate": rate, "admin": db_id(admin_id)},
+        )
         self._tx.execute(
             """
             INSERT INTO exchange_rates (currency_code, rate, updated_at, updated_by)

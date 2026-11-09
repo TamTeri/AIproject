@@ -14,6 +14,7 @@ from typing import Protocol
 from app.identity.contracts import Principal
 
 MAX_RATE = Decimal("100000")
+MAX_CHANGE = Decimal("0.25")  # larger edits need explicit confirmation (admin-006)
 MAX_RATE_PLACES = 8  # exchange_rates.rate is NUMERIC(18, 8)
 AUDIT_PAGE_SIZE = 50
 
@@ -58,7 +59,11 @@ class AdminRepository(Protocol):
 
     def currency_enabled(self, code: str) -> bool: ...
 
-    def upsert_rate(self, *, currency: str, rate: Decimal, admin_id: str) -> None: ...
+    def current_rate(self, code: str) -> Decimal | None: ...
+
+    def upsert_rate(self, *, currency: str, rate: Decimal, admin_id: str, old_rate: Decimal | None) -> None:
+        """Store the rate and a history row in the caller's transaction."""
+        ...
 
     def list_attempts(self, *, limit: int, before_id: str | None) -> list[AuditRow]: ...
 
@@ -88,7 +93,9 @@ class AdminService:
         _require_admin(actor)
         return self._repository.list_rates()
 
-    def set_rate(self, actor: Principal | None, *, currency: str, rate: str) -> Decimal:
+    def set_rate(
+        self, actor: Principal | None, *, currency: str, rate: str, confirm_large_change: bool = False
+    ) -> Decimal:
         _require_admin(actor)
         code = (currency or "").strip().upper()
         if code == self._base:
@@ -96,7 +103,13 @@ class AdminService:
         if not self._repository.currency_enabled(code):
             raise RateValidationError("Unknown or disabled currency.")
         value = parse_rate(rate)
-        self._repository.upsert_rate(currency=code, rate=value, admin_id=actor.account_id)
+        old = self._repository.current_rate(code)
+        if old is not None and not confirm_large_change and abs(value - old) > old * MAX_CHANGE:
+            raise RateValidationError(
+                f"This changes the rate by more than {MAX_CHANGE:.0%} (now {old:f}). "
+                "Tick the confirmation box if that is intended."
+            )
+        self._repository.upsert_rate(currency=code, rate=value, admin_id=actor.account_id, old_rate=old)
         return value
 
     def audit_page(self, actor: Principal | None, *, before_id: str | None = None) -> AuditPage:
