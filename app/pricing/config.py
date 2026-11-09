@@ -45,8 +45,8 @@ class PricingPolicy:
     revision: str
     discount_percent: Decimal | str | int
     eligibility_domain: str
-    currency_code: str = "USD"
-    currency_exponent: int = 2
+    currency_code: str
+    currency_exponent: int
     discount_order: str = "discount_then_convert"
     rounding_mode: str = "ROUND_HALF_UP"
     rate_direction: str = "base_to_target"

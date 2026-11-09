@@ -74,6 +74,7 @@ class FakeQuotes:
             quantity=quantity,
             currency=currency,
             exchange_rate=Decimal("1"),
+            currency_exponent=2,
             total_minor=2500,
             unit_price_minor=2500,
         )

@@ -22,6 +22,11 @@
       "code": "CAD",
       "minor_unit": 2,
       "enabled": true
+    },
+    {
+      "code": "JPY",
+      "minor_unit": 0,
+      "enabled": true
     }
   ],
   "exchange_rates": [
@@ -40,6 +45,10 @@
     {
       "currency_code": "CAD",
       "rate": "1.38000000"
+    },
+    {
+      "currency_code": "JPY",
+      "rate": "150.00000000"
     }
   ],
   "config": [

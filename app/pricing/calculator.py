@@ -22,6 +22,15 @@ BASE_EXPONENT = 2  # USD cents
 MAX_QUANTITY = 1_000
 
 
+@dataclass(frozen=True, slots=True)
+class Currency:
+    code: str
+    exponent: int
+
+
+BASE_CURRENCY = Currency("USD", BASE_EXPONENT)
+
+
 class PriceError(ValueError):
     """Raised when price inputs are invalid. Callers validate first."""
 
@@ -105,4 +114,4 @@ def format_rate(rate: Decimal) -> str:
     return text
 
 
-__all__ = ["MAX_QUANTITY", "PriceBreakdown", "PriceError", "calculate_price", "format_minor", "format_rate"]
+__all__ = ["BASE_CURRENCY", "MAX_QUANTITY", "Currency", "PriceBreakdown", "PriceError", "calculate_price", "format_minor", "format_rate"]

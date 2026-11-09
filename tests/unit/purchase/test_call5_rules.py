@@ -90,6 +90,7 @@ class DiscountQuotes(Quotes):
             quantity=quantity,
             currency=currency,
             exchange_rate=Decimal("1"),
+            currency_exponent=2,
             total_minor=subtotal - subtotal // 10,
             unit_price_minor=self.unit,
             subtotal_minor=subtotal,
