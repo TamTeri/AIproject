@@ -18,7 +18,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 from selenium import webdriver
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import StaleElementReferenceException, TimeoutException, WebDriverException
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webdriver import WebDriver
@@ -146,7 +146,7 @@ class EventHub:
         self.wait().until(EC.element_to_be_clickable((By.XPATH, xpath))).click()
         if navigates:
             try:
-                self.wait().until(EC.staleness_of(old_page))
+                self.wait().until(_page_left(old_page))
             except TimeoutException as exc:
                 raise AssertionError(
                     f"clicking {label!r} did not load a new page (still {self.path})"
@@ -162,7 +162,7 @@ class EventHub:
         old_page = self.driver.find_element(By.TAG_NAME, "html")
         button.click()
         try:
-            self.wait().until(EC.staleness_of(old_page))
+            self.wait().until(_page_left(old_page))
         except TimeoutException as exc:
             raise AssertionError(f"the click did not load a new page (still {self.path})") from exc
         self.find("body")
@@ -313,6 +313,28 @@ class EventHub:
                     }
                 )
         return rows
+
+
+def _page_left(old_page: WebElement):
+    """Wait condition: the page ``old_page`` belonged to has been replaced.
+
+    Like ``EC.staleness_of``, but Chrome 150 reports a node from a page that has already navigated
+    away as "Node with given id does not belong to the document" (an unknown-error WebDriverException)
+    and not as a stale-element error. Both mean the old page is gone (ST-11 and ST-18 on Chrome 150).
+    """
+
+    def check(_driver) -> bool:
+        try:
+            old_page.is_enabled()
+            return False
+        except StaleElementReferenceException:
+            return True
+        except WebDriverException as exc:
+            if "does not belong to the document" in str(exc):
+                return True
+            raise
+
+    return check
 
 
 def _xpath_literal(value: str) -> str:
