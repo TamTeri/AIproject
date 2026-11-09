@@ -4,7 +4,9 @@
 #   run-local.cmd -Stop           stop the database container
 # Local-only test values below (the same ones the README uses); never use them anywhere real.
 param([switch]$NoReset, [switch]$Stop)
-$ErrorActionPreference = "Stop"
+# "Continue", not "Stop": Windows PowerShell 5.1 turns a native command's stderr into a terminating error under "Stop",
+# which would crash before our own $LASTEXITCODE checks print a helpful message.
+$ErrorActionPreference = "Continue"
 Set-Location (Split-Path $PSScriptRoot -Parent)
 
 function Fail($msg) { Write-Host "`n$msg" -ForegroundColor Red; exit 1 }
