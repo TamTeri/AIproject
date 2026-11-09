@@ -652,7 +652,7 @@ def admin_rates_update():
         if error.status_code == 403:
             return _error_page(error)
         return admin_rates(error=error)
-    flash("Exchange rate for {code} saved.".format(code=currency.strip().upper()[:3]))
+    flash(f"Exchange rate for {currency.strip().upper()[:3]} saved.")
     return redirect(url_for("web.admin_rates"))
 
 
