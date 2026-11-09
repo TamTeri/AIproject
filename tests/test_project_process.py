@@ -11,6 +11,8 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
+import pytest
+
 from app import create_app
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -95,3 +97,53 @@ def test_the_system_test_catalogue_matches_the_tests():
     spec.loader.exec_module(module)
     committed = read("docs/testing/system-test-catalogue.md").replace("\r\n", "\n")
     assert committed == module.render(), "run: python scripts/list_system_tests.py --write"
+
+
+@pytest.mark.requirement("system-018")
+def test_ci_fails_on_skipped_tests_and_checks_the_migration_round_trip():
+    """system-018: a green run that silently skipped a layer is not green."""
+    ci = read(".github/workflows/ci.yml")
+    for step in ("--junitxml", "scripts/fail_on_skips.py", "alembic downgrade -1", "alembic upgrade head"):
+        assert step in ci, step
+    assert "fail_on_skips.py" in read(".github/workflows/system-tests.yml")
+
+
+@pytest.mark.requirement("system-018")
+def test_fail_on_skips_script(tmp_path):
+    """system-018"""
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("fail_on_skips", ROOT / "scripts" / "fail_on_skips.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    def junit(body: str) -> str:
+        path = tmp_path / f"{abs(hash(body))}.xml"
+        path.write_text(f'<testsuites><testsuite name="s">{body}</testsuite></testsuites>')
+        return str(path)
+
+    assert module.main([junit('<testcase classname="a" name="ok"/>')]) == 0
+    assert module.main([junit('<testcase classname="a" name="s"><skipped/></testcase>')]) == 1
+    assert module.main([junit("")]) == 1
+    assert module.main([]) == 2
+
+
+@pytest.mark.requirement("audit-009")
+def test_order_watch_workflow_only_runs_with_the_secret_and_holds_no_secret():
+    """audit-009: scheduled check, skipped cleanly without the repository secret."""
+    workflow = read(".github/workflows/order-watch.yml")
+    assert "schedule:" in workflow and "check-orders" in workflow
+    assert "secrets.EVENTHUB_DATABASE_URL" in workflow and "postgresql://" not in workflow
+
+
+@pytest.mark.requirement("system-019")
+def test_backup_and_restore_scripts_refuse_without_database_url_and_never_print_it():
+    """system-019"""
+    for name in ("backup.sh", "restore.sh"):
+        script = read(f"scripts/{name}")
+        assert "EVENTHUB_DATABASE_URL:?" in script, name
+        assert 'echo "$EVENTHUB_DATABASE_URL' not in script and "set -x" not in script, name
+    assert "pg_dump" in read("scripts/backup.sh") and "--format=custom" in read("scripts/backup.sh")
+    assert "backups/" in read(".gitignore")
+    for runbook in ("release-and-rollback.md", "backup-restore.md"):
+        assert "[OPEN]" in read(f"docs/runbooks/{runbook}")
