@@ -41,6 +41,8 @@ Open http://127.0.0.1:5000. Register with an `@usf.edu` email to see the student
 - At checkout, pick the "declines" test card to see the payment-failure path.
 - Log in as the admin to see every attempt at `/admin/audit`.
 
+**Windows one-click:** double-click `run-local.cmd` (needs Docker Desktop). It starts PostgreSQL, installs dependencies, resets and seeds the local database, creates a local admin and opens the site. `run-local.cmd -NoReset` keeps your data; `run-local.cmd -Stop` stops the database.
+
 ## Run the tests
 
 ```bash
