@@ -88,7 +88,7 @@ Test paths are under `tests/`. A test marked "PostgreSQL" runs only when `EVENTH
 | More languages and right-to-left support | Not part of ADR-010. Adding a language is adding a catalog. |
 | Hosting-side backup assumed | Not assumed. We do not rely on it. |
 
-**Known inconsistency to fix.** `docs/runbooks/release-and-rollback.md` says `v1.3.0` adds no migration, but `migrations/versions/0007_rate_history.py` creates `exchange_rate_history`. `v1.2.0` simply does not use that table, so the schemas are compatible in practice (extra table left in place, as ADR-009 advises). The runbook sentence should be corrected to say so.
+**Found in review and fixed.** The release runbook said `v1.3.0` adds no migration, but `migrations/versions/0007_rate_history.py` creates `exchange_rate_history`. The runbook now says migration `0007` is additive (v1.2.0 code runs against the v1.3.0 schema, so roll back code only) and that `alembic downgrade 0006` drops the history table.
 
 ## 6. Acceptance matrix
 
