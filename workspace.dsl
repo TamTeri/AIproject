@@ -1,4 +1,4 @@
-workspace "EventHub" "EventHub C4 model before and after Calls 3, 4 and 5" {
+workspace "EventHub" "EventHub C4 model before and after Calls 3, 4, 5 and 6" {
 
     !identifiers hierarchical
 
@@ -26,6 +26,13 @@ workspace "EventHub" "EventHub C4 model before and after Calls 3, 4 and 5" {
                     tags "PostCall4"
                 }
 
+                localization = component "Localization" "Message catalogs (English, Spanish), allowlisted locale choice (?lang or cookie, then Accept-Language, then en), regional date format, and currency format by the currency's minor unit. Presentation only: it never changes a stored amount." "Python module + message catalogs (ADR-010)" {
+                    tags "PostCall6"
+                }
+                orderMonitor = component "Order monitor" "Run by the scheduled check-orders command. Flags orders whose per-ticket USD-equivalent total is under 50% or over 200% of the event base price and sends one message with no personal data through the notify port. Rotation is open." "check-orders command + notify port (ADR-009)" {
+                    tags "PostCall6"
+                }
+
                 group "Administrator-only area" {
                     admin = component "Administration" "Rate-management screen and purchase-attempt audit viewer. Every route requires the administrator role; no buyer-facing component calls it." "Flask blueprint /admin" {
                         tags "AdministratorOnly"
@@ -37,9 +44,13 @@ workspace "EventHub" "EventHub C4 model before and after Calls 3, 4 and 5" {
                 tags "PostCall5" "TestTooling"
             }
 
-            database = container "EventHub database" "All persistent application data: accounts, events, inventory, orders, purchase-attempt records." "PostgreSQL" {
+            database = container "EventHub database" "All persistent application data: accounts, events, inventory, orders, purchase-attempt records, exchange-rate history." "PostgreSQL" {
                 tags "Database"
             }
+        }
+
+        alertChannel = softwareSystem "Alert channel" "External message channel (for example email or chat) that reaches a human when an order looks wrong. The channel and who receives it are open decisions." {
+            tags "PostCall6" "External"
         }
 
         # ---- System and container level (declared first so they are the labels shown on higher-level views)
@@ -123,12 +134,46 @@ workspace "EventHub" "EventHub C4 model before and after Calls 3, 4 and 5" {
         buyer -> eventHub.webApp.identity "Changes email (needs current password); picks a home currency" "HTTPS /account, /register" {
             tags "PostCall5"
         }
+
+        # ---- After Call 6: maintenance (yen incident, order alert, localization)
+        eventHub -> alertChannel "Sends an out-of-range order alert (no personal data)" "Notification port" {
+            tags "PostCall6"
+        }
+        eventHub.webApp -> alertChannel "Sends an out-of-range order alert (no personal data)" "Notification port" {
+            tags "PostCall6"
+        }
+        eventHub.webApp.orderMonitor -> alertChannel "notify(): flagged order id, event, ratio" "Notification port" {
+            tags "PostCall6"
+        }
+        eventHub.webApp.orderMonitor -> eventHub.database "Reads orders and event base prices" "SQL" {
+            tags "PostCall6"
+        }
+        eventHub.webApp.admin -> eventHub.database "exchange_rate_history: who, old rate, new rate, when" "SQL" {
+            tags "PostCall6"
+        }
+        buyer -> eventHub.webApp.localization "Chooses a language (?lang)" "HTTPS" {
+            tags "PostCall6"
+        }
+        eventHub.webApp.catalog -> eventHub.webApp.localization "format_date(), format_money()" "Python call" {
+            tags "PostCall6"
+        }
+        eventHub.webApp.orders -> eventHub.webApp.localization "format_date(), format_money()" "Python call" {
+            tags "PostCall6"
+        }
+        eventHub.webApp.purchase -> eventHub.webApp.localization "format_money() on checkout and confirmation" "Python call" {
+            tags "PostCall6"
+        }
+        eventHub.webApp.localization -> eventHub.webApp.pricing "minor_unit(currency): no hardcoded decimals" "Python call" {
+            tags "PostCall6"
+        }
     }
 
     views {
         # Before Call 3: views built from Calls 1 and 2 only (one actor, no admin area).
         systemContext eventHub "Context_PreCall3" {
             include *
+            exclude "element.tag==PostCall6"
+            exclude "relationship.tag==PostCall6"
             exclude "relationship.tag==PostCall3"
             exclude "relationship.tag==PostCall5"
             exclude "element.tag==PostCall5"
@@ -140,6 +185,8 @@ workspace "EventHub" "EventHub C4 model before and after Calls 3, 4 and 5" {
 
         container eventHub "Container_PreCall3" {
             include *
+            exclude "element.tag==PostCall6"
+            exclude "relationship.tag==PostCall6"
             exclude "relationship.tag==PostCall3"
             exclude "relationship.tag==PostCall5"
             exclude "element.tag==PostCall5"
@@ -151,6 +198,8 @@ workspace "EventHub" "EventHub C4 model before and after Calls 3, 4 and 5" {
 
         component eventHub.webApp "Component_PreCall3" {
             include *
+            exclude "element.tag==PostCall6"
+            exclude "relationship.tag==PostCall6"
             exclude "relationship.tag==PostCall3"
             exclude "relationship.tag==PostCall4"
             exclude "relationship.tag==PostCall5"
@@ -165,6 +214,8 @@ workspace "EventHub" "EventHub C4 model before and after Calls 3, 4 and 5" {
         # After Call 3: administrator actor, admin routes, Administration component.
         systemContext eventHub "Context_PostCall3" {
             include *
+            exclude "element.tag==PostCall6"
+            exclude "relationship.tag==PostCall6"
             exclude "relationship.tag==PostCall5"
             exclude "element.tag==PostCall5"
             exclude "relationship.tag==PostCall4"
@@ -174,6 +225,8 @@ workspace "EventHub" "EventHub C4 model before and after Calls 3, 4 and 5" {
 
         container eventHub "Container_PostCall3" {
             include *
+            exclude "element.tag==PostCall6"
+            exclude "relationship.tag==PostCall6"
             exclude "relationship.tag==PostCall5"
             exclude "element.tag==PostCall5"
             exclude "relationship.tag==PostCall4"
@@ -183,6 +236,8 @@ workspace "EventHub" "EventHub C4 model before and after Calls 3, 4 and 5" {
 
         component eventHub.webApp "Component_PostCall3" {
             include *
+            exclude "element.tag==PostCall6"
+            exclude "relationship.tag==PostCall6"
             exclude "relationship.tag==PostCall4"
             exclude "relationship.tag==PostCall5"
             exclude "element.tag==PostCall5"
@@ -194,6 +249,8 @@ workspace "EventHub" "EventHub C4 model before and after Calls 3, 4 and 5" {
         # After Call 4: separate eligibility function, quick-buy path, server-side sessions.
         component eventHub.webApp "Component_PostCall4" {
             include *
+            exclude "element.tag==PostCall6"
+            exclude "relationship.tag==PostCall6"
             exclude "relationship.tag==PostCall5"
             exclude "element.tag==PostCall5"
             autolayout lr 250 200
@@ -204,18 +261,37 @@ workspace "EventHub" "EventHub C4 model before and after Calls 3, 4 and 5" {
         # payment, email change, and the Selenium system test suite.
         container eventHub "Container_PostCall5" {
             include *
+            exclude "element.tag==PostCall6"
+            exclude "relationship.tag==PostCall6"
             autolayout lr
             title "EventHub containers - after Call 5 (with the system test suite)"
         }
 
         component eventHub.webApp "Component_PostCall5" {
             include *
+            exclude "element.tag==PostCall6"
+            exclude "relationship.tag==PostCall6"
             exclude eventHub.systemTests
             exclude tester
             autolayout lr 250 200
             title "Flask application components - after Call 5 (as built)"
         }
 
+
+        # After Call 6: yen incident corrective work, order alert, localization.
+        container eventHub "Container_PostCall6" {
+            include *
+            autolayout lr
+            title "EventHub containers - after Call 6 (with the alert channel)"
+        }
+
+        component eventHub.webApp "Component_PostCall6" {
+            include *
+            exclude eventHub.systemTests
+            exclude tester
+            autolayout lr 250 200
+            title "Flask application components - after Call 6 (localization and order monitor)"
+        }
 
         styles {
             element "Person" {
@@ -250,6 +326,10 @@ workspace "EventHub" "EventHub C4 model before and after Calls 3, 4 and 5" {
             }
             element "Group" {
                 color #8f2d56
+            }
+            element "External" {
+                background #999999
+                color #ffffff
             }
             element "TestTooling" {
                 background #5c4d7d
