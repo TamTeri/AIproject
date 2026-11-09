@@ -7,6 +7,8 @@ from urllib.parse import urlparse
 
 from sqlalchemy import Connection, Engine, create_engine, text
 
+from app.ids import is_db_id
+
 
 class PostgresDatabase:
     """Own one SQLAlchemy engine and one transaction per unit-of-work scope.
@@ -127,6 +129,6 @@ def db_id(value: object) -> int | None:
     """Convert a string id from a URL/session into a BIGINT, or None if invalid."""
     text_value = str(value).strip() if value is not None else ""
     # isascii(): str.isdigit() also accepts "²" and "①", which int() rejects (Part 5, ST-21).
-    if not text_value.isascii() or not text_value.isdigit() or len(text_value) > 18:
+    if not is_db_id(text_value):
         return None
     return int(text_value)

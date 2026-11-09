@@ -11,6 +11,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Protocol
 
+from app.ids import is_db_id
 from app.pricing.calculator import BASE_CURRENCY, format_rate
 from app.pricing.presenter import present_breakdown
 
@@ -84,7 +85,7 @@ class OrderHistoryService:
 
     def get_for_buyer(self, *, buyer_id: str, order_id: str) -> OrderView | None:
         order_id = str(order_id or "").strip()
-        if not (order_id.isascii() and order_id.isdigit()) or len(order_id) > 18:
+        if not is_db_id(order_id):
             return None
         row = self._repository.get_for_buyer(buyer_id, order_id)
         return to_view(row) if row else None

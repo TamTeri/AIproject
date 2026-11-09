@@ -69,8 +69,8 @@ class IdentityAdapter:
         code = (currency or "").strip().upper()
         try:
             with unit_of_work(self._db) as tx:
-                if code and code not in {c.code for c in PostgresPricingRepository().enabled_currencies(tx)}:
-                    raise ServiceError("unsupported-currency", "That currency is not supported.", 400)
+                if code:
+                    _require_enabled_currency(tx, code)
                 account = self._service(tx).register(
                     RegisterInput(name=name, email=email, password=password), now=_now()
                 )
@@ -127,9 +127,13 @@ class IdentityAdapter:
     def set_preferred_currency(self, *, account_id: str, currency: str) -> None:
         code = (currency or "").strip().upper()
         with unit_of_work(self._db) as tx:
-            if code not in {c.code for c in PostgresPricingRepository().enabled_currencies(tx)}:
-                raise ServiceError("unsupported-currency", "That currency is not supported.", 400)
+            _require_enabled_currency(tx, code)
             PostgresAccountRepository(tx).set_preferred_currency(account_id, code)
+
+
+def _require_enabled_currency(tx, code: str) -> None:
+    if code not in {c.code for c in PostgresPricingRepository().enabled_currencies(tx)}:
+        raise ServiceError("unsupported-currency", "That currency is not supported.", 400)
 
 
 class CatalogAdapter:
@@ -156,14 +160,6 @@ class PricingAdapter:
 
     def base_price_display(self, *, base_price_minor: int) -> str:
         return format_minor(base_price_minor, self._policy.currency_code, self._policy.currency_exponent)
-
-    @property
-    def discount_percent(self) -> str:
-        return f"{self._policy.discount_percent.normalize():f}"
-
-    @property
-    def eligibility_domain(self) -> str:
-        return self._policy.eligibility_domain
 
     def student_discount_applies(self, *, email: str) -> bool:
         """Shown on the Account page: the discount follows the current email (pricing-011)."""

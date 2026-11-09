@@ -27,7 +27,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Any
 from uuid import uuid4
@@ -68,7 +68,6 @@ class _AttemptFacts:
     request_id: str | None = None
     idempotency_key: str | None = None
     claimed_key: str | None = None  # set once this request owns its one-time key
-    extra: dict[str, Any] = field(default_factory=dict)
 
 
 class _Rejected(Exception):
@@ -314,9 +313,7 @@ class PurchaseCoordinator:
                 return CheckoutResult(
                     rejected.outcome, str(rejected.outcome), buyer_id, rejected.hold, None, None
                 )
-            released = self._inventory.release_hold(
-                tx=tx, hold_id=hold.id, buyer_id=buyer_id, reason=HoldReleaseReason.CANCELLED, now=now
-            )
+            released = self._release(tx, buyer_id, now, hold, HoldReleaseReason.CANCELLED)
             record = self._append_audit(tx, now, facts, PurchaseOutcome.CANCELLED)
             return CheckoutResult(
                 PurchaseOutcome.CANCELLED, "cancelled", buyer_id, released, hold.quote_snapshot, record
@@ -498,6 +495,9 @@ class PurchaseCoordinator:
         facts.hold_id = str(hold.id)
         return hold, quote
 
+    def _release(self, tx: Any, buyer_id: str, now: datetime, hold: Any, reason: HoldReleaseReason) -> Any:
+        return self._inventory.release_hold(tx=tx, hold_id=hold.id, buyer_id=buyer_id, reason=reason, now=now)
+
     def _owned_active_hold(
         self, tx: Any, buyer_id: str, now: datetime, hold_id: str, facts: _AttemptFacts
     ) -> Any:
@@ -512,18 +512,14 @@ class PurchaseCoordinator:
         if HoldStatus(str(hold.status)) is not HoldStatus.ACTIVE:
             raise _Rejected(PurchaseOutcome.HOLD_TERMINAL, hold)
         if _aware(hold.expires_at) <= now:
-            released = self._inventory.release_hold(
-                tx=tx, hold_id=hold.id, buyer_id=buyer_id, reason=HoldReleaseReason.EXPIRED, now=now
-            )
+            released = self._release(tx, buyer_id, now, hold, HoldReleaseReason.EXPIRED)
             raise _Rejected(PurchaseOutcome.HOLD_EXPIRED, released)
         return hold
 
     def _still_on_sale(self, tx: Any, buyer_id: str, now: datetime, hold: Any) -> None:
         """purchase-018: a hold placed just before the start cannot be paid after it."""
         if self._events.sales_closed(tx, str(hold.event_id), now):
-            released = self._inventory.release_hold(
-                tx=tx, hold_id=hold.id, buyer_id=buyer_id, reason=HoldReleaseReason.CANCELLED, now=now
-            )
+            released = self._release(tx, buyer_id, now, hold, HoldReleaseReason.CANCELLED)
             raise _Rejected(PurchaseOutcome.SALES_CLOSED, released)
 
     def _discount_still_applies(self, tx: Any, buyer_id: str, now: datetime, hold: Any) -> None:
@@ -534,9 +530,7 @@ class PurchaseCoordinator:
             return
         if self._quotes.discount_still_applies(tx=tx, buyer_id=buyer_id, quote=quote):
             return
-        released = self._inventory.release_hold(
-            tx=tx, hold_id=hold.id, buyer_id=buyer_id, reason=HoldReleaseReason.CANCELLED, now=now
-        )
+        released = self._release(tx, buyer_id, now, hold, HoldReleaseReason.CANCELLED)
         raise _Rejected(PurchaseOutcome.ELIGIBILITY_CHANGED, released)
 
     def _complete(
@@ -553,9 +547,7 @@ class PurchaseCoordinator:
             tx=tx, buyer_id=buyer_id, hold=hold, quote_snapshot=quote, payment_choice=payment_choice
         )
         if not payment.succeeded:
-            released = self._inventory.release_hold(
-                tx=tx, hold_id=hold.id, buyer_id=buyer_id, reason=HoldReleaseReason.PAYMENT_FAILED, now=now
-            )
+            released = self._release(tx, buyer_id, now, hold, HoldReleaseReason.PAYMENT_FAILED)
             record = self._append_audit(tx, now, facts, PurchaseOutcome.PAYMENT_FAILED)
             return PurchaseResult(
                 PurchaseOutcome.PAYMENT_FAILED, payment.reason_code, buyer_id, released, None, record
