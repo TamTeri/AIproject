@@ -11,3 +11,6 @@ browser-shots/
 
 # System test reports and screenshots (scripts/run_system_tests.py)
 /reports/
+
+# Database dumps contain personal data: never commit (scripts/backup.sh)
+/backups/
