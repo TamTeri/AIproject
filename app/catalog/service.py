@@ -9,6 +9,8 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Protocol
 
+from app.ids import is_db_id
+
 MAX_QUERY_LENGTH = 100
 
 
@@ -63,7 +65,7 @@ class CatalogService:
 
     def get_event(self, *, event_id: str) -> EventSummary | None:
         event_id = str(event_id or "").strip()
-        if not (event_id.isascii() and event_id.isdigit()) or len(event_id) > 18:
+        if not is_db_id(event_id):
             return None
         return self._repository.get_active(event_id)
 
