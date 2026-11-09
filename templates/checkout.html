@@ -1,40 +1,40 @@
 {% extends "base.html" %}
-{% block title %}Checkout · EventHub{% endblock %}
+{% block title %}{{ _('checkout_title') }} · EventHub{% endblock %}
 {% block content %}
-<h1>Checkout</h1>
-<p class="message" role="status">Your tickets are held for 10 minutes, until {{ hold.expires_at|when("time") }}. If you do not pay by then they are released.</p>
+<h1>{{ _('checkout_title') }}</h1>
+<p class="message" role="status">{{ _('checkout_hold', time=hold.expires_at|when("time")) }}</p>
 
 {# orders-006 (Call 5): one clearly labelled amount; the USD price is only a reference. #}
 <section class="charged" aria-labelledby="amount-charged-label">
-  <p id="amount-charged-label">Amount that will be charged to your card</p>
-  <p id="amount-charged" class="amount">{{ hold.total }}</p>
-  <p class="muted">This is the only amount you pay, in {{ hold.currency }}.</p>
+  <p id="amount-charged-label">{{ _('checkout_charged_label') }}</p>
+  <p id="amount-charged" class="amount">{{ hold.total|money }}</p>
+  <p class="muted">{{ _('checkout_only_amount', currency=hold.currency) }}</p>
 </section>
 
 <dl class="summary">
-  <dt>Event</dt><dd>{{ hold.event_title }}</dd>
-  <dt>Quantity</dt><dd>{{ hold.quantity }}</dd>
-  <dt>Currency</dt><dd>{{ hold.currency }} (rate {{ hold.exchange_rate }} per USD)</dd>
-  <dt>Subtotal</dt><dd>{{ hold.subtotal }}</dd>
-  {% if hold.discount_applied %}<dt>Student discount</dt><dd>−{{ hold.discount }}</dd>{% endif %}
-  <dt>Total charged</dt><dd class="total">{{ hold.total }}</dd>
+  <dt>{{ _('summary_event') }}</dt><dd>{{ hold.event_title }}</dd>
+  <dt>{{ _('summary_quantity') }}</dt><dd>{{ hold.quantity }}</dd>
+  <dt>{{ _('summary_currency') }}</dt><dd>{{ _('summary_currency_rate', currency=hold.currency, rate=hold.exchange_rate) }}</dd>
+  <dt>{{ _('summary_subtotal') }}</dt><dd>{{ hold.subtotal|money }}</dd>
+  {% if hold.discount_applied %}<dt>{{ _('summary_discount') }}</dt><dd>−{{ hold.discount|money }}</dd>{% endif %}
+  <dt>{{ _('summary_total') }}</dt><dd class="total">{{ hold.total|money }}</dd>
 </dl>
 {% if hold.list_price %}
-<p class="muted" id="usd-reference">Ticket list price: {{ hold.list_price }} each. This US-dollar price is for reference only and is not charged. Converted at {{ hold.exchange_rate }} {{ hold.currency }} per 1 USD.</p>
+<p class="muted" id="usd-reference">{{ _('usd_reference', price=hold.list_price|money, rate=hold.exchange_rate, currency=hold.currency) }}</p>
 {% endif %}
 
 <form class="stack" method="post" action="{{ url_for('web.checkout_pay', hold_id=hold.hold_id) }}" data-single-submit>
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <input type="hidden" name="idempotency_key" value="{{ idempotency_key() }}">
-  <label for="payment">Simulated card (no real payment in version one)</label>
+  <label for="payment">{{ _('checkout_card_label') }}</label>
   <select id="payment" name="payment">
-    <option value="approve">Test card — approves</option>
-    <option value="decline">Test card — declines</option>
+    <option value="approve">{{ _('checkout_card_approve') }}</option>
+    <option value="decline">{{ _('checkout_card_decline') }}</option>
   </select>
-  <button type="submit">Pay {{ hold.total }}</button>
+  <button type="submit">{{ _('checkout_pay', total=hold.total|money) }}</button>
 </form>
 <form method="post" action="{{ url_for('web.checkout_cancel', hold_id=hold.hold_id) }}">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-  <div class="actions"><button class="secondary" type="submit">Cancel and release tickets</button></div>
+  <div class="actions"><button class="secondary" type="submit">{{ _('checkout_cancel') }}</button></div>
 </form>
 {% endblock %}

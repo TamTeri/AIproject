@@ -1,18 +1,18 @@
 {% extends "base.html" %}
-{% block title %}Order history · EventHub{% endblock %}
+{% block title %}{{ _('orders_title') }} · EventHub{% endblock %}
 {% block content %}
-<h1>Order history</h1>
+<h1>{{ _('orders_title') }}</h1>
 {% if orders %}
 <div class="table-wrap">
 <table>
-  <thead><tr><th>Order</th><th>Event</th><th>Qty</th><th>Total</th><th>Purchased</th></tr></thead>
+  <thead><tr><th>{{ _('orders_col_order') }}</th><th>{{ _('orders_col_event') }}</th><th>{{ _('orders_col_qty') }}</th><th>{{ _('orders_col_total') }}</th><th>{{ _('orders_col_purchased') }}</th></tr></thead>
   <tbody>
   {% for order in orders %}
     <tr>
       <td><a href="{{ url_for('web.order_detail', order_id=order.id) }}">#{{ order.id }}</a></td>
       <td>{{ order.artist }}</td>
       <td>{{ order.quantity }}</td>
-      <td>{{ order.total }}</td>
+      <td>{{ order.total|money }}</td>
       <td>{{ order.created_at|when }}</td>
     </tr>
   {% endfor %}
@@ -20,6 +20,6 @@
 </table>
 </div>
 {% else %}
-  <p class="muted">You have no orders yet.</p>
+  <p class="muted">{{ _('orders_none') }}</p>
 {% endif %}
 {% endblock %}

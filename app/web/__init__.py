@@ -9,7 +9,6 @@ from __future__ import annotations
 import secrets
 import time
 from collections.abc import Callable, Mapping
-from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -28,6 +27,9 @@ from flask import (
 )
 from jinja2 import ChoiceLoader, FileSystemLoader
 
+from app.i18n import format_money_text, resolve_locale, translate
+from app.i18n import format_when as _format_when
+from app.i18n.locales import COOKIE_NAME, LANGUAGE_NAMES, SUPPORTED, match_tag
 from app.pricing.calculator import format_rate
 
 from .services import ServiceError, WebServices, default_services
@@ -106,7 +108,13 @@ def register_web(app: Flask, services: WebServices | Any | None = None) -> Flask
     app.jinja_env.globals["csrf_token"] = csrf_token
     app.jinja_env.globals["idempotency_key"] = new_idempotency_key
     app.jinja_env.filters["rate"] = format_rate
-    app.jinja_env.filters["when"] = format_when
+    app.jinja_env.filters["when"] = lambda value, style="datetime": _format_when(
+        value, g.get("locale", "en"), style
+    )
+    app.jinja_env.filters["money"] = lambda value: format_money_text(value, g.get("locale", "en"))
+    app.jinja_env.globals["_"] = lambda key, **values: translate(key, g.get("locale", "en"), **values)
+    app.jinja_env.globals["locale"] = lambda: g.get("locale", "en")
+    app.jinja_env.globals["languages"] = [(code, LANGUAGE_NAMES[code]) for code in SUPPORTED]
     app.jinja_env.globals["current_user"] = lambda: g.get("principal")
     return app
 
@@ -126,13 +134,18 @@ def create_web_app(
 
 
 def format_when(value: Any, style: str = "datetime") -> str:
-    """Readable dates: "Sun, Nov 1, 2026 · 7:00 PM" (time only with style="time")."""
-    if not isinstance(value, datetime):
-        return "" if value is None else str(value)
-    time_text = value.strftime("%I:%M %p").lstrip("0")
-    if style == "time":
-        return time_text
-    return f"{value.strftime('%a, %b')} {value.day}, {value.year} · {time_text}"
+    """English dates ("Sun, Nov 1, 2026 · 7:00 PM"); pages use the locale-aware |when filter."""
+    return _format_when(value, "en", style)
+
+
+@web.before_app_request
+def _resolve_locale() -> None:
+    """system-020: ?lang= > cookie > Accept-Language > en, all checked against an allowlist."""
+    g.locale = resolve_locale(
+        request.args.get("lang"), request.cookies.get(COOKIE_NAME), request.headers.get("Accept-Language")
+    )
+    # Remember an explicit choice. The cookie value is the allowlisted code, never the input.
+    g.remember_locale = match_tag(request.args.get("lang"))
 
 
 def _services() -> Any:
@@ -185,6 +198,10 @@ def _load_principal_and_check_csrf() -> None:
 
 @web.after_app_request
 def _security_headers(response):
+    if g.get("remember_locale"):
+        response.set_cookie(COOKIE_NAME, g.remember_locale, max_age=31536000, samesite="Lax", httponly=True)
+    response.vary.add("Accept-Language")
+    response.vary.add("Cookie")
     response.headers.setdefault("X-Content-Type-Options", "nosniff")
     response.headers.setdefault("X-Frame-Options", "DENY")
     response.headers.setdefault("Referrer-Policy", "same-origin")

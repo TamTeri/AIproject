@@ -1,31 +1,31 @@
 {% extends "base.html" %}
-{% block title %}Order {{ order.id }} · EventHub{% endblock %}
+{% block title %}{{ _('order_page_title', id=order.id) }} · EventHub{% endblock %}
 {% block content %}
-{% if just_confirmed %}<p class="message" role="status">Payment complete. This page is your confirmation — no email or paper ticket needed. You can reopen it any time from Order history.</p>{% endif %}
-<h1>Order confirmed</h1>
+{% if just_confirmed %}<p class="message" role="status">{{ _('order_just_confirmed') }}</p>{% endif %}
+<h1>{{ _('order_title') }}</h1>
 
 {# orders-006 (Call 5, Darnell's finding): one clearly labelled amount charged. #}
 <section class="charged" aria-labelledby="amount-charged-label">
-  <p id="amount-charged-label">Amount charged to your card</p>
-  <p id="amount-charged" class="amount">{{ order.total }}</p>
-  <p class="muted">This is the only amount you paid, in {{ order.currency }}.</p>
+  <p id="amount-charged-label">{{ _('order_charged_label') }}</p>
+  <p id="amount-charged" class="amount">{{ order.total|money }}</p>
+  <p class="muted">{{ _('order_only_amount', currency=order.currency) }}</p>
 </section>
 
 <dl class="summary">
-  <dt>Order number</dt><dd>{{ order.id }}</dd>
-  <dt>Event</dt><dd>{{ order.artist }}{% if order.event_title %} — {{ order.event_title }}{% endif %}</dd>
-  <dt>Venue</dt><dd>{{ order.venue }}</dd>
-  <dt>Starts</dt><dd>{{ order.starts_at|when }}</dd>
-  <dt>Quantity</dt><dd>{{ order.quantity }}</dd>
-  <dt>Currency paid</dt><dd>{{ order.currency }}</dd>
-  <dt>Exchange rate applied</dt><dd>{{ order.exchange_rate_display }} {{ order.currency }} per USD</dd>
-  <dt>Subtotal</dt><dd>{{ order.subtotal }}</dd>
-  {% if order.discount_applied %}<dt>Student discount</dt><dd>−{{ order.discount }}</dd>{% endif %}
-  <dt>Total charged</dt><dd class="total">{{ order.total }}</dd>
-  <dt>Purchased</dt><dd>{{ order.created_at|when }}</dd>
+  <dt>{{ _('order_number') }}</dt><dd>{{ order.id }}</dd>
+  <dt>{{ _('summary_event') }}</dt><dd>{{ order.artist }}{% if order.event_title %} — {{ order.event_title }}{% endif %}</dd>
+  <dt>{{ _('detail_venue') }}</dt><dd>{{ order.venue }}</dd>
+  <dt>{{ _('detail_starts') }}</dt><dd>{{ order.starts_at|when }}</dd>
+  <dt>{{ _('summary_quantity') }}</dt><dd>{{ order.quantity }}</dd>
+  <dt>{{ _('order_currency_paid') }}</dt><dd>{{ order.currency }}</dd>
+  <dt>{{ _('order_rate') }}</dt><dd>{{ _('order_rate_value', rate=order.exchange_rate_display, currency=order.currency) }}</dd>
+  <dt>{{ _('summary_subtotal') }}</dt><dd>{{ order.subtotal|money }}</dd>
+  {% if order.discount_applied %}<dt>{{ _('summary_discount') }}</dt><dd>−{{ order.discount|money }}</dd>{% endif %}
+  <dt>{{ _('summary_total') }}</dt><dd class="total">{{ order.total|money }}</dd>
+  <dt>{{ _('order_purchased') }}</dt><dd>{{ order.created_at|when }}</dd>
 </dl>
 {% if order.list_price %}
-<p class="muted" id="usd-reference">Ticket list price: {{ order.list_price }} each. This US-dollar price is for reference only and was not charged. Converted at {{ order.exchange_rate_display }} {{ order.currency }} per 1 USD.</p>
+<p class="muted" id="usd-reference">{{ _('order_usd_reference', price=order.list_price|money, rate=order.exchange_rate_display, currency=order.currency) }}</p>
 {% endif %}
-<p><a href="{{ url_for('web.orders') }}">Back to order history</a></p>
+<p><a href="{{ url_for('web.orders') }}">{{ _('order_back') }}</a></p>
 {% endblock %}
