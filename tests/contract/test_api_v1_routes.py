@@ -184,7 +184,7 @@ class AdminFake:
             SimpleNamespace(currency="JPY", rate=Decimal("150.00000000"), updated_at=None, updated_by=None),
         ]
 
-    def set_rate(self, *, actor, currency, rate):
+    def set_rate(self, *, actor, currency, rate, confirm_large_change=False):
         if rate.startswith("-"):
             raise ServiceError("invalid-rate", "Rate must be greater than 0.", 400)
         self.saved.append((actor.account_id, currency, rate))

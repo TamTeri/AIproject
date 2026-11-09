@@ -20,6 +20,7 @@
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <input type="hidden" name="currency" value="{{ row.currency }}">
           <input name="rate" inputmode="decimal" aria-label="New rate for {{ row.currency }}" placeholder="{{ row.rate|rate }}" required>
+          <label class="muted"><input type="checkbox" name="confirm_large_change" value="1"> confirm change over 25%</label>
           <button type="submit">Save</button>
         </form>
         {% else %}<span class="muted">Base currency</span>{% endif %}

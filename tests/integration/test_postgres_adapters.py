@@ -244,7 +244,7 @@ def test_admin_rate_update_is_validated_and_applies_to_new_quotes(seeded_databas
         connection.execute(text("UPDATE accounts SET role = 'administrator'"))
     admin = services.identity.authenticate(email="buyer0@example.com", password="password-123")
 
-    services.admin.set_rate(actor=admin, currency="EUR", rate="0.5")
+    services.admin.set_rate(actor=admin, currency="EUR", rate="0.5", confirm_large_change=True)
     with pytest.raises(ServiceError):
         services.admin.set_rate(actor=admin, currency="EUR", rate="0")
 

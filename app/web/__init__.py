@@ -642,12 +642,17 @@ def admin_rates(error: ServiceError | None = None):
 def admin_rates_update():
     currency = request.form.get("currency", "")
     try:
-        _services().admin.set_rate(actor=_principal(), currency=currency, rate=request.form.get("rate", ""))
+        _services().admin.set_rate(
+            actor=_principal(),
+            currency=currency,
+            rate=request.form.get("rate", ""),
+            confirm_large_change=request.form.get("confirm_large_change") == "1",
+        )
     except ServiceError as error:
         if error.status_code == 403:
             return _error_page(error)
         return admin_rates(error=error)
-    flash(f"Exchange rate for {currency.upper()} saved.")
+    flash("Exchange rate for {code} saved.".format(code=currency.strip().upper()[:3]))
     return redirect(url_for("web.admin_rates"))
 
 

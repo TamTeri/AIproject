@@ -317,8 +317,14 @@ class AdminAdapter:
     def list_rates(self, *, actor: Principal | None):
         return self._call(lambda s: s.list_rates(actor))
 
-    def set_rate(self, *, actor: Principal | None, currency: str, rate: str):
-        return self._call(lambda s: s.set_rate(actor, currency=currency, rate=rate))
+    def set_rate(
+        self, *, actor: Principal | None, currency: str, rate: str, confirm_large_change: bool = False
+    ):
+        return self._call(
+            lambda s: s.set_rate(
+                actor, currency=currency, rate=rate, confirm_large_change=confirm_large_change
+            )
+        )
 
     def audit_page(self, *, actor: Principal | None, before_id: str | None = None):
         return self._call(lambda s: s.audit_page(actor, before_id=before_id))
