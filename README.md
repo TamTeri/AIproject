@@ -43,6 +43,8 @@ Open http://127.0.0.1:5000. Register with an `@usf.edu` email to see the student
 
 **Windows one-click:** double-click `run-local.cmd` (needs Docker Desktop). It starts PostgreSQL, installs dependencies, resets and seeds the local database, creates a local admin and opens the site. `run-local.cmd -NoReset` keeps your data; `run-local.cmd -Stop` stops the database.
 
+**macOS / Linux one-liner:** `./run-local.sh` does the same (needs Docker and Python 3.12+); `./run-local.sh --no-reset` keeps your data, `./run-local.sh --stop` stops the database.
+
 ## Run the tests
 
 ```bash
