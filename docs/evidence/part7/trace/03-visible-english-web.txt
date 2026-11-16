@@ -1,0 +1,20 @@
+### flash( calls in web layer
+app/web/__init__.py:317:    flash(OUTCOME_MESSAGES["not_authenticated"][0])
+app/web/__init__.py:406:    flash("You have been logged out.")
+app/web/__init__.py:440:    flash("Account created. Please log in.")
+app/web/__init__.py:471:            flash("Saved. This currency is now preselected at checkout and used for Quick Buy.")
+app/web/__init__.py:497:                flash("Too many wrong passwords. For your security you have been logged out.")
+app/web/__init__.py:501:    flash("Email changed. Student discounts now follow your new email.")
+app/web/__init__.py:574:        flash(OUTCOME_MESSAGES["cancelled"][0])
+app/web/__init__.py:601:            flash(REPLAYED_MESSAGE)  # purchase-014: the repeat landed on the same order
+app/web/__init__.py:672:    flash(f"Exchange rate for {currency.strip().upper()[:3]} saved.")
+### ServiceError(...) with literal message in web layer
+app/web/__init__.py:222:    return _error_page(ServiceError("bad-request", getattr(error, "description", "Bad request."), 400))
+app/web/__init__.py:227:    return _error_page(ServiceError("forbidden", "Administrators only.", 403))
+app/web/__init__.py:232:    return _error_page(ServiceError("not-found", "We could not find that page.", 404))
+app/web/__init__.py:348:        return _error_page(ServiceError("event-not-found", "We could not find that event.", 404))
+app/web/__init__.py:630:        return _error_page(ServiceError("order-not-found", "We could not find that order.", 404))
+### abort( with description
+app/web/__init__.py:196:            abort(400, description="Your form expired. Reload the page and try again.")
+app/web/__init__.py:263:            abort(403)
+### error= / message= literals passed to render_template

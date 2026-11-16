@@ -1,0 +1,159 @@
+################ graphify explain "app_web_init_resolve_locale"
+Node: _resolve_locale()
+  ID:        app_web_init_resolve_locale
+  Source:    app/web/__init__.py L142
+  Type:      code
+  Community: resolve_locale
+  Degree:    5
+
+Connections (5):
+  <-- web/__init__.py [contains] [EXTRACTED] app/web/__init__.py:L142
+  --> resolve_locale() [calls] [EXTRACTED] app/web/__init__.py:L144
+  --> match_tag() [calls] [EXTRACTED] app/web/__init__.py:L148
+  --> before_app_request [references] [EXTRACTED] app/web/__init__.py:L141
+  <-- system-020: ?lang= > cookie > Accept-Language > en, all checked against an… [rationale_for] [EXTRACTED] app/web/__init__.py:L143
+################ graphify explain "app_i18n_locales_resolve_locale"
+Node: resolve_locale()
+  ID:        app_i18n_locales_resolve_locale
+  Source:    app/i18n/locales.py L52
+  Type:      code
+  Community: resolve_locale
+  Degree:    11
+
+Connections (11):
+  <-- web/__init__.py [imports] [EXTRACTED] app/web/__init__.py:L30
+  <-- test_i18n.py [imports] [EXTRACTED] tests/unit/i18n/test_i18n.py:L11
+  <-- i18n/__init__.py [imports] [EXTRACTED] app/i18n/__init__.py:L5
+  <-- locales.py [contains] [EXTRACTED] app/i18n/locales.py:L52
+  --> match_tag() [calls] [EXTRACTED] app/i18n/locales.py:L57
+  <-- _resolve_locale() [calls] [EXTRACTED] app/web/__init__.py:L144
+  <-- test_hostile_values_never_leave_the_allowlist() [calls] [EXTRACTED] tests/unit/i18n/test_i18n.py:L60
+  <-- test_resolution_order_and_fallback() [calls] [EXTRACTED] tests/unit/i18n/test_i18n.py:L41
+  --> _from_accept_language() [calls] [EXTRACTED] app/i18n/locales.py:L57
+  <-- test_oversized_accept_language_is_ignored_past_the_cap() [calls] [EXTRACTED] tests/unit/i18n/test_i18n.py:L71
+  <-- ?lang= > cookie > Accept-Language > "en". Unknown values fall back silently. [rationale_for] [EXTRACTED] app/i18n/locales.py:L55
+################ graphify explain "register_web()"
+Node: register_web()
+  ID:        app_web_init_register_web
+  Source:    app/web/__init__.py L98
+  Type:      code
+  Community: register_web
+  Degree:    15
+
+Connections (15):
+  <-- web/__init__.py [contains] [EXTRACTED] app/web/__init__.py:L98
+  <-- create_app() [calls] [EXTRACTED] app/__init__.py:L46
+  <-- app/__init__.py [imports] [EXTRACTED] app/__init__.py:L41
+  --> format_rate() [indirect_call] [INFERRED 0.85] app/web/__init__.py:L110
+  --> Any [references] [EXTRACTED] app/web/__init__.py:L98
+  <-- create_web_app() [calls] [EXTRACTED] app/web/__init__.py:L132
+  --> format_when() [calls] [EXTRACTED] app/web/__init__.py:L111
+  --> format_money_text() [calls] [EXTRACTED] app/web/__init__.py:L114
+  --> translate() [calls] [EXTRACTED] app/web/__init__.py:L115
+  --> WebServices [uses] [INFERRED 0.95] app/web/__init__.py:L98
+  --> default_services() [calls] [EXTRACTED] app/web/__init__.py:L102
+  --> Flask [references] [EXTRACTED] app/web/__init__.py:L98
+  --> new_idempotency_key() [indirect_call] [INFERRED 0.85] app/web/__init__.py:L109
+  --> csrf_token() [indirect_call] [INFERRED 0.85] app/web/__init__.py:L108
+  <-- Attach the web boundary to an existing Flask application. [rationale_for] [EXTRACTED] app/web/__init__.py:L99
+################ graphify explain "base.html"
+Node: base.html
+  ID:        templates_base
+  Source:    templates/base.html L1
+  Type:      code
+  Community: templates: logout()
+  Degree:    15
+
+Connections (15):
+  --> Primary navigation [references] [EXTRACTED] templates/base.html:L58
+  <-- checkout.html [references] [EXTRACTED] templates/checkout.html:L1
+  <-- event_detail.html [references] [EXTRACTED] templates/event_detail.html:L1
+  <-- events.html [references] [EXTRACTED] templates/events.html:L1
+  <-- order_detail.html [references] [EXTRACTED] templates/order_detail.html:L1
+  <-- login.html [references] [EXTRACTED] templates/login.html:L1
+  <-- register.html [references] [EXTRACTED] templates/register.html:L1
+  <-- account.html [references] [EXTRACTED] templates/account.html:L1
+  <-- admin_rates.html [references] [EXTRACTED] templates/admin_rates.html:L1
+  <-- admin_audit.html [references] [EXTRACTED] templates/admin_audit.html:L1
+  <-- error.html [references] [EXTRACTED] templates/error.html:L1
+  --> Logout form [references] [EXTRACTED] templates/base.html:L66
+  <-- orders.html [references] [EXTRACTED] templates/orders.html:L1
+  --> Flash messages [references] [EXTRACTED] templates/base.html:L78
+  --> catalog-009: Responsive phone layout [implements] [INFERRED 0.75]
+################ graphify affected "app/i18n/locales.py"
+Affected nodes for locales.py
+Relations: calls, indirect_call, references, imports, imports_from, dynamic_import, re_exports, inherits, extends, implements, uses, mixes_in, embeds, defines, requires
+Depth: 2
+- i18n/__init__.py [re_exports] app/i18n/__init__.py:L5
+- web/__init__.py [re_exports] app/web/__init__.py:L32
+- catalog.py [imports_from] app/i18n/catalog.py:L9
+- formatting.py [imports_from] app/i18n/formatting.py:L11
+- test_i18n.py [imports_from] tests/unit/i18n/test_i18n.py:L13
+- _resolve_locale() [calls] app/web/__init__.py:L148
+- test_hostile_values_never_leave_the_allowlist() [calls] tests/unit/i18n/test_i18n.py:L60
+- test_oversized_accept_language_is_ignored_past_the_cap() [calls] tests/unit/i18n/test_i18n.py:L71
+- test_resolution_order_and_fallback() [calls] tests/unit/i18n/test_i18n.py:L41
+- app/__init__.py [re_exports] app/__init__.py:L41
+- test_api_v1_routes.py [imports_from] tests/contract/test_api_v1_routes.py:L18
+- test_yen_under_localization.py [imports_from] tests/unit/i18n/test_yen_under_localization.py:L7
+- 1. Every Call 6 item, traced to requirement, design, code and test [references] docs/reports/part6-1-design-changes.md:L41
+################ graphify affected "app/web/__init__.py"
+Affected nodes for web/__init__.py
+Relations: calls, indirect_call, references, imports, imports_from, dynamic_import, re_exports, inherits, extends, implements, uses, mixes_in, embeds, defines, requires
+Depth: 2
+- app/__init__.py [re_exports] app/__init__.py:L41
+- test_api_v1_routes.py [imports_from] tests/contract/test_api_v1_routes.py:L18
+- test_i18n.py [imports_from] tests/unit/i18n/test_i18n.py:L16
+- client() [calls] tests/contract/test_api_v1_routes.py:L231
+- client() [calls] tests/unit/i18n/test_i18n.py:L196
+- test_dates_are_shown_in_readable_form() [calls] tests/contract/test_api_v1_routes.py:L531
+- S-03 - app/purchase/service.py:_AttemptFacts.extra; app/wiring.py:PricingAdapter.discount_percent/eligibility_domain; app/pricing/service.py:QuoteService.policy [references] docs/reports/part6-simplification-log.md:L37
+- wrapped() [calls] app/web/__init__.py:L262
+- Primary navigation [calls] templates/base.html:L59
+- error.html [calls] templates/error.html:L8
+- event_detail.html [calls] templates/event_detail.html:L48
+- Artist/venue search form [calls] templates/events.html:L5
+- Event card [calls] templates/events.html:L17
+- register.html [calls] templates/register.html:L24
+- Login form [calls] templates/login.html:L7
+- Logout form [calls] templates/base.html:L66
+- login.html [calls] templates/login.html:L16
+- Registration form [calls] templates/register.html:L6
+- Home currency form [calls] templates/account.html:L18
+- Preselected currency hint [calls] templates/event_detail.html:L32
+- events.html [calls] templates/events.html:L14
+- Change email form [calls] templates/account.html:L30
+- Buy tickets form [calls] templates/event_detail.html:L22
+- Pay form (simulated card) [calls] templates/checkout.html:L26
+- Cancel and release form [calls] templates/checkout.html:L36
+- Quick Buy button form [calls] templates/event_detail.html:L40
+- Hidden double-click quick-buy form [calls] templates/events.html:L23
+- Step 1: AI-assisted analysis of Call 6 [references] docs/reports/part6-2-genai-maintenance-process-report.md:L46
+- Structural changes [references] docs/reports/part6-2-genai-maintenance-process-report.md:L134
+- order_detail.html [calls] templates/order_detail.html:L30
+- Order history table [calls] templates/orders.html:L12
+- admin_audit.html [calls] templates/admin_audit.html:L5
+- Exchange-rate update form [calls] templates/admin_rates.html:L19
+- admin_rates.html [calls] templates/admin_rates.html:L5
+- create_app() [calls] app/__init__.py:L46
+- test_end_to_end.py [imports_from] tests/integration/test_end_to_end.py:L9
+- test_main_program.py [imports_from] tests/test_main_program.py:L12
+- test_project_process.py [imports_from] tests/test_project_process.py:L16
+- base.html [references] templates/base.html:L58
+- account.html [references] templates/account.html:L18
+- checkout.html [references] templates/checkout.html:L26
+- orders.html [references] templates/orders.html:L7
+################ graphify affected "app/i18n/catalog.py"
+Affected nodes for catalog.py
+Relations: calls, indirect_call, references, imports, imports_from, dynamic_import, re_exports, inherits, extends, implements, uses, mixes_in, embeds, defines, requires
+Depth: 2
+- i18n/__init__.py [re_exports] app/i18n/__init__.py:L3
+- test_i18n.py [imports_from] tests/unit/i18n/test_i18n.py:L12
+- test_catalogs_have_identical_keys_and_placeholders() [calls] tests/unit/i18n/test_i18n.py:L81
+- register_web() [calls] app/web/__init__.py:L115
+- test_translate_fills_named_slots_and_falls_back() [calls] tests/unit/i18n/test_i18n.py:L97
+- web/__init__.py [imports] app/web/__init__.py:L30
+- create_app() [calls] app/__init__.py:L46
+- create_web_app() [calls] app/web/__init__.py:L132
+- app/__init__.py [imports] app/__init__.py:L41
+- test_api_v1_routes.py [imports_from] tests/contract/test_api_v1_routes.py:L18

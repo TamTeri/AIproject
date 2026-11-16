@@ -1,0 +1,103 @@
+################ graphify explain "configured_locale()"
+Node: configured_locale()
+  ID:        app_i18n_locales_configured_locale
+  Source:    app/i18n/locales.py L52
+  Type:      code
+  Community: ConfigurationError
+  Degree:    12
+
+Connections (12):
+  <-- web/__init__.py [imports] [EXTRACTED] app/web/__init__.py:L30
+  <-- register_web() [calls] [EXTRACTED] app/web/__init__.py:L99
+  <-- settings.py [imports] [EXTRACTED] app/config/settings.py:L52
+  <-- test_configured_language.py [imports] [EXTRACTED] tests/unit/i18n/test_configured_language.py:L8
+  <-- i18n/__init__.py [imports] [EXTRACTED] app/i18n/__init__.py:L5
+  <-- locales.py [contains] [EXTRACTED] app/i18n/locales.py:L52
+  <-- Configuration (the core of Part 7) [references] [INFERRED 0.95] docs/reports/part7-1-spanish-interface-changes.md:L46
+  <-- Decision [references] [INFERRED 0.95] docs/adr/ADR-011-configured-interface-language.md:L19
+  <-- _language_value() [calls] [EXTRACTED] app/config/settings.py:L55
+  <-- test_unsupported_values_are_refused_never_mapped_to_english() [calls] [EXTRACTED] tests/unit/i18n/test_configured_language.py:L40
+  <-- test_supported_values_and_not_configured() [calls] [EXTRACTED] tests/unit/i18n/test_configured_language.py:L31
+  <-- system-024/025: validate the EVENTHUB_LANGUAGE setting. Absent or blank -> None… [rationale_for] [EXTRACTED] app/i18n/locales.py:L53
+################ graphify explain "_language_value()"
+Node: _language_value()
+  ID:        app_config_settings_language_value
+  Source:    app/config/settings.py L50
+  Type:      code
+  Community: ConfigurationError
+  Degree:    5
+
+Connections (5):
+  --> ConfigurationError [calls] [EXTRACTED] app/config/settings.py:L57
+  <-- settings.py [contains] [EXTRACTED] app/config/settings.py:L50
+  <-- .from_values() [calls] [EXTRACTED] app/config/settings.py:L39
+  --> configured_locale() [calls] [EXTRACTED] app/config/settings.py:L55
+  <-- system-025: an unsupported EVENTHUB_LANGUAGE stops start-up; it never becomes… [rationale_for] [EXTRACTED] app/config/settings.py:L51
+################ graphify explain "_localized()"
+Node: _localized()
+  ID:        app_web_init_localized
+  Source:    app/web/__init__.py L157
+  Type:      code
+  Community: web/__init__.py
+  Degree:    11
+
+Connections (11):
+  <-- web/__init__.py [contains] [EXTRACTED] app/web/__init__.py:L157
+  --> ServiceError [calls] [EXTRACTED] app/web/__init__.py:L165
+  --> _t() [calls] [EXTRACTED] app/web/__init__.py:L165
+  <-- _error_page() [calls] [EXTRACTED] app/web/__init__.py:L254
+  <-- account() [calls] [EXTRACTED] app/web/__init__.py:L497
+  <-- account_email() [calls] [EXTRACTED] app/web/__init__.py:L522
+  <-- admin_rates_update() [calls] [EXTRACTED] app/web/__init__.py:L694
+  <-- register_submit() [calls] [EXTRACTED] app/web/__init__.py:L457
+  <-- login_submit() [calls] [EXTRACTED] app/web/__init__.py:L415
+  <-- The rest of the interface [references] [INFERRED 0.95] docs/reports/part7-1-spanish-interface-changes.md:L61
+  <-- Show a service error in the page language when its code has a fixed sentence… [rationale_for] [EXTRACTED] app/web/__init__.py:L158
+################ graphify affected "app/config/settings.py"
+Affected nodes for settings.py
+Relations: calls, indirect_call, references, imports, imports_from, dynamic_import, re_exports, inherits, extends, implements, uses, mixes_in, embeds, defines, requires
+Depth: 2
+- config/__init__.py [re_exports] app/config/__init__.py:L3
+- app/__init__.py [re_exports] app/__init__.py:L16
+- config/commands.py [imports_from] app/config/commands.py:L13
+- test_configured_language.py [imports_from] tests/unit/i18n/test_configured_language.py:L7
+- _load_seed() [calls] app/config/commands.py:L123
+- _require_reset_enabled() [calls] app/config/commands.py:L146
+- _resolve_seed_path() [calls] app/config/commands.py:L115
+- .from_values() [calls] app/config/settings.py:L33
+- _secret_key() [calls] app/__init__.py:L101
+- test_main_program.py [imports] tests/test_main_program.py:L143
+- Decision [references] docs/adr/ADR-011-configured-interface-language.md:L14
+- Configuration (the core of Part 7) [references] docs/reports/part7-1-spanish-interface-changes.md:L47
+- main() [uses] app/config/commands.py:L107
+- test_an_unsupported_language_stops_start_up() [uses] tests/test_main_program.py:L146
+- test_production_requires_a_secret_key() [uses] tests/test_main_program.py:L157
+- test_settings_refuse_an_unsupported_language() [uses] tests/unit/i18n/test_configured_language.py:L58
+- 5. Configuration items and baselines [references] docs/reports/part7-1-spanish-interface-changes.md:L96
+- check_orders() [uses] app/config/commands.py:L78
+- migrate() [uses] app/config/commands.py:L19
+- reset() [uses] app/config/commands.py:L57
+- seed() [uses] app/config/commands.py:L26
+- create_app() [uses] app/__init__.py:L22
+- test_settings_read_the_language() [uses] tests/unit/i18n/test_configured_language.py:L49
+- test_end_to_end.py [imports_from] tests/integration/test_end_to_end.py:L9
+- test_project_process.py [imports_from] tests/test_project_process.py:L16
+- Round 2: one integration pass (Claude Code) [references] docs/reports/part4-2-genai-process-report.md:L78
+- app() [calls] tests/integration/test_end_to_end.py:L28
+- _serve() [calls] tests/system/conftest.py:L111
+- test_app_factory_exposes_health_and_postgresql_configuration() [calls] tests/test_bootstrap.py:L13
+- app() [calls] tests/test_main_program.py:L19
+- test_healthz_reports_the_configured_language() [calls] tests/test_main_program.py:L120
+- test_the_environment_variable_configures_the_app() [calls] tests/test_main_program.py:L132
+- test_version_one_has_no_native_app_or_seat_map() [calls] tests/test_project_process.py:L78
+- system/conftest.py [imports] tests/system/conftest.py:L109
+- test_bootstrap.py [imports] tests/test_bootstrap.py:L11
+- ADR-001: One Flask Application (Modular Monolith) [references] docs/adr/ADR-001-flask-monolith.md
+- ADR-006: Standalone Feature Modules and Testing [references] docs/adr/ADR-006-feature-modules-and-testing.md
+################ graphify path "Settings" "_resolve_locale()"
+Ambiguous: '_resolve_locale()' matches 2 nodes in different files.
+  app/i18n/locales.py
+    id: app_i18n_locales_resolve_locale
+  app/web/__init__.py
+    id: app_web_init_resolve_locale
+Retry with path::symbol using one of the paths above (e.g. <path>::resolve_locale()) or the full node id.

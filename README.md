@@ -1,6 +1,6 @@
 # EventHub
 
-A ticketing website for campus events, built with Python, Flask and PostgreSQL for CEN 4020 (AI Project, Parts 4 and 5).
+A ticketing website for campus events, built with Python, Flask and PostgreSQL for CEN 4020 (AI Project, Parts 4 to 7).
 
 Buyers can:
 - register and log in;
@@ -45,11 +45,30 @@ Open http://127.0.0.1:5000. Register with an `@usf.edu` email to see the student
 
 **macOS / Linux one-liner:** `./run-local.sh` does the same (needs Docker and Python 3.12+); `./run-local.sh --no-reset` keeps your data, `./run-local.sh --stop` stops the database.
 
+## Language: English or Spanish (Part 7)
+
+Set `EVENTHUB_LANGUAGE` to configure the language of a deployment ([ADR-011](docs/adr/ADR-011-configured-interface-language.md)):
+
+| `EVENTHUB_LANGUAGE` | What visitors see |
+|---|---|
+| `es` | Spanish: the top-level menu, every page, and the messages the pages write. Dates and amounts follow Spanish conventions (`24,84 EUR`). |
+| `en` | English, even for a browser that asks for Spanish. |
+| not set (or blank) | The browser decides (`Accept-Language`), then English. This is release 1.3.0's behaviour. |
+| anything else (`fr`, `spanish`, `es-MX`) | **EventHub refuses to start** and names the allowed values. It never falls back to English silently. |
+
+A visitor can still switch one browser with the footer link (`?lang=en` / `?lang=es`, remembered in a cookie). `GET /healthz` shows the configured language (`"language": "es"`, `"en"` or `"browser"`).
+
+```bash
+EVENTHUB_LANGUAGE=es .venv/bin/flask --app 'app:create_app()' run   # the Spanish version
+```
+
+`run-local.cmd -Language es` (Windows) and `./run-local.sh --language es` (macOS/Linux) start the Spanish version locally. `python scripts/find_untranslated_text.py --all` lists any English left outside the message catalogs (`app/i18n/en.json`, `es.json`); a unit test fails if a template or the web layer has any.
+
 ## Run the tests
 
 ```bash
 .venv/bin/python -m pytest                    # unit + contract + process tests; PostgreSQL tests skip
-EVENTHUB_TEST_DATABASE_URL="$DATABASE_URL" .venv/bin/python -m pytest   # all 286 (no browser)
+EVENTHUB_TEST_DATABASE_URL="$DATABASE_URL" .venv/bin/python -m pytest   # all 545 (no browser)
 ```
 
 The PostgreSQL tests reset the database they are given, so point them at a throwaway one.
@@ -57,7 +76,7 @@ The PostgreSQL tests reset the database they are given, so point them at a throw
 ### System tests: a real browser, at the press of a button (Part 5)
 
 ```bash
-python scripts/run_system_tests.py            # 87 Selenium runs, headless Chrome, about 2 minutes
+python scripts/run_system_tests.py            # 93 Selenium runs, headless Chrome, about 2.5 minutes
 python scripts/run_system_tests.py --headed   # watch the browser
 python scripts/run_system_tests.py -k st30    # one test
 ```

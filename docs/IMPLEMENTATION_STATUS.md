@@ -2,8 +2,8 @@
 
 **Status:** every version-one feature is built and tested. Policy values the customer has not confirmed run as labelled temporary defaults, which work in local, development and test environments only.
 
-**Branch:** `eventhub/part5` (based on `main` @ `5a98b90`, the merged Part 4)
-**Tests:** 286 passing against PostgreSQL (without a database, the PostgreSQL ones skip), plus **87 Selenium system test runs** passing against the final application (`python scripts/run_system_tests.py`).
+**Release:** 1.4.0 on branch `eventhub/part7` (Part 7), based on `main` @ `2a39d28` (tagged `v1.3.0`).
+**Tests:** 545 passing against PostgreSQL with none skipped (without a database, the PostgreSQL ones skip), plus **93 Selenium system test runs** passing against the final application (`python scripts/run_system_tests.py`). Logs: `docs/evidence/part7/`.
 
 ## Built and tested
 
@@ -65,11 +65,11 @@
 
 | What | Requirements | Status |
 |---|---|---|
-| Purchase test for every currency including JPY; minor-unit display and charge (the 1.3 yen incident) | system-016, pricing-014 | planned, see `docs/acceptance-matrix.md` |
-| Admin rate edit used by next purchase; large-change confirmation; `exchange_rate_history` | admin-006, pricing-013 | planned |
-| Localization: Spanish + English, regional dates and currency formats | system-020..023 | planned |
-| Out-of-range order alert (`check-orders`) | audit-009 | planned; rotation `[OPEN]` |
-| Release gate (skipped tests fail), restorable releases, backup | system-017..019 | planned; backup owner `[OPEN]` |
+| Purchase test for every currency including JPY; minor-unit display and charge (the 1.3 yen incident) | system-016, pricing-014 | done; green in CI and locally with PostgreSQL (see `docs/acceptance-matrix.md`) |
+| Admin rate edit used by next purchase; large-change confirmation; `exchange_rate_history` | admin-006, pricing-013 | done |
+| Localization: Spanish + English, regional dates and currency formats | system-020..023 | done (extended in Part 7) |
+| Out-of-range order alert (`check-orders`) | audit-009 | done; recipient and rotation `[OPEN]` |
+| Release gate (skipped tests fail), restorable releases, backup | system-017..019 | gate done; tags `v1.2.0`/`v1.3.0` created in Part 7 (not yet pushed); backup owner `[OPEN]` |
 
 ### Still open after Call 6
 - Backup owner and the first restore drill (system-019).
@@ -79,3 +79,21 @@
 
 ### Diagrams to export
 `workspace.dsl` has new views `Container_PostCall6` and `Component_PostCall6`. The PNGs are not regenerated here (no tooling). Export both from Structurizr, and re-export the PostCall3/4/5 views to check they did not change.
+
+## Part 7 (configuration management), release 1.4.0
+
+| What | Requirements | Status |
+|---|---|---|
+| `EVENTHUB_LANGUAGE` (`en`/`es`) configures the deployment language; beats `Accept-Language`, a visitor's `?lang` still wins; `/healthz` shows it | system-024, ADR-011 | done |
+| An unsupported value stops start-up | system-025 | done |
+| Top-level menu in Spanish | system-026 | done |
+| Every page and web-layer message in Spanish; service errors with a fixed sentence by code | system-027 | done; 15 input-dependent service sentences stay English (ADR-011 decision 6) |
+| Tracing tools: `scripts/find_untranslated_text.py` (guard test), `scripts/trace_requirement.py` | system-027, Part 7 | done |
+| Tags | system-018 | `v1.2.0` (`ede191a`) and `v1.3.0` (`2a39d28`) created locally; `v1.4.0` after merge and a green CI run |
+
+### Still open after Part 7
+- Native-speaker review of the Spanish text (171 catalog entries).
+- Input-dependent service sentences in Spanish (needs codes from the identity and admin services).
+- Exchange rates are shown with `.` in both languages, because the rate form parses `.` only.
+- Push the tags; GitHub Actions run of this branch; teammate review of the AI-written change (CONTRIBUTING).
+- Export `Container_PostCall7` and `Component_PostCall7` (and the PostCall6 views) from Structurizr to `diagrams/`.

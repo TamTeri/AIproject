@@ -105,3 +105,20 @@ These test the seams between components with real row locks and real keys (`test
 ST-70 signs up 20 buyers, then all 20 buy 3 tickets each at the same time (120 timed purchase requests: checkout start and payment). It passes if 95% finish within 1 second and none fails with a server error. The target is `[TEMPORARY_MVP_DEFAULT]` until Marcus supplies the sentence. It can be changed with `EVENTHUB_PERF_P95_SECONDS`, and the buyers and purchases with `EVENTHUB_PERF_BUYERS` / `EVENTHUB_PERF_PURCHASES`.
 
 Measured on the development laptop (Windows 11, Werkzeug threaded server, PostgreSQL 16 in Docker), three runs: median 0.19–0.20 s, p95 0.29–0.36 s, max 0.40–0.46 s ([log](../evidence/system-tests/performance-st70.log)).
+
+## Part 7: configured language (English or Spanish)
+
+Six black-box cases in `tests/system/test_st_part7_language.py`. Each starts a second EventHub on the same database with `EVENTHUB_LANGUAGE` set, the way an operator would deploy it (`configured_site` fixture in `tests/system/conftest.py`). The browser asks for English (`Accept-Language: en-US`, now pinned in `make_driver` so no test depends on the machine's own language), so a Spanish page proves the *configuration* chose the language. The expected Spanish text comes from the requirements and `app/i18n/es.json`.
+
+| Case | Configuration and browser | Expected | Requirements |
+|---|---|---|---|
+| ST-71 | `es`, English browser, not logged in | Menu: Eventos, Historial de pedidos, Iniciar sesión, Registrarse; `<html lang="es">`; footer "Idioma" | system-024, system-026 |
+| ST-72 | `es`, a buyer and the administrator | Menu with Cuenta, Cerrar sesión (name), Administración; admin pages and column headings in Spanish | system-026 |
+| ST-73 | `en` with a Spanish browser; not configured with a Spanish browser | English on the first, Spanish on the second: the configuration decides, and without it the Call 6 behaviour is unchanged | system-024, system-020 |
+| ST-74 | `es`, visitor clicks "English" in the footer | English menu, remembered on the next page (the visitor's choice beats the configuration) | system-020, system-024 |
+| ST-75 | `es`, full buyer journey | Register, log in, buy 2 tickets in EUR: total `24,84 EUR`, "Pedido confirmado", history row with a Spanish date | system-027, system-021, system-022 |
+| ST-76 | `es`, failures | Wrong password: "Correo o contraseña no válidos."; missing page and a 1-ticket-left rejection in Spanish; the error code stays `not_enough_tickets` | system-027, purchase-017 |
+
+`EVENTHUB_LANGUAGE=fr` (system-025) cannot be shown in a browser because the server refuses to start; `tests/test_main_program.py::test_an_unsupported_language_stops_start_up` proves it.
+
+Mutation check: with the precedence deliberately broken (browser before configuration), 34 unit and contract tests and ST-71 and ST-73 failed; with the real code they pass ([log](../evidence/part7/trace/07-mutation-check.txt)).

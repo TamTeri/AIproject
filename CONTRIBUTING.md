@@ -40,9 +40,15 @@ CI (`.github/workflows/ci.yml`) runs the same checks plus the PostgreSQL tests a
 ## Release checklist (Call 6)
 1. All tests pass, **including the system tests** (`python scripts/run_system_tests.py`). The CI gate fails if any test is skipped, so a skip is not a pass.
 2. The corrective tests for the release are green (system-017). If not, the release is not promoted and the previous one stays live.
-3. Tag the release (for example `v1.3.0`). Every release stays restorable (system-018): the previous tag (`v1.2.0` before 1.3) must still check out, install and start.
+3. Tag the release (for example `v1.4.0`). Every release stays restorable (system-018): the previous tag (`v1.3.0` before 1.4) must still check out, install and start.
 4. Know the switch back before you need it: check out the previous tag and restart. If the new release ran a migration, test its Alembic `downgrade` first; if it is not reversible, say so in the release notes.
 5. If something goes wrong live, roll back first, debug in a test environment second.
+
+## Text people read (Part 7)
+- **No English in a template or in `app/web/`.** Add a key to *both* `app/i18n/en.json` and `app/i18n/es.json` and use `{{ _('key') }}` (templates) or `_t("key")` (routes). `tests/unit/i18n/test_untranslated_text_guard.py` fails otherwise; `python scripts/find_untranslated_text.py --all` shows where.
+- A service error is shown in the page language by its code (`SERVICE_ERROR_KEYS` in `app/web/__init__.py`). Codes, audit outcomes and currency codes are never translated.
+- **Adding a language:** a new `app/i18n/<code>.json` with the same keys, the code in `SUPPORTED` and `LANGUAGE_NAMES` (`app/i18n/locales.py`), and its date names and separators in `app/i18n/formatting.py`. `EVENTHUB_LANGUAGE` then accepts it.
+- Spanish text is `[TEMPORARY_MVP_DEFAULT]` until a native speaker reviews it.
 
 ## Where code goes
 - Feature rules belong in `app/<feature>/service.py`. Plain Python only, no Flask and no SQL.

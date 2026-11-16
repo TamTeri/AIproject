@@ -1,0 +1,10 @@
+# Mutation check (Part 7): do the new tests fail if the configured language stops working?
+# Mutant: in app/i18n/locales.py resolve_locale(), Accept-Language moved BEFORE the configured language
+#   (i.e. the browser beats EVENTHUB_LANGUAGE, the behaviour system-024 forbids).
+unit + contract (tests/unit/i18n, tests/contract/test_spanish_interface.py, tests/test_main_program.py):
+  34 failed, 153 passed
+Selenium (-k "st71 or st73"):
+  FAILED test_st71_spanish_deployment_shows_the_top_level_menu_in_spanish
+  FAILED test_st73_the_configuration_decides_not_the_browser
+  2 failed
+# File restored; the same tests pass again on the real code (187 passed; 6/6 Selenium).

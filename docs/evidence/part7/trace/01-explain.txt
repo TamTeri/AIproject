@@ -1,0 +1,49 @@
+################ graphify explain "resolve_locale"
+Ambiguous: 'resolve_locale' matches 2 nodes in different files.
+  app/i18n/locales.py
+    id: app_i18n_locales_resolve_locale
+  app/web/__init__.py
+    id: app_web_init_resolve_locale
+Retry with path::symbol using one of the paths above (e.g. <path>::resolve_locale()) or the full node id.
+################ graphify explain "translate"
+Node: translate()
+  ID:        app_i18n_catalog_translate
+  Source:    app/i18n/catalog.py L23
+  Type:      code
+  Community: test_i18n.py
+  Degree:    7
+
+Connections (7):
+  <-- web/__init__.py [imports] [EXTRACTED] app/web/__init__.py:L30
+  <-- test_i18n.py [imports] [EXTRACTED] tests/unit/i18n/test_i18n.py:L11
+  <-- register_web() [calls] [EXTRACTED] app/web/__init__.py:L115
+  <-- i18n/__init__.py [imports] [EXTRACTED] app/i18n/__init__.py:L3
+  <-- catalog.py [contains] [EXTRACTED] app/i18n/catalog.py:L23
+  <-- test_translate_fills_named_slots_and_falls_back() [calls] [EXTRACTED] tests/unit/i18n/test_i18n.py:L97
+  <-- Look up key (falling back to English, then the key) and fill {name} slots.… [rationale_for] [EXTRACTED] app/i18n/catalog.py:L24
+################ graphify explain "_resolve_locale"
+Ambiguous: '_resolve_locale' matches 2 nodes in different files.
+  app/i18n/locales.py
+    id: app_i18n_locales_resolve_locale
+  app/web/__init__.py
+    id: app_web_init_resolve_locale
+Retry with path::symbol using one of the paths above (e.g. <path>::resolve_locale()) or the full node id.
+################ graphify explain "locales.py"
+Node: locales.py
+  ID:        app_i18n_locales
+  Source:    app/i18n/locales.py L1
+  Type:      code
+  Community: resolve_locale
+  Degree:    10
+
+Connections (10):
+  <-- web/__init__.py [re_exports] [EXTRACTED] app/web/__init__.py:L32
+  --> re [imports] [EXTRACTED] app/i18n/locales.py:L10
+  <-- test_i18n.py [imports_from] [EXTRACTED] tests/unit/i18n/test_i18n.py:L13
+  <-- formatting.py [imports_from] [EXTRACTED] app/i18n/formatting.py:L11
+  --> resolve_locale() [contains] [EXTRACTED] app/i18n/locales.py:L52
+  <-- i18n/__init__.py [re_exports] [EXTRACTED] app/i18n/__init__.py:L5
+  <-- catalog.py [imports_from] [EXTRACTED] app/i18n/catalog.py:L9
+  --> match_tag() [contains] [EXTRACTED] app/i18n/locales.py:L22
+  --> _from_accept_language() [contains] [EXTRACTED] app/i18n/locales.py:L33
+  <-- Locale allowlist and request-locale resolution. A raw header, query or cookie… [rationale_for] [EXTRACTED] app/i18n/locales.py:L1

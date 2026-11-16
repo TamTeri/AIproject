@@ -1,0 +1,132 @@
+templates/account.html:2: [template] Account · EventHub
+templates/account.html:5: [template] Account
+templates/account.html:7: [template] Name
+templates/account.html:8: [template] Email
+templates/account.html:10: [template] Student discount
+templates/account.html:11: [template] Yes: your current email is a USF address.No: the student discount needs a current @usf.edu email.
+templates/account.html:15: [template] Home currency
+templates/account.html:16: [template] Your home currency is preselected at checkout and used for Quick Buy.
+templates/account.html:20: [template] Saved home currency
+templates/account.html:24: [template] Save currency
+templates/account.html:27: [template] Change email
+templates/account.html:28: [template] The student discount is decided from your current email every time you buy.
+templates/account.html:32: [template] New email
+templates/account.html:34: [template] Current password
+templates/account.html:36: [template] Change email
+templates/admin_audit.html:2: [template] Audit log · Admin · EventHub
+templates/admin_audit.html:4: [template] Purchase-attempt audit log
+templates/admin_audit.html:5: [template] ← Exchange rates
+templates/admin_audit.html:6: [template] Every purchase attempt, newest first. Records are append-only and cannot be edited or deleted.
+templates/admin_audit.html:9: [template] Time
+templates/admin_audit.html:9: [template] Buyer
+templates/admin_audit.html:9: [template] Event
+templates/admin_audit.html:9: [template] Qty
+templates/admin_audit.html:9: [template] Currency
+templates/admin_audit.html:9: [template] Outcome
+templates/admin_audit.html:9: [template] Reason
+templates/admin_audit.html:9: [template] Order
+templates/admin_audit.html:24: [template] No purchase attempts yet.
+templates/admin_audit.html:29: [template] Older attempts →
+templates/admin_rates.html:2: [template] Exchange rates · Admin · EventHub
+templates/admin_rates.html:4: [template] Exchange rates
+templates/admin_rates.html:5: [template] Purchase-attempt audit log →
+templates/admin_rates.html:6: [template] Configured rates (no live data). 1 USD = rate × currency. Changes apply to new checkouts; existing orders keep the rate they paid.
+templates/admin_rates.html:10: [template] Currency
+templates/admin_rates.html:10: [template] Rate
+templates/admin_rates.html:10: [template] Last updated
+templates/admin_rates.html:10: [template] Update
+templates/admin_rates.html:16: [template] by
+templates/admin_rates.html:22: [template] aria-label="New rate for"
+templates/admin_rates.html:23: [template] confirm change over 25%
+templates/admin_rates.html:24: [template] Save
+templates/admin_rates.html:26: [template] Base currency
+templates/error.html:5: [template] We could not complete that request
+templates/error.html:8: [template] Return to events
+templates/login.html:2: [template] Log in · EventHub
+templates/login.html:4: [template] Log in
+templates/login.html:5: [template] Your session expired. Please log in again.
+templates/login.html:10: [template] Email
+templates/login.html:12: [template] Password
+templates/login.html:14: [template] Log in
+templates/login.html:16: [template] Need an account? Register
+templates/register.html:2: [template] Register · EventHub
+templates/register.html:4: [template] Register
+templates/register.html:8: [template] Name
+templates/register.html:10: [template] Email
+templates/register.html:12: [template] Password (at least 8 characters)
+templates/register.html:15: [template] Home currency
+templates/register.html:19: [template] Preselected at checkout and used for Quick Buy. You can change it any time on your Account page.
+templates/register.html:21: [template] Create account
+templates/register.html:23: [template] Anyone, anywhere can register. Use your @usf.edu email to get the student discount.
+templates/register.html:24: [template] Already have an account? Log in
+app/web/__init__.py:86: [web] You submitted this purchase more than once. We processed it only once.
+app/web/__init__.py:46: [web] Choose at least 1 ticket.
+app/web/__init__.py:47: [web] The number of tickets cannot be negative. Choose 1 or more.
+app/web/__init__.py:48: [web] Enter the number of tickets as a whole number, such as 2.
+app/web/__init__.py:49: [web] That currency is not supported. Choose one from the list.
+app/web/__init__.py:50: [web] We could not find that event.
+app/web/__init__.py:51: [web] Sorry, this event is sold out.
+app/web/__init__.py:53: [web] Only {available} left for this event. Choose {count} or fewer.
+app/web/__init__.py:54: [web] That would go over the per-account ticket limit for this event.
+app/web/__init__.py:55: [web] Ticket sales have closed for this event because it has already started.
+app/web/__init__.py:57: [web] Too many purchase attempts from your account. Please wait a minute and try again.
+app/web/__init__.py:60: [web] Please log in to buy tickets. You will come back to this event afterwards.
+app/web/__init__.py:62: [web] The student discount no longer applies to your account (for example, because your email changed). The tickets were released and nothing was charged. Please start again to see the new price.
+app/web/__init__.py:67: [web] This form is out of date. Reload the page and try again.
+app/web/__init__.py:69: [web] This form was already used for a different purchase. Reload the page and try again.
+app/web/__init__.py:73: [web] Your 10-minute hold expired and the tickets were released. Please start again.
+app/web/__init__.py:76: [web] We could not find that checkout.
+app/web/__init__.py:77: [web] This checkout is already finished.
+app/web/__init__.py:79: [web] The simulated payment was declined. Your tickets were released and no order was created.
+app/web/__init__.py:82: [web] Checkout cancelled. The tickets were released.
+app/web/__init__.py:83: [web] Something went wrong. Nothing was charged.
+app/web/__init__.py:406: [web] You have been logged out.
+app/web/__init__.py:440: [web] Account created. Please log in.
+app/web/__init__.py:501: [web] Email changed. Student discounts now follow your new email.
+app/web/__init__.py:672: [web] Exchange rate for {…} saved.
+app/web/__init__.py:227: [web] Administrators only.
+app/web/__init__.py:232: [web] We could not find that page.
+app/web/__init__.py:289: [web] We could not complete that purchase.
+app/web/__init__.py:295: [web] Sorry, there are not enough tickets left for that quantity.
+app/web/__init__.py:222: [web] Bad request.
+app/web/__init__.py:348: [web] We could not find that event.
+app/web/__init__.py:471: [web] Saved. This currency is now preselected at checkout and used for Quick Buy.
+app/web/__init__.py:630: [web] We could not find that order.
+app/web/__init__.py:196: [web] Your form expired. Reload the page and try again.
+app/web/__init__.py:497: [web] Too many wrong passwords. For your security you have been logged out.
+app/web/services.py:86: [service, stays English] This EventHub service is temporarily unavailable.
+app/wiring.py:136: [service, stays English] That currency is not supported.
+app/wiring.py:83: [service, stays English] An account with this email already exists.
+app/wiring.py:92: [service, stays English] Invalid email or password.
+app/wiring.py:121: [service, stays English] Your current password is not correct.
+app/wiring.py:125: [service, stays English] That email is already used by another account.
+app/wiring.py:318: [service, stays English] Administrators only.
+app/identity/service.py:128: [service, stays English] name must be text
+app/identity/service.py:131: [service, stays English] name must not be blank
+app/identity/service.py:133: [service, stays English] name must be at most 200 characters
+app/identity/service.py:143: [service, stays English] email must be at most 320 characters
+app/identity/service.py:149: [service, stays English] password must be text
+app/identity/service.py:151: [service, stays English] password must be at least 8 characters
+app/identity/service.py:153: [service, stays English] password must be at most 1024 characters
+app/identity/policy.py:13: [service, stays English] email must be text
+app/identity/policy.py:16: [service, stays English] email must be a valid address
+app/admin/service.py:76: [service, stays English] Enter a rate, for example 0.92.
+app/admin/service.py:82: [service, stays English] Rate must be greater than 0 and at most {…}.
+app/admin/service.py:84: [service, stays English] Rate may have at most {…} decimal places.
+app/admin/service.py:80: [service, stays English] Rate must be a number.
+app/admin/service.py:105: [service, stays English] Unknown or disabled currency.
+app/admin/service.py:110: [service, stays English] This changes the rate by more than {…} (now {…}). Tick the confirmation box if that is intended.
+
+96 untranslated text(s) in templates and app/web; service sentences: 0 shown by code, 22 stay English (ADR-011)
+    35  app/web/__init__.py
+    15  templates/account.html
+    14  templates/admin_audit.html
+    13  templates/admin_rates.html
+    10  templates/register.html
+     7  templates/login.html
+     7  app/identity/service.py
+     6  app/wiring.py
+     6  app/admin/service.py
+     2  templates/error.html
+     2  app/identity/policy.py
+     1  app/web/services.py

@@ -1,0 +1,151 @@
+=== system-024
+  features/system/requirements.md: (optional feature) [Part 7]: Where the operator sets `EVENTHUB_LANGUAGE` to `en` (English) or `es` (Spanish), the {EventHub} shall operate in that language: the configured language is used instead of the browser's `Accept-Language`, while a visitor's own choice (`?la
+  -- code (12)
+     app/__init__.py:38  # system-024: the validated code ("en"/"es") or None, never the raw setting.
+     app/__init__.py:57  # system-024: which language this deployment is configured for ("browser" = not set).
+     app/config/settings.py:22  # system-024 (Part 7): "en", "es", or None when EVENTHUB_LANGUAGE is not set.
+     app/i18n/__init__.py:1  """Interface language and regional formatting (system-020..022, configured language system-024..025)."""
+     app/i18n/locales.py:53  """system-024/025: validate the EVENTHUB_LANGUAGE setting.
+     app/web/__init__.py:141  """system-020/024: ?lang= > cookie > EVENTHUB_LANGUAGE > Accept-Language > en, all allowlisted."""
+     templates/base.html:59  EVENTHUB_LANGUAGE (system-024) unless the visitor chose one with ?lang (system-020). #}
+     templates/base.html:87  {# system-020/024: a visitor's own choice; it beats the configured language. #}
+     scripts/trace_requirement.py:5  python scripts/trace_requirement.py system-024 system-025 --code-only
+     scripts/trace_requirement.py:8  ("system-020/024: ?lang= > cookie > ..."), and every test names what it proves with
+     scripts/trace_requirement.py:10  "system-020/024" and "system-020..023", so that before changing a configurable feature you
+     scripts/trace_requirement.py:35  """'system-020/024' -> {system-020, system-024}; 'system-020..023' -> 020, 021, 022, 023."""
+  -- tests (23)
+     tests/contract/test_spanish_interface.py:1  """Part 7: EventHub configured to run in Spanish (system-024..027, ADR-011).
+     tests/contract/test_spanish_interface.py:66  test_configured_spanish_shows_the_guest_menu_in_spanish_to_an_english_browser
+     tests/contract/test_spanish_interface.py:69  test_configured_spanish_shows_the_guest_menu_in_spanish_to_an_english_browser
+     tests/contract/test_spanish_interface.py:95  test_configured_english_shows_english_to_a_spanish_browser
+     tests/contract/test_spanish_interface.py:103  test_not_configured_follows_the_browser_as_before
+     tests/contract/test_spanish_interface.py:112  test_a_visitors_choice_beats_the_configured_language_and_is_remembered
+     tests/system/conftest.py:140  """Part 7 (system-024): another EventHub on the same database, started with
+     tests/system/test_st_part7_language.py:4  (system-024), on the same seeded database as the other system tests. The browser asks
+     tests/system/test_st_part7_language.py:34  test_st71_spanish_deployment_shows_the_top_level_menu_in_spanish
+     tests/system/test_st_part7_language.py:71  test_st73_the_configuration_decides_not_the_browser
+     tests/system/test_st_part7_language.py:85  test_st74_a_visitor_can_still_switch_the_spanish_deployment_to_english
+     tests/test_main_program.py:111  test_healthz_reports_the_configured_language
+     tests/test_main_program.py:129  test_the_environment_variable_configures_the_app
+     tests/test_trace_requirement.py:6  can start from `python scripts/trace_requirement.py system-024`.
+     tests/test_trace_requirement.py:34  test_short_forms_are_expanded
+     tests/test_trace_requirement.py:35  test_short_forms_are_expanded
+     tests/test_trace_requirement.py:45  test_every_part7_requirement_is_named_by_the_code_that_implements_it
+     tests/test_trace_requirement.py:46  test_every_part7_requirement_is_named_by_the_code_that_implements_it
+     tests/unit/i18n/test_configured_language.py:1  """Part 7: the deployment language is configured with EVENTHUB_LANGUAGE (system-024, system-025, ADR
+     tests/unit/i18n/test_configured_language.py:15  @pytest.mark.requirement("system-024")
+     tests/unit/i18n/test_configured_language.py:46  test_settings_read_the_language
+     tests/unit/i18n/test_configured_language.py:65  @pytest.mark.requirement("system-020", "system-024")
+     tests/unit/i18n/test_configured_language.py:90  test_an_unchecked_configured_value_can_never_leave_the_allowlist
+  -- docs (10)
+     docs/acceptance-matrix.md:86  | system-024 `EVENTHUB_LANGUAGE` configures the language; beats `Accept-Language`; visitor choice still wins; 
+     docs/adr/ADR-011-configured-interface-language.md:3  **Status:** `[STAKEHOLDER]` request (Part 7: "allow the program to be configured to operate in either English 
+     docs/adr/ADR-011-configured-interface-language.md:15  3. **Order of precedence** (system-020 amended, system-024): `?lang` > cookie > **configured language** > `Acc
+     docs/reports/part7-1-spanish-interface-changes.md:31  | system-024 | `EVENTHUB_LANGUAGE=en` or `es` configures the language. It beats the browser's `Accept-Language
+     docs/testing/system-test-cases.md:115  | ST-71 | `es`, English browser, not logged in | Menu: Eventos, Historial de pedidos, Iniciar sesión, Registra
+     docs/testing/system-test-cases.md:117  | ST-73 | `en` with a Spanish browser; not configured with a Spanish browser | English on the first, Spanish o
+     docs/testing/system-test-cases.md:118  | ST-74 | `es`, visitor clicks "English" in the footer | English menu, remembered on the next page (the visito
+     docs/testing/system-test-catalogue.md:70  | ST-71 | EventHub started with EVENTHUB_LANGUAGE=es shows the top-level menu in Spanish, even to a browser th
+     docs/testing/system-test-catalogue.md:72  | ST-73 | A Spanish browser sees English on a deployment configured for English, and Spanish on one that is no
+     docs/testing/system-test-catalogue.md:73  | ST-74 | On the Spanish deployment the footer link switches one visitor to English, and the choice is remembe
+
+=== system-025
+  features/system/requirements.md: (unwanted) [Part 7]: If `EVENTHUB_LANGUAGE` is set to a value that is not a supported language code, then the {EventHub} shall refuse to start and shall name the allowed values, instead of falling back to English.
+  -- code (5)
+     app/config/settings.py:51  """system-025: an unsupported EVENTHUB_LANGUAGE stops start-up; it never becomes English."""
+     app/i18n/__init__.py:1  """Interface language and regional formatting (system-020..022, configured language system-024..025)."""
+     app/i18n/locales.py:53  """system-024/025: validate the EVENTHUB_LANGUAGE setting.
+     app/web/__init__.py:97  # system-025: create_app() has already checked this through Settings; apps built without
+     scripts/trace_requirement.py:5  python scripts/trace_requirement.py system-024 system-025 --code-only
+  -- tests (9)
+     tests/contract/test_spanish_interface.py:1  """Part 7: EventHub configured to run in Spanish (system-024..027, ADR-011).
+     tests/contract/test_spanish_interface.py:122  test_an_app_built_with_an_unsupported_language_is_refused
+     tests/test_main_program.py:140  test_an_unsupported_language_stops_start_up
+     tests/test_trace_requirement.py:35  test_short_forms_are_expanded
+     tests/test_trace_requirement.py:45  test_every_part7_requirement_is_named_by_the_code_that_implements_it
+     tests/test_trace_requirement.py:46  test_every_part7_requirement_is_named_by_the_code_that_implements_it
+     tests/unit/i18n/test_configured_language.py:1  """Part 7: the deployment language is configured with EVENTHUB_LANGUAGE (system-024, system-025, ADR
+     tests/unit/i18n/test_configured_language.py:34  test_unsupported_values_are_refused_never_mapped_to_english
+     tests/unit/i18n/test_configured_language.py:55  test_settings_refuse_an_unsupported_language
+  -- docs (5)
+     docs/acceptance-matrix.md:87  | system-025 an unsupported value stops start-up | `test_main_program.py::test_an_unsupported_language_stops_s
+     docs/adr/ADR-011-configured-interface-language.md:3  **Status:** `[STAKEHOLDER]` request (Part 7: "allow the program to be configured to operate in either English 
+     docs/adr/ADR-011-configured-interface-language.md:14  2. **A wrong value stops the start-up** (system-025). `EVENTHUB_LANGUAGE=fr` or `spanish` raises `Configuratio
+     docs/reports/part7-1-spanish-interface-changes.md:32  | system-025 | An unsupported value (`fr`, `spanish`, `es-MX`) stops start-up and names the allowed values; it
+     docs/testing/system-test-cases.md:122  `EVENTHUB_LANGUAGE=fr` (system-025) cannot be shown in a browser because the server refuses to start; `tests/t
+
+=== system-026
+  features/system/requirements.md: (state-driven) [Part 7]: While the interface language is Spanish, the {EventHub} shall show every top-level menu option (events, order history, account, administration, log out, log in, register) and the language-switcher label in Spanish.
+  -- code (4)
+     templates/base.html:58  {# system-026 (Part 7): the top-level menu. Text from app/i18n/<lang>.json; the language from
+     scripts/find_untranslated_text.py:4  Used to trace "show the interface in Spanish" (system-026, system-027) to the code
+     scripts/trace_requirement.py:4  python scripts/trace_requirement.py system-026
+     scripts/trace_requirement.py:90  parser.add_argument("requirements", nargs="+", help="ids such as system-026")
+  -- tests (8)
+     tests/contract/test_spanish_interface.py:1  """Part 7: EventHub configured to run in Spanish (system-024..027, ADR-011).
+     tests/contract/test_spanish_interface.py:69  test_configured_spanish_shows_the_guest_menu_in_spanish_to_an_english_browser
+     tests/contract/test_spanish_interface.py:82  test_configured_spanish_menu_for_a_buyer_and_an_administrator
+     tests/contract/test_spanish_interface.py:95  test_configured_english_shows_english_to_a_spanish_browser
+     tests/system/test_st_part7_language.py:34  test_st71_spanish_deployment_shows_the_top_level_menu_in_spanish
+     tests/system/test_st_part7_language.py:45  test_st72_spanish_menu_for_a_logged_in_buyer_and_an_administrator
+     tests/test_trace_requirement.py:45  test_every_part7_requirement_is_named_by_the_code_that_implements_it
+     tests/test_trace_requirement.py:46  test_every_part7_requirement_is_named_by_the_code_that_implements_it
+  -- docs (8)
+     docs/acceptance-matrix.md:88  | system-026 top-level menu in Spanish | `test_spanish_interface.py::test_configured_spanish_*`; ST-71, ST-72 
+     docs/adr/ADR-011-configured-interface-language.md:3  **Status:** `[STAKEHOLDER]` request (Part 7: "allow the program to be configured to operate in either English 
+     docs/adr/ADR-011-configured-interface-language.md:20  5. **All fixed page text comes from the catalogs** (system-026, system-027). The six remaining templates use c
+     docs/reports/part7-1-spanish-interface-changes.md:33  | system-026 | While Spanish, every top-level menu option and the language-switcher label are in Spanish. |
+     docs/testing/system-test-cases.md:115  | ST-71 | `es`, English browser, not logged in | Menu: Eventos, Historial de pedidos, Iniciar sesión, Registra
+     docs/testing/system-test-cases.md:116  | ST-72 | `es`, a buyer and the administrator | Menu with Cuenta, Cerrar sesión (name), Administración; admin 
+     docs/testing/system-test-catalogue.md:70  | ST-71 | EventHub started with EVENTHUB_LANGUAGE=es shows the top-level menu in Spanish, even to a browser th
+     docs/testing/system-test-catalogue.md:71  | ST-72 | On the Spanish deployment a buyer's and an administrator's top-level menus are in Spanish, and the a
+
+=== system-027
+  features/system/requirements.md: (state-driven) [Part 7]: While the interface language is Spanish, the {EventHub} shall show the fixed text of every page in Spanish: page titles, headings, labels, buttons, help text, error pages, and the messages the web pages write. Sentences that a feature service
+  -- code (11)
+     app/web/__init__.py:46  # catalogs (system-027, ADR-011): en.json holds the English, word for word as before.
+     app/web/__init__.py:71  # system-027, ADR-011 decision 6: service errors whose code always carries the same sentence are shown
+     app/web/__init__.py:153  """system-027: a sentence the web layer writes, in the page's language."""
+     templates/account.html:2  {# system-027 (Part 7): every visible text is a catalog key (app/i18n/<lang>.json). #}
+     templates/admin_audit.html:2  {# system-027 (Part 7): every visible text is a catalog key (app/i18n/<lang>.json). #}
+     templates/admin_rates.html:2  {# system-027 (Part 7): every visible text is a catalog key (app/i18n/<lang>.json). #}
+     templates/base.html:80  {# system-027: flash messages are written in the page language by app/web (_t). #}
+     templates/error.html:2  {# system-027 (Part 7): every visible text is a catalog key (app/i18n/<lang>.json). #}
+     templates/login.html:2  {# system-027 (Part 7): every visible text is a catalog key (app/i18n/<lang>.json). #}
+     templates/register.html:2  {# system-027 (Part 7): every visible text is a catalog key (app/i18n/<lang>.json). #}
+     scripts/find_untranslated_text.py:4  Used to trace "show the interface in Spanish" (system-026, system-027) to the code
+  -- tests (24)
+     tests/contract/test_spanish_interface.py:1  """Part 7: EventHub configured to run in Spanish (system-024..027, ADR-011).
+     tests/contract/test_spanish_interface.py:131  # ------------------------------------------- system-027: every page in Spanish
+     tests/contract/test_spanish_interface.py:151  test_no_english_is_left_on_any_page_when_spanish
+     tests/contract/test_spanish_interface.py:164  test_the_same_pages_in_english_still_show_english
+     tests/contract/test_spanish_interface.py:176  test_page_titles_and_error_pages_are_spanish
+     tests/contract/test_spanish_interface.py:192  test_every_purchase_rejection_is_spanish_and_keeps_its_code
+     tests/contract/test_spanish_interface.py:195  test_every_purchase_rejection_is_spanish_and_keeps_its_code
+     tests/contract/test_spanish_interface.py:211  test_not_enough_tickets_in_both_languages
+     tests/contract/test_spanish_interface.py:232  test_flash_messages_are_spanish
+     tests/contract/test_spanish_interface.py:256  test_expired_form_message_is_spanish
+     tests/contract/test_spanish_interface.py:267  test_service_errors_with_a_fixed_sentence_are_shown_in_spanish
+     tests/contract/test_spanish_interface.py:291  test_input_dependent_service_sentences_stay_english_as_decided
+     tests/contract/test_spanish_interface.py:331  test_english_outcome_sentences_are_word_for_word_release_1_3_0
+     tests/contract/test_spanish_interface.py:338  test_english_flash_messages_are_unchanged
+     tests/contract/test_spanish_interface.py:368  test_english_text_shown_by_code_is_the_services_own_sentence
+     tests/system/test_st_part7_language.py:99  test_st75_spanish_buyer_journey_from_registration_to_order_history
+     tests/system/test_st_part7_language.py:143  test_st76_errors_and_rejections_are_spanish_on_the_spanish_deployment
+     tests/test_trace_requirement.py:45  test_every_part7_requirement_is_named_by_the_code_that_implements_it
+     tests/test_trace_requirement.py:46  test_every_part7_requirement_is_named_by_the_code_that_implements_it
+     tests/unit/i18n/test_untranslated_text_guard.py:1  """Part 7 guard: no user-visible English outside the catalogs (system-027, ADR-011 decision 8).
+     tests/unit/i18n/test_untranslated_text_guard.py:29  test_templates_and_web_layer_have_no_hard_coded_english
+     tests/unit/i18n/test_untranslated_text_guard.py:35  test_scanner_finds_planted_english_in_a_template
+     tests/unit/i18n/test_untranslated_text_guard.py:51  test_scanner_finds_planted_sentences_in_python
+     tests/unit/i18n/test_untranslated_text_guard.py:67  test_service_sentences_are_labelled_by_how_they_are_shown
+  -- docs (8)
+     docs/acceptance-matrix.md:89  | system-027 every page's fixed text and web messages in Spanish | `test_spanish_interface.py::test_no_english
+     docs/adr/ADR-011-configured-interface-language.md:3  **Status:** `[STAKEHOLDER]` request (Part 7: "allow the program to be configured to operate in either English 
+     docs/adr/ADR-011-configured-interface-language.md:20  5. **All fixed page text comes from the catalogs** (system-026, system-027). The six remaining templates use c
+     docs/reports/part7-1-spanish-interface-changes.md:34  | system-027 | While Spanish, every page's fixed text and the messages the web pages write are in Spanish. Inp
+     docs/testing/system-test-cases.md:119  | ST-75 | `es`, full buyer journey | Register, log in, buy 2 tickets in EUR: total `24,84 EUR`, "Pedido confir
+     docs/testing/system-test-cases.md:120  | ST-76 | `es`, failures | Wrong password: "Correo o contraseña no válidos."; missing page and a 1-ticket-left
+     docs/testing/system-test-catalogue.md:74  | ST-75 | On the Spanish deployment: register, log in, buy 2 tickets in EUR, and read the confirmation and his
+     docs/testing/system-test-catalogue.md:75  | ST-76 | On the Spanish deployment a failed log-in, a missing page and a purchase rejection are explained in 
+

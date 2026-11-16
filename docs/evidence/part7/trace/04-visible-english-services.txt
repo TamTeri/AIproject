@@ -1,0 +1,9 @@
+### app/web/services.py ServiceError construction
+7:class ServiceError(Exception):
+84:            raise ServiceError(
+### messages raised by feature services that reach pages
+app/admin/service.py:76:        raise RateValidationError("Enter a rate, for example 0.92.")
+app/admin/service.py:80:        raise RateValidationError("Rate must be a number.") from exc
+app/admin/service.py:105:            raise RateValidationError("Unknown or disabled currency.")
+app/pricing/config.py:83:            raise PricingConfigurationError("USD is the only supported base currency")
+app/pricing/config.py:86:            raise PricingConfigurationError("USD must use a two-digit minor unit exponent")

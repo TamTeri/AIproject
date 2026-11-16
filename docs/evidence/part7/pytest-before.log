@@ -1,0 +1,6 @@
+# EventHub 1.3.0 (main @ 2a39d28, tag v1.3.0) BEFORE any Part 7 change: unit + contract + process + PostgreSQL integration
+# command: EVENTHUB_TEST_DATABASE_URL=<docker postgres 16> python -m pytest -q -p no:cacheprovider -rs   (tail of the output; none skipped)
+........................................................................ [ 68%]
+........................................................................ [ 85%]
+..............................................................           [100%]
+422 passed, 87 deselected in 77.18s (0:01:17)

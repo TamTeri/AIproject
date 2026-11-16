@@ -1,0 +1,29 @@
+app/web/services.py:86: [service, shown by code] This EventHub service is temporarily unavailable.
+app/wiring.py:136: [service, shown by code] That currency is not supported.
+app/wiring.py:83: [service, shown by code] An account with this email already exists.
+app/wiring.py:92: [service, shown by code] Invalid email or password.
+app/wiring.py:121: [service, shown by code] Your current password is not correct.
+app/wiring.py:125: [service, shown by code] That email is already used by another account.
+app/wiring.py:318: [service, shown by code] Administrators only.
+app/identity/service.py:128: [service, stays English] name must be text
+app/identity/service.py:131: [service, stays English] name must not be blank
+app/identity/service.py:133: [service, stays English] name must be at most 200 characters
+app/identity/service.py:143: [service, stays English] email must be at most 320 characters
+app/identity/service.py:149: [service, stays English] password must be text
+app/identity/service.py:151: [service, stays English] password must be at least 8 characters
+app/identity/service.py:153: [service, stays English] password must be at most 1024 characters
+app/identity/policy.py:13: [service, stays English] email must be text
+app/identity/policy.py:16: [service, stays English] email must be a valid address
+app/admin/service.py:76: [service, stays English] Enter a rate, for example 0.92.
+app/admin/service.py:82: [service, stays English] Rate must be greater than 0 and at most {…}.
+app/admin/service.py:84: [service, stays English] Rate may have at most {…} decimal places.
+app/admin/service.py:80: [service, stays English] Rate must be a number.
+app/admin/service.py:105: [service, stays English] Unknown or disabled currency.
+app/admin/service.py:110: [service, stays English] This changes the rate by more than {…} (now {…}). Tick the confirmation box if that is intended.
+
+0 untranslated text(s) in templates and app/web; service sentences: 7 shown by code, 15 stay English (ADR-011)
+     7  app/identity/service.py
+     6  app/wiring.py
+     6  app/admin/service.py
+     2  app/identity/policy.py
+     1  app/web/services.py
