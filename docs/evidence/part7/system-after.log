@@ -1,4 +1,4 @@
-# EventHub 1.4.0 (commit 49c416b): Selenium system tests, headless Chrome, python scripts/run_system_tests.py
+# EventHub 1.4.0 (commit 83dc490): Selenium system tests, headless Chrome, python scripts/run_system_tests.py
 Running: D:\AIproject\.venv\Scripts\python.exe -m pytest tests/system -m system -v --html=D:\AIproject\reports\system-tests.html --self-contained-html --junitxml=D:\AIproject\reports\system-tests.xml --basetemp=<tmp>
 ============================= test session starts =============================
 platform win32 -- Python 3.12.10, pytest-9.2.0, pluggy-1.7.0 -- D:\AIproject\.venv\Scripts\python.exe
