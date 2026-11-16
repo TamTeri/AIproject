@@ -10,6 +10,9 @@ workspace "EventHub" "EventHub C4 model before and after Calls 3, 4, 5 and 6" {
         administrator = person "Administrator" "Finance or EventHub staff who update exchange rates and read the purchase-attempt audit log. How an account becomes an administrator is an open decision." {
             tags "Administrator"
         }
+        operator = person "Operator" "Deploys EventHub and sets its environment settings, including the interface language (EVENTHUB_LANGUAGE), then checks /healthz to confirm the live configuration." {
+            tags "PostCall7"
+        }
 
         eventHub = softwareSystem "EventHub" "Public ticketing website for events, with student discounts and multi-currency pricing." {
 
@@ -26,7 +29,7 @@ workspace "EventHub" "EventHub C4 model before and after Calls 3, 4, 5 and 6" {
                     tags "PostCall4"
                 }
 
-                localization = component "Localization" "Message catalogs (English, Spanish), allowlisted locale choice (?lang or cookie, then Accept-Language, then en), regional date format, and currency format by the currency's minor unit. Presentation only: it never changes a stored amount." "Python module + message catalogs (ADR-010)" {
+                localization = component "Localization" "Message catalogs (English, Spanish), allowlisted locale choice (?lang or cookie, then the configured EVENTHUB_LANGUAGE, then Accept-Language, then en; Part 7), regional date format, and currency format by the currency's minor unit. Presentation only: it never changes a stored amount." "Python module + message catalogs (ADR-010)" {
                     tags "PostCall6"
                 }
                 orderMonitor = component "Order monitor" "Run by the scheduled check-orders command. Flags orders whose per-ticket USD-equivalent total is under 50% or over 200% of the event base price and sends one message with no personal data through the notify port. Rotation is open." "check-orders command + notify port (ADR-009)" {
@@ -166,6 +169,17 @@ workspace "EventHub" "EventHub C4 model before and after Calls 3, 4, 5 and 6" {
         eventHub.webApp.localization -> eventHub.webApp.pricing "minor_unit(currency): no hardcoded decimals" "Python call" {
             tags "PostCall6"
         }
+
+        # ---- Part 7: configuration management (English or Spanish deployment)
+        operator -> eventHub "Configures the interface language (en or es); reads /healthz" "Environment variable, HTTPS" {
+            tags "PostCall7"
+        }
+        operator -> eventHub.webApp "Sets EVENTHUB_LANGUAGE; a wrong value stops start-up" "Environment variable" {
+            tags "PostCall7"
+        }
+        operator -> eventHub.webApp.localization "Configured language: used before Accept-Language" "EVENTHUB_LANGUAGE, validated by Settings (ADR-011)" {
+            tags "PostCall7"
+        }
     }
 
     views {
@@ -173,6 +187,8 @@ workspace "EventHub" "EventHub C4 model before and after Calls 3, 4, 5 and 6" {
         systemContext eventHub "Context_PreCall3" {
             include *
             exclude "element.tag==PostCall6"
+            exclude "element.tag==PostCall7"
+            exclude "relationship.tag==PostCall7"
             exclude "relationship.tag==PostCall6"
             exclude "relationship.tag==PostCall3"
             exclude "relationship.tag==PostCall5"
@@ -186,6 +202,8 @@ workspace "EventHub" "EventHub C4 model before and after Calls 3, 4, 5 and 6" {
         container eventHub "Container_PreCall3" {
             include *
             exclude "element.tag==PostCall6"
+            exclude "element.tag==PostCall7"
+            exclude "relationship.tag==PostCall7"
             exclude "relationship.tag==PostCall6"
             exclude "relationship.tag==PostCall3"
             exclude "relationship.tag==PostCall5"
@@ -199,6 +217,8 @@ workspace "EventHub" "EventHub C4 model before and after Calls 3, 4, 5 and 6" {
         component eventHub.webApp "Component_PreCall3" {
             include *
             exclude "element.tag==PostCall6"
+            exclude "element.tag==PostCall7"
+            exclude "relationship.tag==PostCall7"
             exclude "relationship.tag==PostCall6"
             exclude "relationship.tag==PostCall3"
             exclude "relationship.tag==PostCall4"
@@ -215,6 +235,8 @@ workspace "EventHub" "EventHub C4 model before and after Calls 3, 4, 5 and 6" {
         systemContext eventHub "Context_PostCall3" {
             include *
             exclude "element.tag==PostCall6"
+            exclude "element.tag==PostCall7"
+            exclude "relationship.tag==PostCall7"
             exclude "relationship.tag==PostCall6"
             exclude "relationship.tag==PostCall5"
             exclude "element.tag==PostCall5"
@@ -226,6 +248,8 @@ workspace "EventHub" "EventHub C4 model before and after Calls 3, 4, 5 and 6" {
         container eventHub "Container_PostCall3" {
             include *
             exclude "element.tag==PostCall6"
+            exclude "element.tag==PostCall7"
+            exclude "relationship.tag==PostCall7"
             exclude "relationship.tag==PostCall6"
             exclude "relationship.tag==PostCall5"
             exclude "element.tag==PostCall5"
@@ -237,6 +261,8 @@ workspace "EventHub" "EventHub C4 model before and after Calls 3, 4, 5 and 6" {
         component eventHub.webApp "Component_PostCall3" {
             include *
             exclude "element.tag==PostCall6"
+            exclude "element.tag==PostCall7"
+            exclude "relationship.tag==PostCall7"
             exclude "relationship.tag==PostCall6"
             exclude "relationship.tag==PostCall4"
             exclude "relationship.tag==PostCall5"
@@ -250,6 +276,8 @@ workspace "EventHub" "EventHub C4 model before and after Calls 3, 4, 5 and 6" {
         component eventHub.webApp "Component_PostCall4" {
             include *
             exclude "element.tag==PostCall6"
+            exclude "element.tag==PostCall7"
+            exclude "relationship.tag==PostCall7"
             exclude "relationship.tag==PostCall6"
             exclude "relationship.tag==PostCall5"
             exclude "element.tag==PostCall5"
@@ -262,6 +290,8 @@ workspace "EventHub" "EventHub C4 model before and after Calls 3, 4, 5 and 6" {
         container eventHub "Container_PostCall5" {
             include *
             exclude "element.tag==PostCall6"
+            exclude "element.tag==PostCall7"
+            exclude "relationship.tag==PostCall7"
             exclude "relationship.tag==PostCall6"
             autolayout lr
             title "EventHub containers - after Call 5 (with the system test suite)"
@@ -270,6 +300,8 @@ workspace "EventHub" "EventHub C4 model before and after Calls 3, 4, 5 and 6" {
         component eventHub.webApp "Component_PostCall5" {
             include *
             exclude "element.tag==PostCall6"
+            exclude "element.tag==PostCall7"
+            exclude "relationship.tag==PostCall7"
             exclude "relationship.tag==PostCall6"
             exclude eventHub.systemTests
             exclude tester
@@ -281,16 +313,35 @@ workspace "EventHub" "EventHub C4 model before and after Calls 3, 4, 5 and 6" {
         # After Call 6: yen incident corrective work, order alert, localization.
         container eventHub "Container_PostCall6" {
             include *
+            exclude "element.tag==PostCall7"
+            exclude "relationship.tag==PostCall7"
             autolayout lr
             title "EventHub containers - after Call 6 (with the alert channel)"
         }
 
         component eventHub.webApp "Component_PostCall6" {
             include *
+            exclude "element.tag==PostCall7"
+            exclude "relationship.tag==PostCall7"
             exclude eventHub.systemTests
             exclude tester
             autolayout lr 250 200
             title "Flask application components - after Call 6 (localization and order monitor)"
+        }
+
+        # Part 7: the operator configures the deployment language (ADR-011).
+        container eventHub "Container_PostCall7" {
+            include *
+            autolayout lr
+            title "EventHub containers - after Part 7 (configured interface language)"
+        }
+
+        component eventHub.webApp "Component_PostCall7" {
+            include *
+            exclude eventHub.systemTests
+            exclude tester
+            autolayout lr 250 200
+            title "Flask application components - after Part 7 (configured interface language)"
         }
 
         styles {
