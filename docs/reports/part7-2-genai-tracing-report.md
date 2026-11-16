@@ -13,13 +13,9 @@ We gave the GenAI tool the assignment and the repository. We asked it to find th
 3. Where else does English show up on the screen?
 4. Which tests depend on the current English text?
 
-It answered them with three tools:
+It answered them with three tools: graphify, a code graph that shows what calls what; a scanner it wrote that lists the English a user can see; and a requirement tracer it wrote that lists the code and tests naming a requirement.
 
-- **graphify**, a code graph, for "what calls what";
-- **a scanner it wrote**, which lists the English a user can see;
-- **a requirement tracer it wrote**, which lists the code and tests that name a requirement.
-
-**Main finding.** The Spanish menu already existed from Part 6, but there was no setting to choose the language for the whole site. The scanner also found 96 pieces of untranslated English in six templates and in the web routes.
+The main thing it found was that the Spanish menu already existed from Part 6, but there was no setting to choose the language for the whole site. The scanner also found 96 pieces of untranslated English in six templates and in the web routes.
 
 ## Step 1: Tracing the menu and the language choice
 
@@ -33,17 +29,9 @@ We rebuilt the code graph first. The old graph was from before Part 6 added the 
 | `graphify explain "register_web()"` | The app can be built two ways (`create_app()` and `create_web_app()`), so the setting had to be checked in both. |
 | `graphify affected "app/i18n/locales.py"` | The tests that depend on the language code. We ran these first after each change. |
 
-The path from the setting to the menu text:
+Putting these together, the path from the setting to the menu text is:
 
-```mermaid
-flowchart LR
-  ENV["EVENTHUB_LANGUAGE=es"] --> S["Settings.from_values()<br/>app/config/settings.py"]
-  S --> CA["create_app()<br/>app/__init__.py"]
-  CA --> RL["_resolve_locale()<br/>app/web/__init__.py"]
-  RL --> RES["resolve_locale()<br/>app/i18n/locales.py"]
-  RES --> TR["translate()<br/>app/i18n/catalog.py"]
-  TR --> MENU["menu in<br/>templates/base.html"]
-```
+`EVENTHUB_LANGUAGE` → `Settings.from_values()` (`app/config/settings.py`) → `create_app()` (`app/__init__.py`) → `_resolve_locale()` (`app/web/__init__.py`) → `resolve_locale()` (`app/i18n/locales.py`) → `translate()` (`app/i18n/catalog.py`) → the menu in `templates/base.html`
 
 The graph could not link a template's `_('nav_events')` to the entry in `es.json`, so we confirmed that part by reading `base.html` and the language files.
 
@@ -81,7 +69,7 @@ We fixed all four before relying on it.
 
 All other settings are read in `Settings.from_values()` (`app/config/settings.py`), so the language setting went there too. A wrong value stops the app at start-up, the same way other bad settings already do.
 
-The tool chose an order of precedence: the visitor's own choice, then the setting, then the browser language. These choices are recorded in ADR-011 for the team to review.
+The order we used is: the visitor's own choice first, then the setting, then the browser language. If the setting came after the browser language, it would almost never take effect, because most browsers ask for English. Putting the visitor's choice first means someone who needs English can still get it on the Spanish site. These decisions are written down in ADR-011.
 
 ## Step 4: Effect on the tests
 
@@ -109,7 +97,7 @@ The existing Selenium tests click buttons by their English labels. So they keep 
 
 The logs and the Selenium HTML report are in `docs/evidence/part7/`.
 
-**Mutation check.** To make sure the new tests can actually fail, we broke the feature on purpose: the browser's language was made to win over the setting. 34 tests and two Selenium tests failed, and they passed again once the code was restored.
+We also wanted to be sure the new tests could actually fail. We broke the feature on purpose so that the browser's language won over the setting. 34 tests and two Selenium tests failed, and they all passed again once the code was put back.
 
 ## Problems we ran into
 
