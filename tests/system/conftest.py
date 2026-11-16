@@ -102,13 +102,8 @@ def db(database_url) -> Iterator[Database]:
     database.dispose()
 
 
-@pytest.fixture(scope="session")
-def base_url(db, database_url) -> Iterator[str]:
-    external = os.environ.get("EVENTHUB_BASE_URL")
-    if external:
-        yield external.rstrip("/")
-        return
-
+def _serve(database_url: str, extra: dict | None = None):
+    """Start create_app() on a free localhost port in a background thread."""
     from werkzeug.serving import make_server
 
     from app import create_app
@@ -118,15 +113,45 @@ def base_url(db, database_url) -> Iterator[str]:
             "DATABASE_URL": database_url,
             "EVENTHUB_ENVIRONMENT": "test",
             "SECRET_KEY": "eventhub-system-tests",
+            **(extra or {}),
         }
     )
     logging.getLogger("werkzeug").setLevel(logging.WARNING)
     server = make_server("127.0.0.1", 0, app, threaded=True)
     thread = threading.Thread(target=server.serve_forever, name="eventhub-under-test", daemon=True)
     thread.start()
+    return server, thread
+
+
+@pytest.fixture(scope="session")
+def base_url(db, database_url) -> Iterator[str]:
+    external = os.environ.get("EVENTHUB_BASE_URL")
+    if external:
+        yield external.rstrip("/")
+        return
+    server, thread = _serve(database_url)
     yield f"http://127.0.0.1:{server.server_port}"
     server.shutdown()
     thread.join(timeout=5)
+
+
+@pytest.fixture(scope="session")
+def configured_site(db, database_url) -> Iterator[Callable[[str], str]]:
+    """Part 7 (system-024): another EventHub on the same database, started with
+    EVENTHUB_LANGUAGE set, exactly as an operator would deploy it. One server per language."""
+    if os.environ.get("EVENTHUB_BASE_URL"):
+        pytest.skip("configured-language tests start their own servers; not possible with EVENTHUB_BASE_URL")
+    started: dict[str, tuple] = {}
+
+    def site(language: str) -> str:
+        if language not in started:
+            started[language] = _serve(database_url, {"EVENTHUB_LANGUAGE": language})
+        return f"http://127.0.0.1:{started[language][0].server_port}"
+
+    yield site
+    for server, thread in started.values():
+        server.shutdown()
+        thread.join(timeout=5)
 
 
 # ---------------------------------------------------------------- browsers
@@ -164,11 +189,12 @@ def browser_factory(request, base_url, _browser_pool) -> Iterator[Callable[..., 
     opened: list[tuple[tuple, EventHub]] = []
     hubs: list[EventHub] = []  # the same list the failure-screenshot hook reads
 
-    def open_browser(**options) -> EventHub:
+    def open_browser(site: str | None = None, **options) -> EventHub:
+        """``site``: another server's address (Part 7 configured-language servers)."""
         key = tuple(sorted(options.items()))
         spare = _browser_pool.setdefault(key, [])
         driver = spare.pop() if spare else make_driver(**options)
-        hub = EventHub(driver, base_url)
+        hub = EventHub(driver, site or base_url)
         opened.append((key, hub))
         hubs.append(hub)
         return hub

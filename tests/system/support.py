@@ -49,18 +49,27 @@ def unique_email(prefix: str = "buyer", domain: str = "example.com") -> str:
 # ----------------------------------------------------------------- browser
 
 
-def make_driver(*, width: int = 1280, height: int = 900, mobile: bool = False) -> WebDriver:
-    """Chrome by default; EVENTHUB_BROWSER=edge or firefox to switch."""
+def make_driver(
+    *, width: int = 1280, height: int = 900, mobile: bool = False, accept_language: str = "en-US,en"
+) -> WebDriver:
+    """Chrome by default; EVENTHUB_BROWSER=edge or firefox to switch.
+
+    ``accept_language`` is what the browser asks for (Part 7). It is pinned to English by
+    default, so a test never depends on the language of the machine running it.
+    """
     name = os.environ.get("EVENTHUB_BROWSER", "chrome").lower()
     headed = os.environ.get("EVENTHUB_HEADED", "").lower() in {"1", "true", "yes"}
     if name == "firefox":
         options = webdriver.FirefoxOptions()
+        options.set_preference("intl.accept_languages", accept_language)
         if not headed:
             options.add_argument("-headless")
         driver = webdriver.Firefox(options=options)
         driver.set_window_size(width, height)
         return driver
     options = webdriver.EdgeOptions() if name == "edge" else webdriver.ChromeOptions()
+    options.add_experimental_option("prefs", {"intl.accept_languages": accept_language})
+    options.add_argument(f"--lang={accept_language.split(',')[0]}")
     if not headed:
         options.add_argument("--headless=new")
     options.add_argument(f"--window-size={width},{height}")
@@ -191,6 +200,19 @@ class EventHub:
 
     def flash(self) -> str:
         return " ".join(e.text for e in self.find_all(".flash, .message")).strip()
+
+    # -------------------------------------------------------------- language
+
+    def menu(self) -> list[str]:
+        """Part 7: the top-level menu entries, in order, as a person reads them."""
+        return [e.text.strip() for e in self.find_all("nav a, nav button")]
+
+    def page_language(self) -> str:
+        return self.find("html").get_attribute("lang") or ""
+
+    def submit_main_form(self) -> None:
+        """Press the main form's button without knowing its label (the label depends on the language)."""
+        self.submit_with(self.find("main form.stack button[type=submit]"))
 
     # ------------------------------------------------------------ identity
 

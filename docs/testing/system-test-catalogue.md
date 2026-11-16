@@ -6,7 +6,7 @@ Run every case with `python scripts/run_system_tests.py` (or double-click `run-s
 **Kind:** black-box = designed from the requirements and Call 5 only; white-box = designed from knowing the code.
 **Runs:** how many times the case runs (parametrized variants count separately in the report).
 
-**57 test cases, 87 runs** (43 black-box cases, 14 white-box cases).
+**63 test cases, 93 runs** (49 black-box cases, 14 white-box cases).
 
 | ID | Test case (expected result) | Kind | Requirements | Runs | Code |
 |---|---|---|---|---|---|
@@ -67,3 +67,9 @@ Run every case with `python scripts/run_system_tests.py` (or double-click `run-s
 | ST-68 | The admin rate form refuses zero, negative and text rates and keeps the old rate. | white-box | admin-003, pricing-005 | 1 | `test_st_whitebox.py::test_st68_admin_rate_form_validates_input` |
 | ST-69 | Boundary for sales closing: an event five minutes from now can still be bought. | white-box | purchase-018, catalog-001 | 1 | `test_st_whitebox.py::test_st69_event_starting_in_a_few_minutes_is_still_on_sale` |
 | ST-70 | 20 simultaneous buyers: 95% of purchase requests finish within 1 s and none fails. | black-box | system-013, inventory-004 | 1 | `test_st_performance.py::test_st70_twenty_buyers_at_once_meet_the_performance_target` |
+| ST-71 | EventHub started with EVENTHUB_LANGUAGE=es shows the top-level menu in Spanish, even to a browser that asks for English. | black-box | system-024, system-026 | 1 | `test_st_part7_language.py::test_st71_spanish_deployment_shows_the_top_level_menu_in_spanish` |
+| ST-72 | On the Spanish deployment a buyer's and an administrator's top-level menus are in Spanish, and the admin pages follow. | black-box | system-026, identity-002, admin-002 | 1 | `test_st_part7_language.py::test_st72_spanish_menu_for_a_logged_in_buyer_and_an_administrator` |
+| ST-73 | A Spanish browser sees English on a deployment configured for English, and Spanish on one that is not configured. | black-box | system-024, system-020 | 1 | `test_st_part7_language.py::test_st73_the_configuration_decides_not_the_browser` |
+| ST-74 | On the Spanish deployment the footer link switches one visitor to English, and the choice is remembered. | black-box | system-020, system-024 | 1 | `test_st_part7_language.py::test_st74_a_visitor_can_still_switch_the_spanish_deployment_to_english` |
+| ST-75 | On the Spanish deployment: register, log in, buy 2 tickets in EUR, and read the confirmation and history, all in Spanish. | black-box | system-027, system-021, system-022, pricing-003, orders-003 | 1 | `test_st_part7_language.py::test_st75_spanish_buyer_journey_from_registration_to_order_history` |
+| ST-76 | On the Spanish deployment a failed log-in, a missing page and a purchase rejection are explained in Spanish. | black-box | system-027, identity-004, purchase-017 | 1 | `test_st_part7_language.py::test_st76_errors_and_rejections_are_spanish_on_the_spanish_deployment` |

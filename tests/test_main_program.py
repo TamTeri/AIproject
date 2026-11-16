@@ -95,13 +95,59 @@ def test_healthz_reads_alembic_head_when_db_is_up(app, monkeypatch):
     assert body["alembic_head"] == "0006_call5_rate_windows"
 
 
-@pytest.mark.requirement("system-017")
-def test_release_version_is_1_3_0():
+@pytest.mark.requirement("system-017", "system-018")
+def test_release_version_is_1_4_0():
+    """Part 7 (configured interface language) is release 1.4.0; 1.3.0 stays restorable by its tag."""
     import tomllib
     from pathlib import Path
 
     data = tomllib.loads((Path(__file__).parents[1] / "pyproject.toml").read_text())
-    assert data["project"]["version"] == "1.3.0"
+    assert data["project"]["version"] == "1.4.0"
+
+
+DB = "postgresql+psycopg://u:p@localhost:1/none"
+
+
+@pytest.mark.requirement("system-024")
+def test_healthz_reports_the_configured_language(monkeypatch):
+    import app as app_module
+
+    def unreachable(_url):
+        raise OSError("db down")
+
+    monkeypatch.setattr(app_module, "_probe_engine", unreachable)
+    monkeypatch.delenv("EVENTHUB_LANGUAGE", raising=False)
+    not_set = create_app({"TESTING": True, "SECRET_KEY": "x", "DATABASE_URL": DB})
+    assert not_set.test_client().get("/healthz").get_json()["language"] == "browser"
+    spanish = create_app(
+        {"TESTING": True, "SECRET_KEY": "x", "DATABASE_URL": DB, "EVENTHUB_LANGUAGE": " ES "}
+    )
+    assert spanish.test_client().get("/healthz").get_json()["language"] == "es"
+    assert spanish.config["EVENTHUB_LANGUAGE"] == "es"  # the checked code, never the raw " ES "
+
+
+@pytest.mark.requirement("system-024")
+def test_the_environment_variable_configures_the_app(monkeypatch):
+    monkeypatch.setenv("EVENTHUB_LANGUAGE", "es")
+    app = create_app({"TESTING": True, "SECRET_KEY": "x", "DATABASE_URL": DB})
+    html = (
+        app.test_client().get("/login", headers={"Accept-Language": "en-US,en;q=0.9"}).get_data(as_text=True)
+    )
+    assert '<html lang="es">' in html
+    assert ">Iniciar sesión</h1>" in html
+
+
+@pytest.mark.requirement("system-025")
+@pytest.mark.parametrize("bad", ["fr", "spanish", "es-MX", "en_US", "../es", "x" * 300])
+def test_an_unsupported_language_stops_start_up(monkeypatch, bad):
+    from app.config.settings import ConfigurationError
+
+    monkeypatch.delenv("EVENTHUB_LANGUAGE", raising=False)
+    with pytest.raises(ConfigurationError) as caught:
+        create_app({"TESTING": True, "SECRET_KEY": "x", "DATABASE_URL": DB, "EVENTHUB_LANGUAGE": bad})
+    message = str(caught.value)
+    assert "EVENTHUB_LANGUAGE must be one of: en, es" in message
+    assert len(message) < 200  # the bad value is cut short, never echoed in full
 
 
 def test_production_requires_a_secret_key(monkeypatch):
