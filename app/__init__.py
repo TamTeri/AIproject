@@ -35,6 +35,8 @@ def create_app(test_config: Mapping[str, Any] | None = None) -> Flask:
     if test_config:
         app.config.update(test_config)
         app.config["SQLALCHEMY_DATABASE_URI"] = settings.database_url
+    # system-024: the validated code ("en"/"es") or None, never the raw setting.
+    app.config["EVENTHUB_LANGUAGE"] = settings.language
 
     # Imported here so unit tests of single features never need the web stack.
     from app.db.transaction import PostgresDatabase
@@ -52,6 +54,8 @@ def create_app(test_config: Mapping[str, Any] | None = None) -> Flask:
             "status": "ok",
             "version": _version(),
             "alembic_head": _alembic_head(database),
+            # system-024: which language this deployment is configured for ("browser" = not set).
+            "language": settings.language or "browser",
         }, 200
 
     return app

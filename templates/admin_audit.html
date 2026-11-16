@@ -1,12 +1,13 @@
 {% extends "base.html" %}
-{% block title %}Audit log · Admin · EventHub{% endblock %}
+{# system-027 (Part 7): every visible text is a catalog key (app/i18n/<lang>.json). #}
+{% block title %}{{ _('admin_audit_title_short') }} · {{ _('nav_admin') }} · EventHub{% endblock %}
 {% block content %}
-<h1>Purchase-attempt audit log</h1>
-<p><a href="{{ url_for('web.admin_rates') }}">← Exchange rates</a></p>
-<p class="muted">Every purchase attempt, newest first. Records are append-only and cannot be edited or deleted.</p>
+<h1>{{ _('admin_audit_title') }}</h1>
+<p><a href="{{ url_for('web.admin_rates') }}">← {{ _('admin_rates_title') }}</a></p>
+<p class="muted">{{ _('admin_audit_intro') }}</p>
 <div class="table-wrap">
 <table>
-  <thead><tr><th>#</th><th>Time</th><th>Buyer</th><th>Event</th><th>Qty</th><th>Currency</th><th>Outcome</th><th>Reason</th><th>Order</th></tr></thead>
+  <thead><tr><th>#</th><th>{{ _('audit_col_time') }}</th><th>{{ _('audit_col_buyer') }}</th><th>{{ _('audit_col_event') }}</th><th>{{ _('audit_col_qty') }}</th><th>{{ _('audit_col_currency') }}</th><th>{{ _('audit_col_outcome') }}</th><th>{{ _('audit_col_reason') }}</th><th>{{ _('audit_col_order') }}</th></tr></thead>
   <tbody>
   {% for row in page.rows %}
     <tr data-outcome="{{ row.outcome }}">
@@ -21,10 +22,10 @@
       <td>{{ row.order_id or '—' }}</td>
     </tr>
   {% else %}
-    <tr><td colspan="9" class="muted">No purchase attempts yet.</td></tr>
+    <tr><td colspan="9" class="muted">{{ _('admin_audit_none') }}</td></tr>
   {% endfor %}
   </tbody>
 </table>
 </div>
-{% if page.next_before_id %}<p><a href="{{ url_for('web.admin_audit', before=page.next_before_id) }}">Older attempts →</a></p>{% endif %}
+{% if page.next_before_id %}<p><a href="{{ url_for('web.admin_audit', before=page.next_before_id) }}">{{ _('admin_audit_older') }} →</a></p>{% endif %}
 {% endblock %}

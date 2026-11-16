@@ -2,8 +2,9 @@
 #   run-local.cmd                 start everything (resets the LOCAL test database each time)
 #   run-local.cmd -NoReset        keep the data from the last run
 #   run-local.cmd -Stop           stop the database container
+#   run-local.cmd -Language es    run the Spanish version (EVENTHUB_LANGUAGE=es; also: en)
 # Local-only test values below (the same ones the README uses); never use them anywhere real.
-param([switch]$NoReset, [switch]$Stop)
+param([switch]$NoReset, [switch]$Stop, [ValidateSet("", "en", "es")][string]$Language = "")
 # "Continue", not "Stop": Windows PowerShell 5.1 turns a native command's stderr into a terminating error under "Stop",
 # which would crash before our own $LASTEXITCODE checks print a helpful message.
 $ErrorActionPreference = "Continue"
@@ -61,10 +62,12 @@ if (-not $NoReset) {
 
 # 4. Web server (Ctrl+C to stop it; run-local.cmd -Stop stops the database)
 $url = "http://127.0.0.1:5000"
+if ($Language) { $env:EVENTHUB_LANGUAGE = $Language }  # Part 7 (system-024): the deployment language
+$shownLanguage = if ($env:EVENTHUB_LANGUAGE) { $env:EVENTHUB_LANGUAGE } else { "not configured (follows the browser)" }
 Write-Host @"
 
 EventHub is starting at $url
-  Spanish:   $url/?lang=es
+  Language:  $shownLanguage; a visitor can still switch with ?lang=en or ?lang=es
   Health:    $url/healthz
   Admin:     $url/login   ->  admin@eventhub.test / change-me-123   (rates: $url/admin/rates)
   Register your own buyer account on the site; pick JPY as the currency to see yen.

@@ -49,10 +49,42 @@ def _from_accept_language(header: str | None) -> str | None:
     return min(ranked)[2] if ranked else None
 
 
+def configured_locale(value: object) -> str | None:
+    """system-024/025: validate the EVENTHUB_LANGUAGE setting.
+
+    Absent or blank -> None (not configured: follow the browser). Otherwise the value must
+    be one of SUPPORTED, ignoring case and surrounding spaces. Anything else raises
+    ValueError: a wrong setting stops start-up instead of quietly becoming English.
+    """
+    if value is None:
+        return None
+    text = str(value).strip().lower()
+    if not text:
+        return None
+    if text not in SUPPORTED:
+        allowed = ", ".join(SUPPORTED)
+        raise ValueError(
+            f"EVENTHUB_LANGUAGE must be one of: {allowed} (or unset to follow the browser); got {str(value)[:20]!r}"
+        )
+    return text
+
+
 def resolve_locale(
-    query_lang: str | None = None, cookie: str | None = None, accept_language: str | None = None
+    query_lang: str | None = None,
+    cookie: str | None = None,
+    accept_language: str | None = None,
+    configured: str | None = None,
 ) -> str:
-    """?lang= > cookie > Accept-Language > "en". Unknown values fall back silently."""
+    """?lang= > cookie > configured language > Accept-Language > "en".
+
+    Request values that are not supported fall through silently. ``configured`` has
+    already passed configured_locale() at start-up; it is checked against the allowlist
+    again so that nothing outside SUPPORTED can ever be returned.
+    """
     return (
-        match_tag(query_lang) or match_tag(cookie) or _from_accept_language(accept_language) or DEFAULT_LOCALE
+        match_tag(query_lang)
+        or match_tag(cookie)
+        or (configured if configured in SUPPORTED else None)
+        or _from_accept_language(accept_language)
+        or DEFAULT_LOCALE
     )

@@ -27,7 +27,7 @@ from flask import (
 )
 from jinja2 import ChoiceLoader, FileSystemLoader
 
-from app.i18n import format_money_text, resolve_locale, translate
+from app.i18n import DEFAULT_LOCALE, configured_locale, format_money_text, resolve_locale, translate
 from app.i18n import format_when as _format_when
 from app.i18n.locales import COOKIE_NAME, LANGUAGE_NAMES, SUPPORTED, match_tag
 from app.pricing.calculator import format_rate
@@ -42,48 +42,43 @@ SESSION_TOKEN_KEY = "session_token"
 CSRF_KEY = "csrf_token"
 
 # purchase-017 (Call 5): every rejection has its own message.
-OUTCOME_MESSAGES: dict[str, tuple[str, int]] = {
-    "quantity_zero": ("Choose at least 1 ticket.", 400),
-    "quantity_negative": ("The number of tickets cannot be negative. Choose 1 or more.", 400),
-    "invalid_quantity": ("Enter the number of tickets as a whole number, such as 2.", 400),
-    "unsupported_currency": ("That currency is not supported. Choose one from the list.", 400),
-    "event_not_found": ("We could not find that event.", 404),
-    "sold_out": ("Sorry, this event is sold out.", 409),
-    # {available} is filled in from the result (see _outcome_error).
-    "not_enough_tickets": ("Only {available} left for this event. Choose {count} or fewer.", 409),
-    "limit_exceeded": ("That would go over the per-account ticket limit for this event.", 409),
-    "sales_closed": ("Ticket sales have closed for this event because it has already started.", 409),
-    "rate_limited": (
-        "Too many purchase attempts from your account. Please wait a minute and try again.",
-        429,
-    ),
-    "not_authenticated": ("Please log in to buy tickets. You will come back to this event afterwards.", 401),
-    "eligibility_changed": (
-        "The student discount no longer applies to your account (for example, because your email "
-        "changed). The tickets were released and nothing was charged. Please start again to see the "
-        "new price.",
-        409,
-    ),
-    "idempotency_key_required": ("This form is out of date. Reload the page and try again.", 400),
-    "idempotency_conflict": (
-        "This form was already used for a different purchase. Reload the page and try again.",
-        409,
-    ),
-    "hold_expired": (
-        "Your 10-minute hold expired and the tickets were released. Please start again.",
-        409,
-    ),
-    "hold_not_found": ("We could not find that checkout.", 404),
-    "hold_terminal": ("This checkout is already finished.", 409),
-    "payment_failed": (
-        "The simulated payment was declined. Your tickets were released and no order was created.",
-        402,
-    ),
-    "cancelled": ("Checkout cancelled. The tickets were released.", 200),
-    "internal_error": ("Something went wrong. Nothing was charged.", 500),
+# outcome -> (message key in app/i18n/<lang>.json, HTTP status). The sentences live in the
+# catalogs (system-027, ADR-011): en.json holds the English, word for word as before.
+OUTCOME_ERRORS: dict[str, tuple[str, int]] = {
+    "quantity_zero": ("outcome_quantity_zero", 400),
+    "quantity_negative": ("outcome_quantity_negative", 400),
+    "invalid_quantity": ("outcome_invalid_quantity", 400),
+    "unsupported_currency": ("outcome_unsupported_currency", 400),
+    "event_not_found": ("outcome_event_not_found", 404),
+    "sold_out": ("outcome_sold_out", 409),
+    # one/other/unknown variants are chosen from the result (see _outcome_error).
+    "not_enough_tickets": ("outcome_not_enough_tickets_other", 409),
+    "limit_exceeded": ("outcome_limit_exceeded", 409),
+    "sales_closed": ("outcome_sales_closed", 409),
+    "rate_limited": ("outcome_rate_limited", 429),
+    "not_authenticated": ("outcome_not_authenticated", 401),
+    "eligibility_changed": ("outcome_eligibility_changed", 409),
+    "idempotency_key_required": ("outcome_idempotency_key_required", 400),
+    "idempotency_conflict": ("outcome_idempotency_conflict", 409),
+    "hold_expired": ("outcome_hold_expired", 409),
+    "hold_not_found": ("outcome_hold_not_found", 404),
+    "hold_terminal": ("outcome_hold_terminal", 409),
+    "payment_failed": ("outcome_payment_failed", 402),
+    "cancelled": ("outcome_cancelled", 200),
+    "internal_error": ("outcome_internal_error", 500),
 }
 
-REPLAYED_MESSAGE = "You submitted this purchase more than once. We processed it only once."
+# system-027, ADR-011 decision 6: service errors whose code always carries the same sentence are shown
+# from the catalog, so they follow the page language. Codes whose sentence is built from the
+# input (invalid-registration, invalid-email, invalid-rate) keep the service's English.
+SERVICE_ERROR_KEYS: dict[str, str] = {
+    "invalid-credentials": "error_invalid_credentials",
+    "wrong-password": "error_wrong_password",
+    "unsupported-currency": "error_unsupported_currency",
+    "email-taken": "error_email_taken",
+    "forbidden": "error_forbidden",
+    "service-unavailable": "error_service_unavailable",
+}
 
 # purchase-016: at most one audit record per browser session in this many seconds for
 # purchases from people who are not logged in, so a script cannot flood the audit log.
@@ -99,6 +94,9 @@ def register_web(app: Flask, services: WebServices | Any | None = None) -> Flask
     """Attach the web boundary to an existing Flask application."""
     if "web" not in app.blueprints:
         app.register_blueprint(web)
+    # system-025: create_app() has already checked this through Settings; apps built without
+    # Settings (create_web_app) are checked here, so no path carries an unchecked value.
+    app.config["EVENTHUB_LANGUAGE"] = configured_locale(app.config.get("EVENTHUB_LANGUAGE"))
     app.extensions["eventhub_web_services"] = services or default_services()
     existing_loader = app.jinja_loader
     loaders = [FileSystemLoader(str(_TEMPLATES))]
@@ -140,12 +138,31 @@ def format_when(value: Any, style: str = "datetime") -> str:
 
 @web.before_app_request
 def _resolve_locale() -> None:
-    """system-020: ?lang= > cookie > Accept-Language > en, all checked against an allowlist."""
+    """system-020/024: ?lang= > cookie > EVENTHUB_LANGUAGE > Accept-Language > en, all allowlisted."""
     g.locale = resolve_locale(
-        request.args.get("lang"), request.cookies.get(COOKIE_NAME), request.headers.get("Accept-Language")
+        request.args.get("lang"),
+        request.cookies.get(COOKIE_NAME),
+        request.headers.get("Accept-Language"),
+        configured=current_app.config.get("EVENTHUB_LANGUAGE"),
     )
     # Remember an explicit choice. The cookie value is the allowlisted code, never the input.
     g.remember_locale = match_tag(request.args.get("lang"))
+
+
+def _t(key: str, **values: Any) -> str:
+    """system-027: a sentence the web layer writes, in the page's language."""
+    return translate(key, g.get("locale", DEFAULT_LOCALE), **values)
+
+
+def _localized(error: ServiceError, overrides: Mapping[str, str] | None = None) -> ServiceError:
+    """Show a service error in the page language when its code has a fixed sentence (ADR-011).
+
+    ``overrides`` picks a different key for a code on one page (the two "email-taken" sentences).
+    """
+    key = (overrides or {}).get(error.code) or SERVICE_ERROR_KEYS.get(error.code)
+    if key is None:
+        return error
+    return ServiceError(error.code, _t(key), error.status_code, error.fields)
 
 
 def _services() -> Any:
@@ -193,7 +210,7 @@ def _load_principal_and_check_csrf() -> None:
         expected = session.get(CSRF_KEY)
         supplied = request.form.get(CSRF_KEY, "")
         if not expected or not secrets.compare_digest(str(expected), str(supplied)):
-            abort(400, description="Your form expired. Reload the page and try again.")
+            abort(400, description=_t("error_form_expired"))
 
 
 @web.after_app_request
@@ -219,20 +236,22 @@ def _security_headers(response):
 
 @web.app_errorhandler(400)
 def _bad_request(error):
-    return _error_page(ServiceError("bad-request", getattr(error, "description", "Bad request."), 400))
+    description = getattr(error, "description", None) or _t("error_bad_request")
+    return _error_page(ServiceError("bad-request", description, 400))
 
 
 @web.app_errorhandler(403)
 def _forbidden(_error):
-    return _error_page(ServiceError("forbidden", "Administrators only.", 403))
+    return _error_page(ServiceError("forbidden", _t("error_forbidden"), 403))
 
 
 @web.app_errorhandler(404)
 def _not_found(_error):
-    return _error_page(ServiceError("not-found", "We could not find that page.", 404))
+    return _error_page(ServiceError("not-found", _t("error_page_not_found"), 404))
 
 
 def _error_page(error: ServiceError):
+    error = _localized(error)
     return render_template("error.html", error=error), error.status_code
 
 
@@ -286,14 +305,16 @@ def _outcome_value(result: Any) -> str:
 
 
 def _outcome_error(outcome: str, result: Any = None) -> ServiceError:
-    message, status = OUTCOME_MESSAGES.get(outcome, ("We could not complete that purchase.", 400))
+    key, status = OUTCOME_ERRORS.get(outcome, ("outcome_unknown", 400))
+    values: dict[str, Any] = {}
     if outcome == "not_enough_tickets":
         left = _field(result, "available")
         if isinstance(left, int) and left > 0:
-            message = message.format(available=f"{left} ticket{'s' if left != 1 else ''}", count=left)
+            key = "outcome_not_enough_tickets_one" if left == 1 else "outcome_not_enough_tickets_other"
+            values = {"count": left}
         else:
-            message = "Sorry, there are not enough tickets left for that quantity."
-    return ServiceError(outcome, message, status)
+            key = "outcome_not_enough_tickets_unknown"
+    return ServiceError(outcome, _t(key, **values), status)
 
 
 def _not_logged_in_purchase(event_id: str | None, *, next_path: str):
@@ -314,7 +335,7 @@ def _not_logged_in_purchase(event_id: str | None, *, next_path: str):
             )
         except Exception:  # never turn "please log in" into an error page
             current_app.logger.warning("could not record a not-logged-in purchase attempt", exc_info=True)
-    flash(OUTCOME_MESSAGES["not_authenticated"][0])
+    flash(_t("outcome_not_authenticated"))
     return redirect(url_for("web.login", next=next_path))
 
 
@@ -345,7 +366,7 @@ def event_detail(event_id: str, *, error: ServiceError | None = None, form: dict
     except ServiceError as service_error:
         return _error_page(service_error)
     if event is None:
-        return _error_page(ServiceError("event-not-found", "We could not find that event.", 404))
+        return _error_page(ServiceError("event-not-found", _t("outcome_event_not_found"), 404))
     try:
         currencies = _services().pricing.currencies()
         price = _services().pricing.base_price_display(base_price_minor=_field(event, "base_price_minor", 0))
@@ -390,7 +411,9 @@ def login_submit():
         token = _services().identity.start_session(account_id=str(_field(principal, "account_id")))
     except ServiceError as error:
         return (
-            render_template("login.html", next_target=safe_next, error=error.message, email=email),
+            render_template(
+                "login.html", next_target=safe_next, error=_localized(error).message, email=email
+            ),
             error.status_code,
         )
     session.clear()  # fresh session contents on login
@@ -403,7 +426,7 @@ def login_submit():
 def logout():
     _services().identity.end_session(token=session.get(SESSION_TOKEN_KEY))
     session.clear()
-    flash("You have been logged out.")
+    flash(_t("flash_logged_out"))
     return redirect(url_for("web.events"))
 
 
@@ -431,13 +454,13 @@ def register_submit():
         return (
             render_template(
                 "register.html",
-                error=error.message,
+                error=_localized(error).message,
                 form={"name": name, "email": email, "currency": currency},
                 currencies=_currencies(),
             ),
             error.status_code,
         )
-    flash("Account created. Please log in.")
+    flash(_t("flash_account_created"))
     return redirect(url_for("web.login"))
 
 
@@ -468,10 +491,10 @@ def account():
             _services().identity.set_preferred_currency(
                 account_id=_buyer_id(), currency=request.form.get("currency", "")
             )
-            flash("Saved. This currency is now preselected at checkout and used for Quick Buy.")
+            flash(_t("flash_currency_saved"))
             return redirect(url_for("web.account"))
         except ServiceError as service_error:
-            return _account_page(error=service_error)
+            return _account_page(error=_localized(service_error))
     return _account_page()
 
 
@@ -494,11 +517,11 @@ def account_email():
             if failures >= EMAIL_CHANGE_MAX_FAILURES:
                 _services().identity.end_session(token=session.get(SESSION_TOKEN_KEY))
                 session.clear()
-                flash("Too many wrong passwords. For your security you have been logged out.")
+                flash(_t("flash_email_change_locked"))
                 return redirect(url_for("web.login"))
-        return _account_page(email_error=error)
+        return _account_page(email_error=_localized(error, {"email-taken": "error_email_taken_change"}))
     session.pop("email_change_failures", None)
-    flash("Email changed. Student discounts now follow your new email.")
+    flash(_t("flash_email_changed"))
     return redirect(url_for("web.account"))
 
 
@@ -571,7 +594,7 @@ def checkout_cancel(hold_id: str):
         return _error_page(error)
     outcome = _outcome_value(result)
     if outcome == "cancelled":
-        flash(OUTCOME_MESSAGES["cancelled"][0])
+        flash(_t("outcome_cancelled"))
         return redirect(url_for("web.events"))
     return _error_page(_outcome_error(outcome))
 
@@ -598,7 +621,7 @@ def _purchase_response(result: Any):
     outcome = _outcome_value(result)
     if outcome == "success":
         if _field(result, "replayed", False):
-            flash(REPLAYED_MESSAGE)  # purchase-014: the repeat landed on the same order
+            flash(_t("flash_replayed"))  # purchase-014: the repeat landed on the same order
         order_id = _field(_field(result, "order"), "id")
         return redirect(url_for("web.order_detail", order_id=order_id, confirmed=1))
     return _error_page(_outcome_error(outcome, result))
@@ -627,7 +650,7 @@ def order_detail(order_id: str):
     except ServiceError as error:
         return _error_page(error)
     if order is None:
-        return _error_page(ServiceError("order-not-found", "We could not find that order.", 404))
+        return _error_page(ServiceError("order-not-found", _t("error_order_not_found"), 404))
     return render_template(
         "order_detail.html", order=order, just_confirmed=request.args.get("confirmed") == "1"
     )
@@ -668,8 +691,8 @@ def admin_rates_update():
     except ServiceError as error:
         if error.status_code == 403:
             return _error_page(error)
-        return admin_rates(error=error)
-    flash(f"Exchange rate for {currency.strip().upper()[:3]} saved.")
+        return admin_rates(error=_localized(error))
+    flash(_t("flash_rate_saved", currency=currency.strip().upper()[:3]))
     return redirect(url_for("web.admin_rates"))
 
 
@@ -683,4 +706,4 @@ def admin_audit():
     return render_template("admin_audit.html", page=page)
 
 
-__all__ = ["OUTCOME_MESSAGES", "create_web_app", "register_web", "web"]
+__all__ = ["OUTCOME_ERRORS", "SERVICE_ERROR_KEYS", "create_web_app", "register_web", "web"]

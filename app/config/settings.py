@@ -19,6 +19,8 @@ class Settings:
     database_url: str
     seed_file: Path
     reset_enabled: bool
+    # system-024 (Part 7): "en", "es", or None when EVENTHUB_LANGUAGE is not set.
+    language: str | None = None
 
     @classmethod
     def from_values(cls, overrides: Mapping[str, object] | None = None) -> Settings:
@@ -34,13 +36,25 @@ class Settings:
         environment = _string_value(values.get("EVENTHUB_ENVIRONMENT")) or "development"
         seed_file = Path(_string_value(values.get("EVENTHUB_SEED_FILE")) or "seed/bootstrap.json")
         reset_enabled = _boolean_value(values.get("EVENTHUB_RESET_ENABLED"), default=False)
+        language = _language_value(values.get("EVENTHUB_LANGUAGE"))
 
         return cls(
             environment=environment,
             database_url=database_url,
             seed_file=seed_file,
             reset_enabled=reset_enabled,
+            language=language,
         )
+
+
+def _language_value(value: object) -> str | None:
+    """system-025: an unsupported EVENTHUB_LANGUAGE stops start-up; it never becomes English."""
+    from app.i18n.locales import configured_locale
+
+    try:
+        return configured_locale(value)
+    except ValueError as exc:
+        raise ConfigurationError(str(exc)) from exc
 
 
 def _string_value(value: object) -> str | None:

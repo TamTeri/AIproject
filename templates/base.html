@@ -55,6 +55,8 @@
 </head>
 <body>
   <header>
+    {# system-026 (Part 7): the top-level menu. Text from app/i18n/<lang>.json; the language from
+       EVENTHUB_LANGUAGE (system-024) unless the visitor chose one with ?lang (system-020). #}
     <nav aria-label="{{ _('nav_primary') }}">
       <a class="brand" href="{{ url_for('web.events') }}">EventHub</a>
       <a href="{{ url_for('web.events') }}">{{ _('nav_events') }}</a>
@@ -75,12 +77,14 @@
     </nav>
   </header>
   <main>
+    {# system-027: flash messages are written in the page language by app/web (_t). #}
     {% with messages = get_flashed_messages() %}
       {% for message in messages %}<p class="flash" role="status">{{ message }}</p>{% endfor %}
     {% endwith %}
     {% block content %}{% endblock %}
   </main>
   <footer>
+    {# system-020/024: a visitor's own choice; it beats the configured language. #}
     <p class="muted" id="language-switcher">{{ _('footer_language') }}:
       {% for code, name in languages %}{% if not loop.first %} · {% endif %}{% if code == locale() %}<strong lang="{{ code }}">{{ name }}</strong>{% else %}<a lang="{{ code }}" hreflang="{{ code }}" href="{{ request.path }}?lang={{ code }}">{{ name }}</a>{% endif %}{% endfor %}
     </p>

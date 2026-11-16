@@ -1,38 +1,39 @@
 {% extends "base.html" %}
-{% block title %}Account · EventHub{% endblock %}
+{# system-027 (Part 7): every visible text is a catalog key (app/i18n/<lang>.json). #}
+{% block title %}{{ _('account_title') }} · EventHub{% endblock %}
 {% block content %}
 {% set user = current_user() %}
-<h1>Account</h1>
+<h1>{{ _('account_title') }}</h1>
 <dl class="summary">
-  <dt>Name</dt><dd>{{ user.name }}</dd>
-  <dt>Email</dt><dd>{{ user.email }}</dd>
+  <dt>{{ _('form_name') }}</dt><dd>{{ user.name }}</dd>
+  <dt>{{ _('form_email') }}</dt><dd>{{ user.email }}</dd>
   {% if discount is not none %}
-  <dt>Student discount</dt>
-  <dd id="discount-status">{% if discount %}Yes: your current email is a USF address.{% else %}No: the student discount needs a current @usf.edu email.{% endif %}</dd>
+  <dt>{{ _('account_discount') }}</dt>
+  <dd id="discount-status">{% if discount %}{{ _('account_discount_yes') }}{% else %}{{ _('account_discount_no') }}{% endif %}</dd>
   {% endif %}
 </dl>
 
-<h2>Home currency</h2>
-<p class="muted">Your home currency is preselected at checkout and used for Quick Buy.</p>
+<h2>{{ _('account_home_currency') }}</h2>
+<p class="muted">{{ _('account_currency_help') }}</p>
 {% if error %}<p class="error" role="alert">{{ error.message }}</p>{% endif %}
 <form class="stack" method="post" action="{{ url_for('web.account') }}">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-  <label for="currency">Saved home currency</label>
+  <label for="currency">{{ _('account_saved_currency') }}</label>
   <select id="currency" name="currency">
     {% for code in currencies %}<option value="{{ code }}" {% if code == (user.preferred_currency or 'USD') %}selected{% endif %}>{{ code }}</option>{% endfor %}
   </select>
-  <button type="submit">Save currency</button>
+  <button type="submit">{{ _('account_save_currency') }}</button>
 </form>
 
-<h2>Change email</h2>
-<p class="muted">The student discount is decided from your current email every time you buy.</p>
+<h2>{{ _('account_change_email') }}</h2>
+<p class="muted">{{ _('account_email_help') }}</p>
 {% if email_error %}<p class="error" role="alert">{{ email_error.message }}</p>{% endif %}
 <form class="stack" method="post" action="{{ url_for('web.account_email') }}">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-  <label for="new-email">New email</label>
+  <label for="new-email">{{ _('account_new_email') }}</label>
   <input id="new-email" name="new_email" type="email" autocomplete="email" required>
-  <label for="current-password">Current password</label>
+  <label for="current-password">{{ _('account_current_password') }}</label>
   <input id="current-password" name="current_password" type="password" autocomplete="current-password" required>
-  <button type="submit">Change email</button>
+  <button type="submit">{{ _('account_change_email') }}</button>
 </form>
 {% endblock %}

@@ -3,6 +3,7 @@
 #   ./run-local.sh              start everything (resets the LOCAL test database each time)
 #   ./run-local.sh --no-reset   keep the data from the last run
 #   ./run-local.sh --stop       stop the database container
+#   ./run-local.sh --language es   run the Spanish version (EVENTHUB_LANGUAGE=es; also: en)
 # Local-only test values below (the same ones the README uses); never use them anywhere real.
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -10,11 +11,21 @@ cd "$(dirname "$0")"
 fail() { printf '\n%s\n' "$1" >&2; exit 1; }
 
 NO_RESET=0
-case "${1:-}" in
-  "") ;;
-  --no-reset) NO_RESET=1 ;;
-  --stop) STOP=1 ;;
-  *) fail "usage: ./run-local.sh [--no-reset | --stop]" ;;
+LANGUAGE_SETTING=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --no-reset) NO_RESET=1 ;;
+    --stop) STOP=1 ;;
+    --language)
+      [ $# -ge 2 ] || fail "usage: ./run-local.sh --language en|es"
+      LANGUAGE_SETTING="$2"; shift ;;
+    *) fail "usage: ./run-local.sh [--no-reset] [--language en|es] | --stop" ;;
+  esac
+  shift
+done
+case "$LANGUAGE_SETTING" in
+  "" | en | es) ;;
+  *) fail "--language must be en or es (EventHub refuses to start with any other value)" ;;
 esac
 
 # 1. Docker (the database runs in a container: docker-compose.test.yml, PostgreSQL on localhost:55432)
@@ -59,10 +70,13 @@ fi
 
 # 4. Web server (Ctrl+C to stop it; ./run-local.sh --stop stops the database)
 URL="http://127.0.0.1:5000"
+if [ -n "$LANGUAGE_SETTING" ]; then
+  export EVENTHUB_LANGUAGE="$LANGUAGE_SETTING"   # Part 7 (system-024): the deployment language
+fi
 cat <<EOF
 
 EventHub is starting at $URL
-  Spanish:   $URL/?lang=es
+  Language:  ${EVENTHUB_LANGUAGE:-not configured (follows the browser)}; a visitor can still switch with ?lang=en or ?lang=es
   Health:    $URL/healthz
   Admin:     $URL/login   ->  admin@eventhub.test / change-me-123   (rates: $URL/admin/rates)
   Register your own buyer account on the site; pick JPY as the currency to see yen.
