@@ -10,11 +10,9 @@ real release and record the measured time here.
 |---|---|
 | `v1.2.0` | Baseline: the last release before this maintenance work. Always kept runnable. |
 | `v1.3.0` | Maintenance release (order-total check, `/healthz` version info, backup, CI gates). |
-| `v1.4.0` | Configuration release (Part 7): `EVENTHUB_LANGUAGE` runs EventHub in English or Spanish; every page and web message from the catalogs. |
 
 `pyproject.toml` carries the same version; `/healthz` reports it as `version`, together with
-`alembic_head` (the database schema revision, or `unknown` when the database is unreachable) and,
-from v1.4.0, `language` (the configured `EVENTHUB_LANGUAGE`, or `browser` when it is not set).
+`alembic_head` (the database schema revision, or `unknown` when the database is unreachable).
 
 ## Roll back first, investigate second
 
@@ -39,19 +37,6 @@ Migrations `0001` to `0007` all have `downgrade()`, and CI checks `downgrade -1`
   code runs against the v1.3.0 schema: roll back the code only and leave the table in place.
   `alembic downgrade 0006` would drop the table and its history, so do not do it unless the
   history is backed up. A future release that adds a migration must state its compatibility.
-- v1.4.0 adds **no migration**. Rolling back to v1.3.0 is code only.
-
-## Configuration caveat when rolling back from v1.4.0
-
-v1.3.0 does not know `EVENTHUB_LANGUAGE`. On v1.3.0 the setting is ignored, so a deployment
-configured for Spanish shows each visitor the language of their browser (English for most).
-Nothing breaks and no data changes, but the Spanish deployment is not Spanish any more.
-After rolling back, check `/healthz`: v1.3.0 has no `language` field. Tell the customer, or
-roll forward with a fix (`v1.4.1`) instead if the Spanish version must stay up.
-
-The reverse also holds: v1.4.0 **refuses to start** if `EVENTHUB_LANGUAGE` holds anything but
-`en`, `es` or nothing. Check the value before deploying v1.4.0 over an environment that may
-already set it.
 
 ## Before every release
 

@@ -22,7 +22,7 @@ The yen incident of Call 6 is the standing lesson: a value that is wrong should 
 7. **Codes stay codes.** The audit viewer's outcome and reason columns, currency codes and `data-error-code` attributes are not translated: they are identifiers that administrators, tests and the audit log compare.
 8. **A guard keeps English from creeping back.** `scripts/find_untranslated_text.py` lists visible text in templates that is not a catalog lookup, and string literals passed to `flash()`, `abort()` or `ServiceError()` in `app/web/`. A unit test fails if it finds any. This scanner is also how the code to change was found (see the Part 7 tracing report).
 9. **The running configuration is visible.** `/healthz` reports `"language": "es"`, `"en"`, or `"browser"` (not configured), next to the release version and Alembic head, so whoever deploys can check which configuration is live.
-10. **Release 1.4.0.** The configured language is a new feature, so the version moves from 1.3.0 to 1.4.0 (system-018: every release tagged and restorable).
+10. **Release 1.4.0.** The configured language is a new feature, so the version moves from 1.3.0 to 1.4.0.
 
 ## Consequences
 - Adding a third language is still "add a catalog file", plus adding its code to `SUPPORTED`; the setting accepts it automatically.

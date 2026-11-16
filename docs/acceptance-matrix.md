@@ -66,24 +66,15 @@ Written before the code and tests were merged, so every row starts `OPEN` or `PA
 
 | Requirement | Proof (planned) | Status |
 |---|---|---|
-| system-016 every currency purchased, exact total, JPY | `tests/integration/test_multicurrency.py` (PostgreSQL), `tests/unit/pricing/test_money_characterization.py` | PASS (Part 7 status update: green in CI run 42690233012 on `v1.3.0` and in the local PostgreSQL run, `docs/evidence/part7/pytest-before.log`) |
-| pricing-014 minor unit for display and charge; missing exponent is an error | `tests/unit/pricing/test_presenter.py`, `test_money_characterization.py`, `tests/unit/orders/test_multicurrency_view.py` | PASS (same evidence as system-016) |
+| system-016 every currency purchased, exact total, JPY | per-currency purchase test (Stream A) | OPEN (until merged tests are green) |
+| pricing-014 minor unit for display and charge; missing exponent is an error | formatting/calculator tests incl. JPY (Stream A) | OPEN (until merged tests are green) |
 | pricing-014 JPY as a real supported currency | customer sign-off needed | OPEN (JPY seeded only for testing) |
-| admin-006, pricing-013 rate edit used by next purchase; >25% confirmation; history row | `tests/integration/test_rate_edit_purchase.py` (PostgreSQL), `tests/unit/admin/test_service.py` | PASS (25% is `[TEMPORARY_MVP_DEFAULT]`; same evidence as system-016) |
-| system-020 Spanish + English, allowlisted locale, order of precedence | `tests/unit/i18n/test_i18n.py`; Part 7: `test_configured_language.py::test_precedence`, ST-73, ST-74 | PASS |
-| system-021 regional date format | `test_i18n.py::test_dates_per_locale`; ST-75 (Spanish date in order history) | PASS |
-| system-022 currency formatted by its own conventions | `test_i18n.py::test_money_per_locale`, `::test_locale_never_changes_the_amount`; ST-75 (`24,84 EUR`) | PASS |
-| system-023 localization keeps the yen test green | `tests/unit/i18n/test_yen_under_localization.py`; still green after Part 7 (`docs/evidence/part7/pytest-after.log`) | PASS |
-| audit-009 out-of-range order flagged and a human notified | `tests/unit/audit/test_anomaly.py`, `tests/integration/test_order_watch.py` (PostgreSQL) | PASS (temporary: thresholds 50%-200%; recipient and rotation `[OPEN]`) |
-| system-017 no promotion until corrective tests green; skipped tests fail the gate | `scripts/fail_on_skips.py`, `test_project_process.py::test_ci_fails_on_skipped_tests_and_checks_the_migration_round_trip` | PASS |
-| system-018 every release restorable | tags `v1.2.0`, `v1.3.0` (created in Part 7: they were documented but missing), `v1.4.0` after merge; `docs/runbooks/release-and-rollback.md`; restore drill of `v1.3.0` in `docs/evidence/part7/` | OPEN until the tags are pushed to GitHub and `v1.4.0` is tagged |
+| admin-006, pricing-013 rate edit used by next purchase; >25% confirmation; history row | admin rate-path tests (Stream B) | OPEN (until merged tests are green) |
+| system-020 Spanish + English, allowlisted locale, order of precedence | localization tests (Stream C) | OPEN (until merged tests are green) |
+| system-021 regional date format | localization tests (Stream C) | OPEN (until merged tests are green) |
+| system-022 currency formatted by its own conventions | localization tests (Stream C) | OPEN (until merged tests are green) |
+| system-023 localization keeps the yen test green | yen test run with localization on (A + C) | OPEN (until merged tests are green) |
+| audit-009 out-of-range order flagged and a human notified | `check-orders` tests (Stream D) | OPEN (rotation deferred; threshold 50%-200% is `[TEMPORARY_MVP_DEFAULT]`) |
+| system-017 no promotion until corrective tests green; skipped tests fail the gate | CI gate (Stream D) | OPEN (until merged tests are green) |
+| system-018 every release restorable | tags `v1.2.0`, `v1.3.0`; switch-back steps in CONTRIBUTING.md | OPEN (documented; `v1.3.0` is tagged only after the merged CI run is green, and the restore drill has not been run) |
 | system-019 database backup owner, nightly `pg_dump`, restore drill | — | OPEN (no owner named) |
-
-## Part 7 additions (configuration management: English or Spanish)
-
-| Requirement | Proof | Status |
-|---|---|---|
-| system-024 `EVENTHUB_LANGUAGE` configures the language; beats `Accept-Language`; visitor choice still wins; `/healthz` shows it | `tests/unit/i18n/test_configured_language.py`, `tests/contract/test_spanish_interface.py`, `tests/test_main_program.py::test_healthz_reports_the_configured_language`; ST-71, ST-73, ST-74 | PASS |
-| system-025 an unsupported value stops start-up | `test_main_program.py::test_an_unsupported_language_stops_start_up`, `test_configured_language.py::test_unsupported_values_are_refused_never_mapped_to_english` | PASS |
-| system-026 top-level menu in Spanish | `test_spanish_interface.py::test_configured_spanish_*`; ST-71, ST-72 | PASS |
-| system-027 every page's fixed text and web messages in Spanish | `test_spanish_interface.py::test_no_english_is_left_on_any_page_when_spanish` (14 pages), message tests, `test_untranslated_text_guard.py`; ST-75, ST-76 | PASS (temporary: Spanish wording until a native speaker reviews it; input-dependent service sentences stay English, ADR-011) |
